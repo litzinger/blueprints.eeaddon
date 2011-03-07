@@ -157,7 +157,7 @@ class Blueprints_ext {
         
         foreach($this->settings['template'] as $key => $setting_template_id)
         {
-            if($template_id == $setting_template_id AND isset($this->settings['layout_group_ids'][$template_id]))
+            if($template_id == $setting_template_id AND isset($this->settings['layout_group_ids'][$key]))
             {
                 $layout_group = $this->settings['layout_group_ids'][$key];
                 break;
