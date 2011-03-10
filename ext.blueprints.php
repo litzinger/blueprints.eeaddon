@@ -154,7 +154,7 @@ class Blueprints_ext {
     private function _find_layout_group($template_id, $channel_id)
     {
         $layout_group = false;
-        
+
         foreach($this->settings['template'] as $key => $setting_template_id)
         {
             if($template_id == $setting_template_id AND isset($this->settings['layout_group_ids'][$key]))
