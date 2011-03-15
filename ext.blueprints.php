@@ -43,6 +43,8 @@ class Blueprints_ext {
         $this->EE =& get_instance();
         $settings = $this->_get_settings();
         
+        // $this->debug($settings, true);
+        
         // All settings
         $this->global_settings = $settings;
         
@@ -266,34 +268,17 @@ class Blueprints_ext {
                 }
             }
             
-            $css = '
-            #template_thumbnail {
-                margin: 20px 20px 0 0;
-                float: left;
-                width: 200px;
+            $carousel_templates = $this->_get_assigned_templates($channel_templates);
+            $carousel = '<ul id=\"blueprints_carousel\" class=\"jcarousel-skin-blueprints\">';
+            foreach($carousel_templates as $template)
+            {
+                $carousel .= '<li data-id=\"'. $template['template_id'] .'\">'. $template['group_name'].'/'.$template['template_name'] .'</li>';
             }
-            #template_thumbnail img {
-                width: 200px;
-                box-shadow: 2px 2px 12px rgba(0,0,0,.4);
-                -webkit-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
-                -moz-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
-            }
-            .active_publish_layout {
-                color: rgba(0,0,0,0.5);
-                margin: 5px;
-            }
-            #layout_change {
-                float: left;
-                margin-top: 15px;
-            }
-            #layout_change .instruction_text {
-                width: 180px;
-                margin-bottom: 12px;
-            }
-            .clear { clear: both; }
-            ';
+            $carousel .= '</ul>';
             
-            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><style type="text/css">'. preg_replace("/\s+/", " ", $css) .'</style><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->_get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
+            // $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><style type="text/css">'. preg_replace("/\s+/", " ", $css) .'</style><!-- END Blueprints assets -->');
 
             if(is_array($channel_templates) AND count($channel_templates) == 1)
             {
@@ -337,6 +322,12 @@ class Blueprints_ext {
 
             jQuery(function(){
                 var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
+                
+                template_select.after("'. $carousel .'");
+                jQuery("#blueprints_carousel").jcarousel({
+                    size: 4
+                });
+                
                 template_select.after(\''. $edit_templates .'<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>\');
                 template_select.change(function(){
                     blueprint_structure_tab($(this));
@@ -863,13 +854,13 @@ class Blueprints_ext {
             
             if($this->_is_structure_installed())
             {
-                require_once $this->_get_theme_folder_path().'libraries/structure_pages.php';
+                require_once $this->_get_theme_folder_path().'boldminded_themes/libraries/structure_pages.php';
                 $pages = Structure_Pages::get_instance();
                 $this->cache['pages'] = $pages->get_pages($this->EE);
             }
             elseif($this->_is_pages_installed())
             {
-                require_once $this->_get_theme_folder_path().'libraries/pages.php';
+                require_once $this->_get_theme_folder_path().'boldminded_themes/libraries/pages.php';
                 $pages = Pages::get_instance();
                 $this->cache['pages'] = $pages->get_pages($this->EE);
             }
@@ -880,10 +871,12 @@ class Blueprints_ext {
     
     private function _get_theme_folder_path()
     {
-        $theme_folder_path = $this->EE->config->item('theme_folder_path');
-        if (substr($theme_folder_path, -1) != '/') $theme_folder_path .= '/';
-        
-        return $theme_folder_path.'third_party/boldminded_themes/';
+        return $this->EE->config->slash_item('theme_folder_path') .'third_party/';
+    }
+    
+    protected function _get_theme_folder_url()
+    {
+        return $this->EE->config->slash_item('theme_folder_url') .'third_party/';
     }
     
     private function _get_active_publish_layout($channel_id = false)
@@ -973,6 +966,26 @@ class Blueprints_ext {
         }
         
         return $this->cache['layouts'];
+    }
+    
+    private function _get_assigned_templates($ids)
+    {
+        if(!isset($this->cache['assigned_templates']))
+        {
+            // Get the current Site ID
+            $site_id = $this->EE->config->item('site_id');
+
+            $query = $this->EE->db->select('template_groups.group_name, templates.template_name, templates.template_id')
+                                  ->where_in('templates.template_id', $ids)
+                                  ->where('template_groups.site_id', $site_id)
+                                  ->order_by('template_groups.group_name, templates.template_name')
+                                  ->join('template_groups', 'template_groups.group_id = templates.group_id')
+                                  ->get('templates');
+
+            $this->cache['assigned_templates'] = $query->result_array();
+        }
+        
+        return $this->cache['assigned_templates'];
     }
     
     private function _get_templates($groups = false)
