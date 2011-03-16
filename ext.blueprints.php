@@ -341,18 +341,15 @@ class Blueprints_ext {
             
             $carousel_templates = $this->_get_assigned_templates($channel_templates);
             $carousel_options = array();
-            // $carousel = '<ul id=\"blueprints_carousel\" class=\"jcarousel-skin-blueprints\">';
+
             foreach($carousel_templates as $template)
             {
                 $carousel_options[] = array(
                     'template_id' => $template['template_id'], 
-                    'template_name' => $template['group_name'].'/'.$template['template_name'], 
+                    'template_name' => $template['template_name'], 
                     'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : ''
                 ); 
-                
-                // $carousel .= '<li data-id=\"'. $template['template_id'] .'\" >'. $template['group_name'].'/'.$template['template_name'] .'</li>';
             }
-            // $carousel .= '</ul>';
 
             $blueprints_options = '
             var blueprints_options = {
