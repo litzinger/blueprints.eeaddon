@@ -13,7 +13,21 @@ var blueprints_options = {
 };
 */
 
+var init_carousel = function()
+{
+    structure_field = $('#hold_field_structure__template_id');
+    pages_field = $('#hold_field_pages__pages_template_id');
+    
+    // Make sure either of these divs are visible first
+    if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
+        jQuery("#blueprints_carousel").jcarousel({
+            size: carousel.length
+        });
+    }
+}
+
 jQuery(function(){
+    
     var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
     
     carousel = blueprints_options.carousel_options;
@@ -33,9 +47,13 @@ jQuery(function(){
     out = out + '</ul>';
     
     template_select.after(out);
-    jQuery("#blueprints_carousel").jcarousel({
-        size: carousel.length
-    });
+    
+    // On page load...
+    init_carousel();
+    // When a tab is clicked...
+    $('.content_tab a').click(function(){
+        init_carousel();
+    })
     
     template_select.after(blueprints_options.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>');
     template_select.change(function(){
