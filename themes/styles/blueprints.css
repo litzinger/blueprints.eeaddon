@@ -33,22 +33,29 @@
 }
 
 .jcarousel-skin-blueprints .jcarousel-container-horizontal {
-    width: 580px;
+    width: 600px;
     padding: 10px 40px;
 }
 
 .jcarousel-skin-blueprints .jcarousel-clip-horizontal {
-    width:  580px;
+    width:  600px;
     height: 165px;
 }
 
 .jcarousel-skin-blueprints .jcarousel-item {
     width: 125px;
     height: 165px;
-    padding-right: 12px;
+    padding: 0 12px;
     text-align: center;
     cursor: pointer;
 }
+.jcarousel-skin-blueprints .jcarousel-item.active {
+    background-color: #fff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
 .jcarousel-skin-blueprints .jcarousel-item:hover span {
     background-color: #fff;
 }
@@ -73,7 +80,6 @@
 
 .jcarousel-skin-blueprints .jcarousel-item-horizontal {
 	margin-left: 0;
-    margin-right: 10px;
 }
 
 .jcarousel-skin-blueprints .jcarousel-direction-rtl .jcarousel-item-horizontal {

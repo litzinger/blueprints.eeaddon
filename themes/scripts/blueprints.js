@@ -13,7 +13,7 @@ var blueprints_options = {
 };
 */
 
-var init_carousel = function()
+var init_carousel = function(template_id)
 {
     structure_field = $('#hold_field_structure__template_id');
     pages_field = $('#hold_field_pages__pages_template_id');
@@ -23,6 +23,10 @@ var init_carousel = function()
         jQuery("#blueprints_carousel").jcarousel({
             size: carousel.length
         });
+        
+        $('.jcarousel-item')
+        
+        $("#blueprints_carousel").find("[data-id='" + template_id +"']").addClass('active');
     }
 }
 
@@ -30,66 +34,90 @@ jQuery(function(){
     
     var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
     
-    carousel = blueprints_options.carousel_options;
-    out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints">';
-
-    for(i = 0; i < carousel.length; i++)
+    // Only create the carousel if turned on
+    if(true)
     {
-        template_thumb = carousel[i].template_thumb;
-        template_name = carousel[i].template_name;
-        template_id = carousel[i].template_id;
-        
-        thumbnail = template_thumb ? '<img src="'+ blueprints_options.thumbnail_path + template_thumb +'" />' : '';
-        
-        out = out + '<li><span>'+ template_name +'</span>'+ thumbnail +'</li>';
-    }
-    
-    out = out + '</ul>';
-    
-    template_select.after(out);
-    
-    // On page load...
-    init_carousel();
-    // When a tab is clicked...
-    $('.content_tab a').click(function(){
-        init_carousel();
-    })
-    
-    template_select.after(blueprints_options.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>');
-    template_select.change(function(){
-        blueprint_structure_tab($(this));
-    });
+        carousel = blueprints_options.carousel_options;
+        out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints">';
 
-    blueprint_structure_tab(template_select);
-    var template_select_options = template_select.find("option");
-    template_select_options.each(function(i){
-        var value = parseInt($(this).val());
-
-        if(!is_array(blueprints_options.channel_templates)) {
-            if(value != blueprints_options.channel_templates) {
-                $(this).remove();
-            }
-        } else {
-            if($.inArray(value, blueprints_options.channel_templates) == -1 && blueprints_options.channel_templates.length > 0) {
-                $(this).remove();
-            }
+        for(i = 0; i < carousel.length; i++)
+        {
+            template_thumb = carousel[i].template_thumb;
+            template_name = carousel[i].template_name;
+            template_id = carousel[i].template_id;
+        
+            thumbnail = template_thumb ? '<img src="'+ blueprints_options.thumbnail_path + template_thumb +'" />' : '';
+        
+            out = out + '<li data-id="'+ template_id +'"><span>'+ template_name +'</span>'+ thumbnail +'</li>';
         }
-    });
     
-    var template_select_optgroups = template_select.find("optgroup");
-    template_select_optgroups.each(function(i){
-        if( $(this).children().length == 0 ){
-            $(this).remove();
-        }
-    });
+        out = out + '</ul>';
     
-    $("body")
-        .ajaxStart(function () {
-            $(this).addClass("loading");
-        })
-        .ajaxStop(function () {
-            $(this).removeClass("loading");
+        // Insert our carousel
+        template_select.after(out);
+        
+        // Create our hidden field to send the ID to on click
+        select_name = template_select.attr('name');
+        select_value = template_select.val();
+        template_select.after('<input type="hidden" name="'+ select_name +'" value="'+ select_value +'" />');
+        
+        // Remove the original dropdown
+        template_select.remove();
+    
+        // On page load...
+        init_carousel(select_value);
+        
+        // When a tab is clicked...
+        $('.content_tab a').click(function(){
+            init_carousel();
         });
+        
+        $('.jcarousel-item').click(function(){
+            id = $(this).attr('data-id');
+            $('input[name='+ select_name +']').val(id);
+            
+            $(this).siblings().removeClass('active');
+            $(this).addClass('active'); 
+        });
+    }
+    else
+    {
+        template_select.after(blueprints_options.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>');
+        template_select.change(function(){
+            blueprint_structure_tab($(this));
+        });
+
+        blueprint_structure_tab(template_select);
+        var template_select_options = template_select.find("option");
+        template_select_options.each(function(i){
+            var value = parseInt($(this).val());
+
+            if(!is_array(blueprints_options.channel_templates)) {
+                if(value != blueprints_options.channel_templates) {
+                    $(this).remove();
+                }
+            } else {
+                if($.inArray(value, blueprints_options.channel_templates) == -1 && blueprints_options.channel_templates.length > 0) {
+                    $(this).remove();
+                }
+            }
+        });
+    
+        var template_select_optgroups = template_select.find("optgroup");
+        template_select_optgroups.each(function(i){
+            if( $(this).children().length == 0 ){
+                $(this).remove();
+            }
+        });
+    
+        $("body")
+            .ajaxStart(function () {
+                $(this).addClass("loading");
+            })
+            .ajaxStop(function () {
+                $(this).removeClass("loading");
+            });
+    }
 });
 
 function is_array(input){ return typeof(input)=="object"&&(input instanceof Array); }
