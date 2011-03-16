@@ -80,6 +80,7 @@ class Blueprints_ext {
             // Get our basic data
             $channel_id = $this->EE->input->get_post('channel_id');
             $entry_id = $this->EE->input->get_post('entry_id');
+            $site_assets = false;
             
             // If Structure is installed, get it's data
             if($this->_is_structure_installed())
@@ -150,6 +151,39 @@ class Blueprints_ext {
             {
                 $_GET['layout_preview'] = isset($_GET['layout_preview']) ? $_GET['layout_preview'] : $layout_group;
             }
+            
+            /*
+            $publish_layout = $this->EE->db->select('field_layout')
+                                           ->where('member_group', $layout_group)
+                                           ->where('channel_id', $channel_id)
+                                           ->where('site_id', $this->EE->config->item('site_id'))
+                                           ->get('layout_publish')
+                                           ->row('field_layout');
+            
+            $publish_layout = unserialize($publish_layout);
+            
+            $show_fields = array();
+            $hide_fields = array();
+            
+            foreach($publish_layout as $tab => $fields)
+            {
+                foreach($fields as $name => $settings)
+                {
+                    if(!$settings['visible'])
+                    {
+                        $hide_fields[$name] = $name;
+                    }
+                    elseif($settings['visible'])
+                    {
+                        $show_fields[$name] = array(
+                            'collapse' => $settings['collapse'],
+                            'width' => $settings['width']
+                        );
+                    }
+                }
+            }
+            */
+            // $this->debug($show_fields);
         }
     }
     
@@ -204,6 +238,7 @@ class Blueprints_ext {
         {
             $templates = array();
             $thumbnails = array();
+            $thumbnail_options = array();
             $layout_groups = array();
             $layout_group_names = array();
             $channel_templates = array();
@@ -218,7 +253,7 @@ class Blueprints_ext {
             {
                 $active_publish_layout_array[] = '"'. $id .'"';
             }
-            $active_publish_layouts = 'new Array('. trim(implode(',', $active_publish_layout_array), ',') .');';
+            $active_publish_layouts = 'new Array('. trim(implode(',', $active_publish_layout_array), ',') .')';
 
             
             if(isset($this->settings['template']) AND $this->settings['template'] != '')
@@ -227,6 +262,7 @@ class Blueprints_ext {
                 {
                     $thumbnail = isset($this->settings['thumbnails'][$k]) ? $this->settings['thumbnails'][$k] : '[NO THUMBNAIL DEFINED]';
                     $thumbnails[] = '"'. $template .'":"'. $thumbnail .'"';
+                    $thumbnail_options[$template] = $thumbnail; 
                     
                     // Get our group names
                     $layout_group_name = isset($this->settings['layout_group_names'][$k]) ? $this->settings['layout_group_names'][$k] : '[NO LAYOUT GROUP DEFINED]';
@@ -268,38 +304,26 @@ class Blueprints_ext {
                 }
             }
             
-            $carousel_templates = $this->_get_assigned_templates($channel_templates);
-            $carousel = '<ul id=\"blueprints_carousel\" class=\"jcarousel-skin-blueprints\">';
-            foreach($carousel_templates as $template)
-            {
-                $carousel .= '<li data-id=\"'. $template['template_id'] .'\">'. $template['group_name'].'/'.$template['template_name'] .'</li>';
-            }
-            $carousel .= '</ul>';
-            
-            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->_get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
-            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
-            // $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><style type="text/css">'. preg_replace("/\s+/", " ", $css) .'</style><!-- END Blueprints assets -->');
-
             if(is_array($channel_templates) AND count($channel_templates) == 1)
             {
                 // Reset the index and grab first value
                 sort($channel_templates);
-                $channel_templates = $channel_templates[0];
+                $channel_templates_options = $channel_templates[0];
             }
             elseif(is_array($channel_templates))
             {
-                $channel_templates = 'new Array('. trim(implode(',', $channel_templates), ',') .')';
+                $channel_templates_options = 'new Array('. trim(implode(',', $channel_templates), ',') .')';
             }
             else
             {
-                $channel_templates = '';
+                $channel_templates_options = '';
             }
             
             // If the current user is an Admin, give them a link to edit the templates that appear
-            $edit_templates = '';
+            $edit_templates_link = '';
             if($this->EE->session->userdata['group_id'] == 1)
             {
-                $edit_templates = '<br /><small style="display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);"><a href="'. BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=blueprints">Edit Available Templates</a></small>';
+                $edit_templates_link = '<br /><small style=\"display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);\"><a href=\"'. BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=blueprints\">Edit Available Templates</a></small>';
             }
             
             // Add our custom layout group options to the list, with "member group ids" starting at 2000
@@ -314,106 +338,40 @@ class Blueprints_ext {
             
                 $layout_group_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
             }
-
-            $script = '
-            var blueprint_thumbnails = {'. implode(',', $thumbnails) .'};
-            var blueprint_layout_groups = {'. implode(',', $layout_groups) .'};
-            var channel_templates = '. $channel_templates .';
-
-            jQuery(function(){
-                var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
-                
-                template_select.after("'. $carousel .'");
-                jQuery("#blueprints_carousel").jcarousel({
-                    size: 4
-                });
-                
-                template_select.after(\''. $edit_templates .'<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>\');
-                template_select.change(function(){
-                    blueprint_structure_tab($(this));
-                });
-
-                blueprint_structure_tab(template_select);
-                var template_select_options = template_select.find("option");
-                template_select_options.each(function(i){
-                    var value = parseInt($(this).val());
-
-                    if(!is_array(channel_templates)) {
-                        if(value != channel_templates) {
-                            $(this).remove();
-                        }
-                    } else {
-                        if($.inArray(value, channel_templates) == -1 && channel_templates.length > 0) {
-                            $(this).remove();
-                        }
-                    }
-                });
-                
-                var template_select_optgroups = template_select.find("optgroup");
-                template_select_optgroups.each(function(i){
-                    if( $(this).children().length == 0 ){
-                        $(this).remove();
-                    }
-                });
-                
-                $("body")
-                    .ajaxStart(function () {
-                        $(this).addClass("loading");
-                    })
-                    .ajaxStop(function () {
-                        $(this).removeClass("loading");
-                    });
-            });
             
-            function is_array(input){ return typeof(input)=="object"&&(input instanceof Array); }
-            
-            function blueprint_structure_tab(ele)
+            $carousel_templates = $this->_get_assigned_templates($channel_templates);
+            $carousel_options = array();
+            // $carousel = '<ul id=\"blueprints_carousel\" class=\"jcarousel-skin-blueprints\">';
+            foreach($carousel_templates as $template)
             {
-                var template = $(ele).find("option:selected").val();
-                thumbnail = "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"+blueprint_thumbnails[template];
-                if(blueprint_thumbnails[template] != "" && blueprint_thumbnails[template] != undefined) {
-                    $("#template_thumbnail").show().html("<img src=\""+ thumbnail +"\" width=\"125\" />");
-                } else {
-                    $("#template_thumbnail").hide().html("");
-                }';
-
-            if($this->_enable_publish_layout_takeover())
-            {
-                $script .= '
-                    if(blueprint_layout_groups[template] != undefined && blueprint_layout_groups[template] != "") {
-                        $("#layout_change").html("<div class=\"instruction_text\"><p style=\"margin-left: 0;\">A Revision must be saved to apply the selected Template\'s Publish Layout.</p></div><input type=\"hidden\" name=\"layout_preview\" value=\""+ blueprint_layout_groups[template] +"\" />");
-                        $("#revision_button").clone(true).appendTo( jQuery("#layout_change") );
-                    } else {
-                        $("#layout_change").html("<input type=\"hidden\" name=\"layout_preview\" value=\"NULL\" />");
-                    }
-                ';
+                $carousel_options[] = array(
+                    'template_id' => $template['template_id'], 
+                    'template_name' => $template['group_name'].'/'.$template['template_name'], 
+                    'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : ''
+                ); 
+                
+                // $carousel .= '<li data-id=\"'. $template['template_id'] .'\" >'. $template['group_name'].'/'.$template['template_name'] .'</li>';
             }
-                
-            $script .= '}';
+            // $carousel .= '</ul>';
+
+            $blueprints_options = '
+            var blueprints_options = {
+                carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
+                thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
+                thumbnails: {'. implode(',', $thumbnails) .'},
+                layout_groups: {'. implode(',', $layout_groups) .'},
+                layout_group_options: "'. $layout_group_options .'",
+                active_publish_layouts: '. $active_publish_layouts .',
+                channel_templates: '. $channel_templates_options .',
+                edit_templates_link: "'. $edit_templates_link .'",
+                publish_layout_takeover: '. $this->_enable_publish_layout_takeover() .',
+                thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
+            };';
             
-            if($this->_enable_publish_layout_takeover())
-            {
-                $script .= '
-                    jQuery(function(){
-                        $("#showToolbarLink a").toggle(function() {
-                            if($(".blueprints_layout_groups_holder").length == 0){
-                                $("#layout_groups_holder").prepend("<div class=\"blueprints_layout_groups_holder\">'. $layout_group_options .'</div>");
-                            }
-                            active_layouts = '. $active_publish_layouts .'
-                            $("#layout_groups_holder input").each(function(){
-                                value = $(this).val();
-                                if($.inArray(value, active_layouts) != -1 && active_layouts.length > 0) {
-                                    $(this).attr("checked", "checked");
-                                }
-                            });
-                        }, function() {
-                            $(".active_publish_layout").remove();
-                        });
-                    })';
-            }
-            
-            // Add to foot, and remove extra white space
-            $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. preg_replace("/\s+/", " ", $script) .'</script><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_options .'</script><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->_get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
         }
         
         return $data;
@@ -974,15 +932,22 @@ class Blueprints_ext {
         {
             // Get the current Site ID
             $site_id = $this->EE->config->item('site_id');
+            
+            if($ids)
+            {
+                $query = $this->EE->db->select('template_groups.group_name, templates.template_name, templates.template_id')
+                                      ->where_in('templates.template_id', $ids)
+                                      ->where('template_groups.site_id', $site_id)
+                                      ->order_by('template_groups.group_name, templates.template_name')
+                                      ->join('template_groups', 'template_groups.group_id = templates.group_id')
+                                      ->get('templates');
 
-            $query = $this->EE->db->select('template_groups.group_name, templates.template_name, templates.template_id')
-                                  ->where_in('templates.template_id', $ids)
-                                  ->where('template_groups.site_id', $site_id)
-                                  ->order_by('template_groups.group_name, templates.template_name')
-                                  ->join('template_groups', 'template_groups.group_id = templates.group_id')
-                                  ->get('templates');
-
-            $this->cache['assigned_templates'] = $query->result_array();
+                $this->cache['assigned_templates'] = $query->result_array();
+            }
+            else
+            {
+                $this->cache['assigned_templates'] = array();
+            }
         }
         
         return $this->cache['assigned_templates'];
