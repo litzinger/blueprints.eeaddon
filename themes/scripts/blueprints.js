@@ -146,10 +146,11 @@ jQuery(function(){
             template_name = carousel[i].template_name;
             template_id = carousel[i].template_id;
             layout_preview = carousel[i].layout_preview;
+            layout_name = carousel[i].layout_name;
         
             thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ blueprints_options.thumbnail_path + template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
         
-            out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span>'+ template_name +'</span>'+ thumbnail +'</li>';
+            out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span>'+ layout_name +'</span>'+ thumbnail +'</li>';
         }
     
         out = out + '</ul><div id="layout_change"></div><div class="clear"></div>';

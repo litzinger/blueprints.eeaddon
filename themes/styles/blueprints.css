@@ -62,7 +62,7 @@
     width: 125px;
     height: 125px;
     background-color: #fff;
-    opacity: 0.75;
+    opacity: 0.55;
     z-index: 90;
 }
 .jcarousel-skin-blueprints .jcarousel-item .overlay.loading {

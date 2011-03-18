@@ -245,7 +245,8 @@ class Blueprints_ext {
                     $layout_group_names[] = $layout_group_name;
                     
                     // For use in the Carousel below
-                    $layout_group_ids[$template] = $layout_group_id;
+                    $layout_group_carousel_ids[$template] = $layout_group_id;
+                    $layout_group_carousel_names[$template] = $layout_group_name;
                 }
             }
             
@@ -323,7 +324,8 @@ class Blueprints_ext {
                     'template_id' => $template['template_id'], 
                     'template_name' => $template['template_name'], 
                     'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
-                    'layout_preview' => isset($layout_group_ids[$template['template_id']]) ? $layout_group_ids[$template['template_id']] : $key
+                    'layout_preview' => isset($layout_group_carousel_ids[$template['template_id']]) ? $layout_group_carousel_ids[$template['template_id']] : $key,
+                    'layout_name' => isset($layout_group_carousel_names[$template['template_id']]) ? $layout_group_carousel_names[$template['template_id']] : $template['template_name']
                 ); 
             }
 
