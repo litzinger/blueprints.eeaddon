@@ -58,6 +58,7 @@ var init_carousel = function(template_id)
                     e.preventDefault();
                     item.find('.overlay').addClass('loading');
                     $(this).before('<img class="ajax_loader" src="'+ blueprints_options.theme_url +'blueprints/images/ajax_loader.gif" />').remove();
+                    
                     init_autosave(layout_preview);
                 });
             }
@@ -70,35 +71,63 @@ var init_carousel = function(template_id)
 */
 var init_autosave = function(layout_preview)
 {
-    data = $("#publishForm").serialize();
+    post_data = $("#publishForm").serialize();
+    
+    console.log(post_data);
     
     $.ajax({
         type: "POST",
         dataType: "json",
         url: EE.BASE + "&C=content_publish&M=autosave",
-        data: data,
+        data: post_data,
         success: function (data, status, xhr) {
             setTimeout({
                 run: function() {
-                    href = window.location.href;
                     
-                    if(href.indexOf('layout_preview') != -1) {
-                        href = href.replace(/&layout_preview=(\d+)/, '&layout_preview='+layout_preview);
-                    } else {
-                        href = href +'&layout_preview='+ layout_preview;
+                    entry_id = $("#publishForm input[name=entry_id]").val();
+                    channel_id = $("#publishForm input[name=channel_id]").val();
+                    autosave_entry_id = $("#publishForm input[name=autosave_entry_id]").val();
+                    new_autosave_entry_id = false;
+                    
+                    if(autosave_entry_id == 0)
+                    {
+                        $.ajax({
+                            type: "POST",
+                            dataType: "text",
+                            url: blueprints_options.get_autosave_entry_url,
+                            data: "entry_id="+ entry_id +"&channel_id="+ channel_id,
+                            success: function (autosave_entry_id, status, xhr) {
+                                autosave_redirect(autosave_entry_id, layout_preview);
+                            }
+                        });
                     }
-                    
-                    // TODO: Need to get the autosave entry_id, should be in the json response
-                    // would rather not create a module file for 1 ajax request.
-                    // reported as bug: http://expressionengine.com/bug_tracker/bug/15478/
-                    
-                    // console.log(data.autosave_entry_id);
-                    
-                    // window.location.href = href + '&use_autosave=y';
+                    else
+                    {
+                        autosave_redirect(autosave_entry_id, layout_preview);
+                    }
                 }
-            }.run, 1000);
+            }.run, 500);
         }
-    })
+    });
+}
+
+var autosave_redirect = function(autosave_entry_id, layout_preview)
+{
+    href = window.location.href;
+    
+    if(href.indexOf('layout_preview') != -1) {
+        href = href.replace(/&layout_preview=(\d+)/, '&layout_preview='+ layout_preview);
+    } else {
+        href = href +'&layout_preview='+ layout_preview;
+    }
+    
+    href = href.replace(/&entry_id=(\d+)/, '&entry_id='+ autosave_entry_id);
+
+    // TODO: Need to get the autosave entry_id, should be in the json response
+    // would rather not create a module file for 1 ajax request.
+    // reported as bug: http://expressionengine.com/bug_tracker/bug/15478/
+    
+    window.location.href = href + '&use_autosave=y';
 }
 
 jQuery(function(){

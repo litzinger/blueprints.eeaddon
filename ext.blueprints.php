@@ -327,10 +327,13 @@ class Blueprints_ext {
                 ); 
             }
 
+            $action_id = $this->EE->db->where(array('class' => 'Blueprints_mcp', 'method' => 'get_autosave_entry'))->get('actions')->row('action_id');
+
             $blueprints_options = '
             var blueprints_options = {
                 layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
                 enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
+                get_autosave_entry_url: "'. $this->EE->config->item('site_url') .'?ACT='. $action_id .'",
                 carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
                 thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
                 thumbnails: {'. implode(',', $thumbnails) .'},
