@@ -317,13 +317,13 @@ class Blueprints_ext {
             $carousel_templates = $this->_get_assigned_templates($channel_templates);
             $carousel_options = array();
 
-            foreach($carousel_templates as $template)
+            foreach($carousel_templates as $key => $template)
             {
                 $carousel_options[] = array(
                     'template_id' => $template['template_id'], 
                     'template_name' => $template['template_name'], 
                     'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
-                    'layout_preview' => isset($layout_group_ids[$template['template_id']]) ? $layout_group_ids[$template['template_id']] : false
+                    'layout_preview' => isset($layout_group_ids[$template['template_id']]) ? $layout_group_ids[$template['template_id']] : $key
                 ); 
             }
 
@@ -340,7 +340,8 @@ class Blueprints_ext {
                 channel_templates: '. $channel_templates_options .',
                 edit_templates_link: "'. $edit_templates_link .'",
                 publish_layout_takeover: '. $this->_enable_publish_layout_takeover() .',
-                thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
+                thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'",
+                theme_url: "'. $this->_get_theme_folder_url() .'"
             };';
             
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_options .'</script><!-- END Blueprints assets -->');

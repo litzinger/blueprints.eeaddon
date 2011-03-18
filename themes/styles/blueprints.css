@@ -63,6 +63,16 @@
     height: 125px;
     background-color: #fff;
     opacity: 0.75;
+    z-index: 90;
+}
+.jcarousel-skin-blueprints .jcarousel-item .overlay.loading {
+    opacity: 1;
+}
+.jcarousel-skin-blueprints .jcarousel-item .ajax_loader {
+    position: absolute;
+    left: 46px;
+    top: 46px;
+    z-index: 91;
 }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail {
     position: relative;
@@ -70,7 +80,8 @@
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail .submit {
     position: absolute;
     left: 50%;
-    top: 45%;
+    top: 54px;
+    z-index: 91;
 }
 .jcarousel-skin-blueprints .jcarousel-item.active span {
     color: #fff;

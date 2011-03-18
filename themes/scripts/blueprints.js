@@ -10,6 +10,7 @@ var init_carousel = function(template_id)
         // Find the template to select/start on
         if(blueprints_options.layout_preview){
             start_template = $("#blueprints_carousel").find("[data-layout='" + blueprints_options.layout_preview +"']");
+            old_template_id = start_template.attr("data-id");
         } else {
             start_template = $("#blueprints_carousel").find("[data-id='" + template_id +"']");
         }
@@ -27,6 +28,7 @@ var init_carousel = function(template_id)
         
         // On click set active template
         $('.jcarousel-item').live('click' ,function(){
+            item = $(this);
             id = $(this).attr('data-id');
             $('input[name='+ select_name +']').val(id);
             
@@ -34,17 +36,18 @@ var init_carousel = function(template_id)
             layout_preview = blueprint_template_carousel_change(id);
             
             // Make it visually active
-            $(this).siblings().removeClass('active');
-            $(this).addClass('active');
+            item.siblings().removeClass('active');
+            item.addClass('active');
             
-            $(this).siblings().find('.submit').remove();
-            $(this).siblings().find('.overlay').remove();
+            item.siblings().find('.submit').remove();
+            item.siblings().find('.overlay').remove();
+            item.siblings().find('.ajax_loader').remove();
             
             // Add zee button
             if(old_template_id != id)
             {
-                $(this).find('.carousel_thumbnail').append('<div class="overlay"></div>');
-                $(this).find('.carousel_thumbnail').append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
+                item.find('.carousel_thumbnail').append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
+                item.find('.carousel_thumbnail').append('<div class="overlay"></div>');
                 submit_button = $('.carousel_thumbnail').find('.submit');
                 
                 item_width = $('.carousel_thumbnail').width();
@@ -53,6 +56,8 @@ var init_carousel = function(template_id)
                 
                 submit_button.click(function(e){
                     e.preventDefault();
+                    item.find('.overlay').addClass('loading');
+                    $(this).before('<img class="ajax_loader" src="'+ blueprints_options.theme_url +'blueprints/images/ajax_loader.gif" />').remove();
                     init_autosave(layout_preview);
                 });
             }
@@ -60,6 +65,9 @@ var init_carousel = function(template_id)
     }
 }
 
+/*
+    Save the Entries data, then reload the page with the new layout and saved data
+*/
 var init_autosave = function(layout_preview)
 {
     data = $("#publishForm").serialize();
@@ -69,7 +77,7 @@ var init_autosave = function(layout_preview)
         dataType: "json",
         url: EE.BASE + "&C=content_publish&M=autosave",
         data: data,
-        complete: function (xhr, status) {
+        success: function (data, status, xhr) {
             setTimeout({
                 run: function() {
                     href = window.location.href;
@@ -80,7 +88,13 @@ var init_autosave = function(layout_preview)
                         href = href +'&layout_preview='+ layout_preview;
                     }
                     
-                    window.location.href = href;
+                    // TODO: Need to get the autosave entry_id, should be in the json response
+                    // would rather not create a module file for 1 ajax request.
+                    // reported as bug: http://expressionengine.com/bug_tracker/bug/15478/
+                    
+                    // console.log(data.autosave_entry_id);
+                    
+                    // window.location.href = href + '&use_autosave=y';
                 }
             }.run, 1000);
         }
@@ -122,14 +136,26 @@ jQuery(function(){
         // Remove the original dropdown
         template_select.remove();
     
+        // Added short timeouts to ensure it initiates correctly.
+        
         // On page load...
-        init_carousel(select_value);
+        setTimeout({
+            run: function() {
+                init_carousel(select_value);
+            }
+        }.run, 250);
+        
         
         // When a tab is clicked...
         $('.content_tab a').click(function(){
-            init_carousel(select_value);
+            setTimeout({
+                run: function() {
+                    init_carousel(select_value);
+                }
+            }.run, 250);
         });
     }
+    // Old school template select menu
     else
     {
         template_select.after(blueprints_options.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>');
