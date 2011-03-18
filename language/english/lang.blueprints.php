@@ -1,6 +1,12 @@
 <?php
 
+// get the version from config.php
+require PATH_THIRD.'blueprints/config.php';
+
 $lang = array(
+    
+"blueprints_module_name" => $config['name'],
+"blueprints_module_description" => $config['description'],
     
 "blueprint_directory_label" =>
 "Thumbnail Directory",

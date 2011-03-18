@@ -2,12 +2,17 @@ var init_carousel = function(template_id)
 {
     structure_field = $('#hold_field_structure__template_id');
     pages_field = $('#hold_field_pages__pages_template_id');
+    old_template_id = template_id;
     
     // Make sure either of these divs are visible first
     if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
         
         // Find the template to select/start on
-        start_template = $("#blueprints_carousel").find("[data-id='" + template_id +"']");
+        if(blueprints_options.layout_preview){
+            start_template = $("#blueprints_carousel").find("[data-layout='" + blueprints_options.layout_preview +"']");
+        } else {
+            start_template = $("#blueprints_carousel").find("[data-id='" + template_id +"']");
+        }
         
         jQuery("#blueprints_carousel").show().jcarousel({
             size: carousel.length,
@@ -21,22 +26,41 @@ var init_carousel = function(template_id)
         start_template.addClass('active');
         
         // On click set active template
-        $('.jcarousel-item').click(function(){
+        $('.jcarousel-item').live('click' ,function(){
             id = $(this).attr('data-id');
             $('input[name='+ select_name +']').val(id);
             
             // Set layout_change on item click
-            blueprint_template_carousel_change(id);
+            layout_preview = blueprint_template_carousel_change(id);
             
+            // Make it visually active
             $(this).siblings().removeClass('active');
-            $(this).addClass('active'); 
+            $(this).addClass('active');
             
-            init_autosave();
+            $(this).siblings().find('.submit').remove();
+            $(this).siblings().find('.overlay').remove();
+            
+            // Add zee button
+            if(old_template_id != id)
+            {
+                $(this).find('.carousel_thumbnail').append('<div class="overlay"></div>');
+                $(this).find('.carousel_thumbnail').append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
+                submit_button = $('.carousel_thumbnail').find('.submit');
+                
+                item_width = $('.carousel_thumbnail').width();
+                submit_width = submit_button.width();
+                submit_button.css('left', ((item_width / 2) - (submit_width / 2)) - 8);
+                
+                submit_button.click(function(e){
+                    e.preventDefault();
+                    init_autosave(layout_preview);
+                });
+            }
         });
     }
 }
 
-var init_autosave = function()
+var init_autosave = function(layout_preview)
 {
     data = $("#publishForm").serialize();
     
@@ -45,8 +69,20 @@ var init_autosave = function()
         dataType: "json",
         url: EE.BASE + "&C=content_publish&M=autosave",
         data: data,
-        success: function (rdata) {
-            // console.log(rdata);
+        complete: function (xhr, status) {
+            setTimeout({
+                run: function() {
+                    href = window.location.href;
+                    
+                    if(href.indexOf('layout_preview') != -1) {
+                        href = href.replace(/&layout_preview=(\d+)/, '&layout_preview='+layout_preview);
+                    } else {
+                        href = href +'&layout_preview='+ layout_preview;
+                    }
+                    
+                    window.location.href = href;
+                }
+            }.run, 1000);
         }
     })
 }
@@ -66,10 +102,11 @@ jQuery(function(){
             template_thumb = carousel[i].template_thumb;
             template_name = carousel[i].template_name;
             template_id = carousel[i].template_id;
+            layout_preview = carousel[i].layout_preview;
         
             thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ blueprints_options.thumbnail_path + template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
         
-            out = out + '<li data-id="'+ template_id +'"><span>'+ template_name +'</span>'+ thumbnail +'</li>';
+            out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span>'+ template_name +'</span>'+ thumbnail +'</li>';
         }
     
         out = out + '</ul><div id="layout_change"></div><div class="clear"></div>';
@@ -164,11 +201,12 @@ function blueprint_template_carousel_change(template)
     {
         if(blueprints_options.layout_groups[template] != undefined && blueprints_options.layout_groups[template] != "") {
             $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ blueprints_options.layout_groups[template] +'" />');
+            return blueprints_options.layout_groups[template];
         } else {
             $("#layout_change").html('<input type="hidden" name="layout_preview" value="NULL" />');
+            return false;
         }
     }
-    
 }
 
 if(blueprints_options.publish_layout_takeover)

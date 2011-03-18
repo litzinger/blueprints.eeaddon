@@ -16,7 +16,7 @@ if (! defined('BLUEPRINTS_VERSION'))
  * @subpackage  Extensions
  * @category    Blueprints
  * @author      Brian Litzinger
- * @copyright   Copyright 2010 to infinity and beyond! - Boldminded / Brian Litzinger
+ * @copyright   Copyright 2011 to infinity and beyond! - Boldminded / Brian Litzinger
  * @link        http://boldminded.com/add-ons/blueprints
  */
  
@@ -114,80 +114,51 @@ class Blueprints_ext {
                 $template_id = $query->row('configuration_value');
             }
             
-            /*
-            This is where the magic happens, and what makes this extension possible. 
-            In content_publish, there are the following 2 lines. Luckily EllisLab
-            used get_post('layout_preview'), so we can inject a new value.
-
-            $layout_group = (is_numeric($this->input->get_post('layout_preview'))) ? $this->input->get_post('layout_preview') : $this->session->userdata('group_id');
-            $layout_info  = $this->member_model->get_group_layout($layout_group, $channel_id);
-
-            What we're doing here is assigning a Structure template to a publish layout, and 
-            injecting the value into $_GET['layout_preview'], so when those 2 previous lines are called, 
-            it thinks we're previewing a publish layout on every page load. Genius.
-            */
-
-            // If this is a new entry, find out what template is assigned to which layout_group from our settings.
-            if(!$entry_id)
-            {
-                $layout_group = $this->_find_layout_group($template_id, $channel_id);
-            }
-            // If this is an existing entry, then the template/layout_group has already been saved to our settings.
-            else
-            {
-                
-                if(isset($this->settings['template_layout'][$entry_id]['layout_group_id']))
-                {
-                    $layout_group = $this->settings['template_layout'][$entry_id]['layout_group_id'];
-                }
-                else
-                {
-                    $layout_group = $this->_find_layout_group($template_id, $channel_id);
-                }
-            }
-
             // And hi-jack it if we have a custom layout_group
-            if($layout_group)
+            if($layout_group = $this->_find_layout_group($template_id, $channel_id, $entry_id))
             {
                 $_GET['layout_preview'] = isset($_GET['layout_preview']) ? $_GET['layout_preview'] : $layout_group;
             }
-            
-            /*
-            $publish_layout = $this->EE->db->select('field_layout')
-                                           ->where('member_group', $layout_group)
-                                           ->where('channel_id', $channel_id)
-                                           ->where('site_id', $this->EE->config->item('site_id'))
-                                           ->get('layout_publish')
-                                           ->row('field_layout');
-            
-            $publish_layout = unserialize($publish_layout);
-            
-            $show_fields = array();
-            $hide_fields = array();
-            
-            foreach($publish_layout as $tab => $fields)
-            {
-                foreach($fields as $name => $settings)
-                {
-                    if(!$settings['visible'])
-                    {
-                        $hide_fields[$name] = $name;
-                    }
-                    elseif($settings['visible'])
-                    {
-                        $show_fields[$name] = array(
-                            'collapse' => $settings['collapse'],
-                            'width' => $settings['width']
-                        );
-                    }
-                }
-            }
-            */
-            // $this->debug($show_fields);
         }
     }
     
-    private function _find_layout_group($template_id, $channel_id)
+    /*
+    This is where the magic happens, and what makes this extension possible. 
+    In content_publish, there are the following 2 lines. Luckily EllisLab
+    used get_post('layout_preview'), so we can inject a new value.
+
+    $layout_group = (is_numeric($this->input->get_post('layout_preview'))) ? $this->input->get_post('layout_preview') : $this->session->userdata('group_id');
+    $layout_info  = $this->member_model->get_group_layout($layout_group, $channel_id);
+
+    What we're doing here is assigning a Structure template to a publish layout, and 
+    injecting the value into $_GET['layout_preview'], so when those 2 previous lines are called, 
+    it thinks we're previewing a publish layout on every page load. Genius.
+    */
+    private function _find_layout_group($template_id, $channel_id, $entry_id = false)
+    {
+        // If this is a new entry, find out what template is assigned to which layout_group from our settings.
+        if(!$entry_id)
+        {
+            $layout_group = $this->_find_layout_group_from_settings($template_id, $channel_id);
+        }
+        // If this is an existing entry, then the template/layout_group has already been saved to our settings.
+        else
+        {
+            
+            if(isset($this->settings['template_layout'][$entry_id]['layout_group_id']))
+            {
+                $layout_group = $this->settings['template_layout'][$entry_id]['layout_group_id'];
+            }
+            else
+            {
+                $layout_group = $this->_find_layout_group_from_settings($template_id, $channel_id);
+            }
+        }
+        
+        return $layout_group;
+    }
+    
+    private function _find_layout_group_from_settings($template_id, $channel_id)
     {
         $layout_group = false;
 
@@ -243,6 +214,7 @@ class Blueprints_ext {
             $layout_group_names = array();
             $channel_templates = array();
             $channel_id = $this->EE->input->get_post('channel_id');
+            $entry_id = $this->EE->input->get_post('entry_id');
             $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->thumbnail_directory_path;
             
             // Lets get our active layouts into a JavaScrip array to use with jQuery below
@@ -271,6 +243,9 @@ class Blueprints_ext {
                     
                     $layout_groups[] = '"'. $template .'":"'. $layout_group_id .'"';
                     $layout_group_names[] = $layout_group_name;
+                    
+                    // For use in the Carousel below
+                    $layout_group_ids[$template] = $layout_group_id;
                 }
             }
             
@@ -347,13 +322,14 @@ class Blueprints_ext {
                 $carousel_options[] = array(
                     'template_id' => $template['template_id'], 
                     'template_name' => $template['template_name'], 
-                    'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : ''
+                    'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
+                    'layout_preview' => isset($layout_group_ids[$template['template_id']]) ? $layout_group_ids[$template['template_id']] : false
                 ); 
             }
 
             $blueprints_options = '
             var blueprints_options = {
-                autosave_url: "'. $this->EE->config->item('site_url') .'?ACT='. $this->EE->cp->fetch_action_id('Channel', 'insert_new_entry') .'",
+                layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
                 enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
                 carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
                 thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',

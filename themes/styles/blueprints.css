@@ -53,6 +53,24 @@
     padding: 0 10px;
     text-align: center;
     cursor: pointer;
+    position: relative;
+}
+.jcarousel-skin-blueprints .jcarousel-item .overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 125px;
+    height: 125px;
+    background-color: #fff;
+    opacity: 0.75;
+}
+.jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail {
+    position: relative;
+}
+.jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail .submit {
+    position: absolute;
+    left: 50%;
+    top: 45%;
 }
 .jcarousel-skin-blueprints .jcarousel-item.active span {
     color: #fff;
