@@ -51,6 +51,21 @@ option.disabled { color: #999; }
     echo $this->table->generate();
     $this->table->clear();
     
+    
+    // Enable carousel
+    $this->table->set_template($cp_table_template);
+    $this->table->set_heading(
+        array('data' => lang('enable_carousel'), 'colspan' => '2')
+    );
+    $this->table->add_row(
+        array('data' => '<p>'. lang('enable_carousel_detail') .'</p>', 'style' => 'width: 80%'),
+        array('data' => form_dropdown('enable_carousel', array('n' => 'No', 'y' => 'Yes'), $enable_carousel, 'id=enable_carousel'), 'style' => 'width: 20%')
+    );
+
+    echo $this->table->generate();
+    $this->table->clear();
+    
+    
     // Thumbnail Path
     $this->table->set_template($cp_table_template);
     $this->table->set_heading(
@@ -63,6 +78,7 @@ option.disabled { color: #999; }
 
     echo $this->table->generate();
     $this->table->clear();
+    
     
     // Layouts
     echo '<div class="publish_layouts">';
@@ -87,6 +103,7 @@ option.disabled { color: #999; }
     echo '</div>';
     echo '<a href="#" class="blueprint_add_row" rel="publish_layouts">+ Add</a>';
     $this->table->clear();
+    
 
     // Template selection
     echo '<div class="channel_template_selection">';

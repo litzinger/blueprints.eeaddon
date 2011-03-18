@@ -9,6 +9,12 @@
     -webkit-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
     -moz-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
 }
+#template_thumbnail img,
+.jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail {
+    box-shadow: 2px 2px 12px rgba(0,0,0,.4);
+    -webkit-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
+    -moz-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
+}
 .active_publish_layout {
     color: rgba(0,0,0,0.5);
     margin: 5px;
@@ -24,7 +30,6 @@
 .clear { clear: both; }
 
 
-
 .jcarousel-skin-blueprints .jcarousel-container {
 }
 
@@ -33,27 +38,28 @@
 }
 
 .jcarousel-skin-blueprints .jcarousel-container-horizontal {
-    width: 600px;
+    width: 580px;
     padding: 10px 40px;
 }
 
 .jcarousel-skin-blueprints .jcarousel-clip-horizontal {
-    width:  600px;
+    width:  580px;
     height: 165px;
 }
 
 .jcarousel-skin-blueprints .jcarousel-item {
     width: 125px;
     height: 165px;
-    padding: 0 12px;
+    padding: 0 10px;
     text-align: center;
     cursor: pointer;
 }
-.jcarousel-skin-blueprints .jcarousel-item.active {
-    background-color: #fff;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
+.jcarousel-skin-blueprints .jcarousel-item.active span {
+    color: #fff;
+    background: #bfd255;
+    background: -moz-linear-gradient(top, #bfd255 0%, #8eb92a 50%, #72aa00 51%, #9ecb2d 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#bfd255), color-stop(50%,#8eb92a), color-stop(51%,#72aa00), color-stop(100%,#9ecb2d));
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bfd255', endColorstr='#9ecb2d',GradientType=0 ); 
 }
 
 .jcarousel-skin-blueprints .jcarousel-item:hover span {
@@ -62,20 +68,20 @@
 .jcarousel-skin-blueprints .jcarousel-item span {
     display: inline-block;
     text-align: center;
-    padding: 2px 5px;
-    background-color: rgba(255,255,255,0.3);
-    border: 1px solid #fff;
+    padding: 2px 7px;
+    font-weight: bold;
     margin-bottom: 5px;
     
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
 }
-.jcarousel-skin-blueprints .jcarousel-item img {
+.jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail {
+    background-image: url(../images/no_template.png);
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
     width: 125px;
-    box-shadow: 2px 2px 12px rgba(0,0,0,.4);
-    -webkit-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
-    -moz-box-shadow: 2px 2px 12px rgba(0,0,0,.4);
+    height: 125px;
 }
 
 .jcarousel-skin-blueprints .jcarousel-item-horizontal {

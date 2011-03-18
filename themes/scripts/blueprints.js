@@ -1,18 +1,3 @@
-// console.log(blueprints_options);
-
-/*
-var blueprints_options = {
-    thumbnails: {'. implode(',', $thumbnails) .'},
-    layout_groups: {'. implode(',', $layout_groups) .'},
-    layout_group_options: "'. $layout_group_options .'",
-    active_publish_layouts: '. $active_publish_layouts .',
-    channel_templates: '. $channel_templates .',
-    edit_templates_link: "'. $edit_templates_link .'",
-    publish_layout_takeover: '. $this->_enable_publish_layout_takeover() .',
-    thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
-};
-*/
-
 var init_carousel = function(template_id)
 {
     structure_field = $('#hold_field_structure__template_id');
@@ -20,25 +5,44 @@ var init_carousel = function(template_id)
     
     // Make sure either of these divs are visible first
     if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
-        jQuery("#blueprints_carousel").jcarousel({
-            size: carousel.length
+        
+        // Find the template to select/start on
+        start_template = $("#blueprints_carousel").find("[data-id='" + template_id +"']");
+        
+        jQuery("#blueprints_carousel").show().jcarousel({
+            size: carousel.length,
+            start: start_template.index()
         });
         
-        $('.jcarousel-item')
+        // sets the layout_change input value so the correct layout group is saved
+        blueprint_template_carousel_change(template_id);
         
-        $("#blueprints_carousel").find("[data-id='" + template_id +"']").addClass('active');
+        // On load set the active template
+        start_template.addClass('active');
+        
+        // On click set active template
+        $('.jcarousel-item').click(function(){
+            id = $(this).attr('data-id');
+            $('input[name='+ select_name +']').val(id);
+            
+            // Set layout_change on item click
+            blueprint_template_carousel_change(id);
+            
+            $(this).siblings().removeClass('active');
+            $(this).addClass('active'); 
+        });
     }
 }
 
 jQuery(function(){
     
     var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
-    
+
     // Only create the carousel if turned on
-    if(true)
+    if(blueprints_options.enable_carousel == 'y')
     {
         carousel = blueprints_options.carousel_options;
-        out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints">';
+        out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints" style="display: none">';
 
         for(i = 0; i < carousel.length; i++)
         {
@@ -46,12 +50,12 @@ jQuery(function(){
             template_name = carousel[i].template_name;
             template_id = carousel[i].template_id;
         
-            thumbnail = template_thumb ? '<img src="'+ blueprints_options.thumbnail_path + template_thumb +'" />' : '';
+            thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ blueprints_options.thumbnail_path + template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
         
             out = out + '<li data-id="'+ template_id +'"><span>'+ template_name +'</span>'+ thumbnail +'</li>';
         }
     
-        out = out + '</ul>';
+        out = out + '</ul><div id="layout_change"></div><div class="clear"></div>';
     
         // Insert our carousel
         template_select.after(out);
@@ -69,25 +73,17 @@ jQuery(function(){
         
         // When a tab is clicked...
         $('.content_tab a').click(function(){
-            init_carousel();
-        });
-        
-        $('.jcarousel-item').click(function(){
-            id = $(this).attr('data-id');
-            $('input[name='+ select_name +']').val(id);
-            
-            $(this).siblings().removeClass('active');
-            $(this).addClass('active'); 
+            init_carousel(select_value);
         });
     }
     else
     {
         template_select.after(blueprints_options.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>');
         template_select.change(function(){
-            blueprint_structure_tab($(this));
+            blueprint_template_select_change($(this));
         });
 
-        blueprint_structure_tab(template_select);
+        blueprint_template_select_change(template_select);
         var template_select_options = template_select.find("option");
         template_select_options.each(function(i){
             var value = parseInt($(this).val());
@@ -122,7 +118,7 @@ jQuery(function(){
 
 function is_array(input){ return typeof(input)=="object"&&(input instanceof Array); }
 
-function blueprint_structure_tab(ele)
+function blueprint_template_select_change(ele)
 {
     var template = $(ele).find("option:selected").val();
     thumbnail = blueprints_options.thumbnail_path + blueprints_options.thumbnails[template];
@@ -135,8 +131,22 @@ function blueprint_structure_tab(ele)
     if(blueprints_options.publish_layout_takeover)
     {
         if(blueprints_options.layout_groups[template] != undefined && blueprints_options.layout_groups[template] != "") {
-            // $("#layout_change").html('<div class="instruction_text"><p style="margin-left: 0;">A Revision must be saved to apply the selected Template\'s Publish Layout.</p></div><input type="hidden" name="layout_preview" value="'+ blueprints_options.layout_groups[template] +'" />');
+            $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ blueprints_options.layout_groups[template] +'" />');
+            // $("#layout_change").html('<div class="instruction_text"><p style="margin-left: 0;">A Revision must be saved to apply the selected Template\'s Publish Layout.</p></div>');
             $("#revision_button").clone(true).appendTo( jQuery("#layout_change") );
+        } else {
+            $("#layout_change").html('<input type="hidden" name="layout_preview" value="NULL" />');
+        }
+    }
+    
+}
+
+function blueprint_template_carousel_change(template)
+{
+    if(blueprints_options.publish_layout_takeover)
+    {
+        if(blueprints_options.layout_groups[template] != undefined && blueprints_options.layout_groups[template] != "") {
+            $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ blueprints_options.layout_groups[template] +'" />');
         } else {
             $("#layout_change").html('<input type="hidden" name="layout_preview" value="NULL" />');
         }

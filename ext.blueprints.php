@@ -353,6 +353,7 @@ class Blueprints_ext {
 
             $blueprints_options = '
             var blueprints_options = {
+                enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
                 carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
                 thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
                 thumbnails: {'. implode(',', $thumbnails) .'},
@@ -531,6 +532,7 @@ class Blueprints_ext {
 
         $vars['enable_publish_layout_takeover'] = isset($this->settings['enable_publish_layout_takeover']) ? $this->settings['enable_publish_layout_takeover'] : 'n';
         $vars['enable_edit_menu_tweaks'] = isset($this->settings['enable_edit_menu_tweaks']) ? $this->settings['enable_edit_menu_tweaks'] : 'n';
+        $vars['enable_carousel'] = isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n';
         $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->thumbnail_directory_url;
         $vars['site_path'] = $this->site_path();
         $vars['hidden'] = array('file' => 'blueprints');
@@ -553,7 +555,7 @@ class Blueprints_ext {
         
         $insert['enable_publish_layout_takeover'] = $this->EE->input->post('enable_publish_layout_takeover');
         $insert['enable_edit_menu_tweaks'] = $this->EE->input->post('enable_edit_menu_tweaks');
-        $insert['enable_template_multi_channel'] = $this->EE->input->post('enable_template_multi_channel');
+        $insert['enable_carousel'] = $this->EE->input->post('enable_carousel');
         $insert['template'] = $this->EE->input->post('template');
         $insert['thumbnails'] = $this->EE->input->post('thumbnails');
         $insert['layout_group_ids'] = $this->EE->input->post('layout_group_ids');

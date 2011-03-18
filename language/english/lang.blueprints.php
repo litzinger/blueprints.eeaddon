@@ -41,6 +41,12 @@ $lang = array(
 "enable_edit_menu_tweaks_detail" =>
 "If enabled, the Content > Edit menu in the main navigation will directly link to Channels just like the Publish option.<br /><b>The Blueprints Accessory must be installed.</b>",
 
+"enable_carousel" =>
+"Enable Template Carousel?",
+
+"enable_carousel_detail" => 
+"The Pages or Structure template dropdown menu will be replaced with a carousel of templates with the preview thumbnails defined below.",
+
 "template_display_header" =>
 "Visible Templates",
 
