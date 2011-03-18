@@ -353,6 +353,7 @@ class Blueprints_ext {
 
             $blueprints_options = '
             var blueprints_options = {
+                autosave_url: "'. $this->EE->config->item('site_url') .'?ACT='. $this->EE->cp->fetch_action_id('Channel', 'insert_new_entry') .'",
                 enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
                 carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
                 thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',

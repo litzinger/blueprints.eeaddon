@@ -30,8 +30,25 @@ var init_carousel = function(template_id)
             
             $(this).siblings().removeClass('active');
             $(this).addClass('active'); 
+            
+            init_autosave();
         });
     }
+}
+
+var init_autosave = function()
+{
+    data = $("#publishForm").serialize();
+    
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: EE.BASE + "&C=content_publish&M=autosave",
+        data: data,
+        success: function (rdata) {
+            // console.log(rdata);
+        }
+    })
 }
 
 jQuery(function(){
