@@ -1,5 +1,5 @@
 <style type="text/css">
-#blueprint_settings tbody tr:first-child .blueprint_remove_row { display: none; }
+/*#blueprint_settings tbody tr:first-child .blueprint_remove_row { display: none; }*/
 .blueprint_add_row { float: right; font-weight: bold; display: inline-block; padding: 5px 12px }
 .blueprint_remove_row { float: right; }
 #remove_dialog { display: none; }
@@ -138,6 +138,13 @@ option.disabled { color: #999; }
         var blueprints_total_templates = <?php echo count($channel['channel_templates_options']) - 1; // minus 1 b/c of the 'None' option ?>;
         var blueprints_total_channels = <?php echo count($channel['channel_options']) - 1; // minus 1 b/c of the 'None' option ?>;
         var blueprints_selected_templates = [];
+        
+        // Hide delete if there is only 1 row
+        $('#blueprint_settings tbody').each(function(){
+            if($(this).children('tr').length == 1) {
+                $(this).find('.blueprint_remove_row').hide();
+            }
+        });
     
         $('.blueprint_add_row').live('click', function(e){
             regex = /(\[\d+\])/g; 
@@ -226,7 +233,7 @@ option.disabled { color: #999; }
             
             rel = $(this).attr('rel');
             field = $(this).closest('tr').find('.layout_group_name');
-
+            
             if(field.val() == "")
             {
                 $(this).closest('tr').remove();
@@ -250,6 +257,11 @@ option.disabled { color: #999; }
                 }
             }
             
+            // Hide delete link if 1 row is present
+            if( $('.'+ rel +' tbody tr').length == 1 ) {
+                $('.'+ rel +' tbody tr').find('.blueprint_remove_row').hide();
+            }
+            
             e.preventDefault();
         });
 
@@ -262,26 +274,13 @@ option.disabled { color: #999; }
         blueprints_set_row_events('channel_template_selection');
         blueprints_set_row_events('publish_layouts');
         
-        // function blueprints_disable_template_options(ele)
-        // {
-        //     $(ele).find('option').attr('disabled', false);
-        //     
-        //     var selected = Array();
-        //     $(ele).find('option:selected').each(function(){
-        //         selected.push($(this).val());
-        //     });
-        // 
-        //     $(ele).find('option').each(function(){
-        //         if($.inArray($(this).val(), selected) != -1)
-        //         {
-        //             $(this).addClass('disabled');
-        //         }
-        //     });
-        //     console.log(selected);
-        // }
-        
         function blueprints_set_row_events(rel)
         {
+            // Show delete link if more than 1 row is present
+            if( $('.'+ rel +' tbody tr').length > 1 ) {
+                $('.'+ rel +' tbody tr').find('.blueprint_remove_row').show();
+            }
+            
             /* Remove Add link if we have no more channels to add settings for */
             if(rel == 'channel_template_selection'){
                 if($('.channel_template_selection tbody tr').length >= blueprints_total_channels){

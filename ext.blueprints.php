@@ -227,7 +227,6 @@ class Blueprints_ext {
             }
             $active_publish_layouts = 'new Array('. trim(implode(',', $active_publish_layout_array), ',') .')';
 
-            
             if(isset($this->settings['template']) AND $this->settings['template'] != '')
             {
                 foreach($this->settings['template'] as $k => $template)
@@ -242,7 +241,7 @@ class Blueprints_ext {
                     $layout_group_id = isset($this->settings['layout_group_ids'][$k]) ? $this->settings['layout_group_ids'][$k] : 0;
                     
                     $layout_groups[] = '"'. $template .'":"'. $layout_group_id .'"';
-                    $layout_group_names[] = $layout_group_name;
+                    $layout_group_names[$layout_group_id] = $layout_group_name;
                     
                     // For use in the Carousel below
                     $layout_group_carousel_ids[$template] = $layout_group_id;
@@ -308,8 +307,7 @@ class Blueprints_ext {
             {
                 foreach($layout_group_names as $k => $name)
                 {
-                    $value = (int) $this->layout_id + $k;
-                    $layout_group_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $value .'\" class=\"toggle_member_groups\" /> '. $name .'</label><br />';
+                    $layout_group_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $k .'\" class=\"toggle_member_groups\" /> '. $name .'</label><br />';
                 }
             
                 $layout_group_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
@@ -318,13 +316,13 @@ class Blueprints_ext {
             $carousel_templates = $this->_get_assigned_templates($channel_templates);
             $carousel_options = array();
 
-            foreach($carousel_templates as $key => $template)
+            foreach($carousel_templates as $template)
             {
                 $carousel_options[] = array(
                     'template_id' => $template['template_id'], 
                     'template_name' => $template['template_name'], 
                     'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
-                    'layout_preview' => isset($layout_group_carousel_ids[$template['template_id']]) ? $layout_group_carousel_ids[$template['template_id']] : $key,
+                    'layout_preview' => isset($layout_group_carousel_ids[$template['template_id']]) ? $layout_group_carousel_ids[$template['template_id']] : '',
                     'layout_name' => isset($layout_group_carousel_names[$template['template_id']]) ? $layout_group_carousel_names[$template['template_id']] : $template['template_name']
                 ); 
             }
@@ -344,7 +342,7 @@ class Blueprints_ext {
                 active_publish_layouts: '. $active_publish_layouts .',
                 channel_templates: '. $channel_templates_options .',
                 edit_templates_link: "'. $edit_templates_link .'",
-                publish_layout_takeover: '. $this->_enable_publish_layout_takeover() .',
+                publish_layout_takeover: '. ($this->_enable_publish_layout_takeover() ? 'true' : 'false') .',
                 thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'",
                 theme_url: "'. $this->_get_theme_folder_url() .'"
             };';
@@ -811,10 +809,10 @@ class Blueprints_ext {
     
     private function _get_theme_folder_path()
     {
-        return $this->EE->config->slash_item('theme_folder_path') .'third_party/';
+        return PATH_THEMES . 'third_party/';
     }
     
-    protected function _get_theme_folder_url()
+    private function _get_theme_folder_url()
     {
         return $this->EE->config->slash_item('theme_folder_url') .'third_party/';
     }

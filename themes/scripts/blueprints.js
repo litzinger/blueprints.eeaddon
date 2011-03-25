@@ -27,8 +27,18 @@ var init_carousel = function(template_id)
         start_template.addClass('active');
         
         // On click set active template
-        $('.jcarousel-item').live('click' ,function(){
+        $('.jcarousel-item').click(function(){
             item = $(this);
+            
+            // Set all siblings as not clicked
+            item.siblings().each(function(){
+                $(this).data('clicked', false);
+            });
+            // Make sure the item can only be clicked once, otherwise it will
+            // execute this code each time it's clicked. bad.
+            if(item.data('clicked')) return;
+            item.data('clicked', true);
+            
             id = $(this).attr('data-id');
             $('input[name='+ select_name +']').val(id);
             
@@ -36,8 +46,8 @@ var init_carousel = function(template_id)
             layout_preview = blueprint_template_carousel_change(id);
             
             // Make it visually active
-            item.siblings().removeClass('active');
-            item.addClass('active');
+            // item.siblings().removeClass('active');
+            // item.addClass('active');
             
             item.siblings().find('.submit').remove();
             item.siblings().find('.overlay').remove();
@@ -48,7 +58,7 @@ var init_carousel = function(template_id)
             {
                 item.find('.carousel_thumbnail').append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
                 item.find('.carousel_thumbnail').append('<div class="overlay"></div>');
-                submit_button = $('.carousel_thumbnail').find('.submit');
+                submit_button = item.find('.submit');
                 
                 item_width = $('.carousel_thumbnail').width();
                 submit_width = submit_button.width();
@@ -57,9 +67,9 @@ var init_carousel = function(template_id)
                 submit_button.click(function(e){
                     e.preventDefault();
                     item.find('.overlay').addClass('loading');
-                    $(this).before('<img class="ajax_loader" src="'+ blueprints_options.theme_url +'blueprints/images/ajax_loader.gif" />').remove();
-                    
-                    init_autosave(layout_preview);
+                    submit_button.after('<img class="ajax_loader" src="'+ blueprints_options.theme_url +'blueprints/images/ajax_loader.gif" />');
+                    submit_button.remove();
+                    init_autosave(layout_preview); 
                 });
             }
         });
@@ -72,8 +82,6 @@ var init_carousel = function(template_id)
 var init_autosave = function(layout_preview)
 {
     post_data = $("#publishForm").serialize();
-    
-    console.log(post_data);
     
     $.ajax({
         type: "POST",
@@ -89,6 +97,8 @@ var init_autosave = function(layout_preview)
                     autosave_entry_id = $("#publishForm input[name=autosave_entry_id]").val();
                     new_autosave_entry_id = false;
                     
+                    // If no autosave entry_id exists, go to the table and find it
+                    // reported as bug: http://expressionengine.com/bug_tracker/bug/15478/
                     if(autosave_entry_id == 0)
                     {
                         $.ajax({
@@ -122,10 +132,6 @@ var autosave_redirect = function(autosave_entry_id, layout_preview)
     }
     
     href = href.replace(/&entry_id=(\d+)/, '&entry_id='+ autosave_entry_id);
-
-    // TODO: Need to get the autosave entry_id, should be in the json response
-    // would rather not create a module file for 1 ajax request.
-    // reported as bug: http://expressionengine.com/bug_tracker/bug/15478/
     
     window.location.href = href + '&use_autosave=y';
 }
@@ -182,7 +188,7 @@ jQuery(function(){
                 run: function() {
                     init_carousel(select_value);
                 }
-            }.run, 250);
+            }.run, 50);
         });
     }
     // Old school template select menu
@@ -242,7 +248,6 @@ function blueprint_template_select_change(ele)
     {
         if(blueprints_options.layout_groups[template] != undefined && blueprints_options.layout_groups[template] != "") {
             $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ blueprints_options.layout_groups[template] +'" />');
-            // $("#layout_change").html('<div class="instruction_text"><p style="margin-left: 0;">A Revision must be saved to apply the selected Template\'s Publish Layout.</p></div>');
             $("#revision_button").clone(true).appendTo( jQuery("#layout_change") );
         } else {
             $("#layout_change").html('<input type="hidden" name="layout_preview" value="NULL" />');
