@@ -248,7 +248,7 @@ class Blueprints_ext {
                     $layout_group_carousel_names[$template] = $layout_group_name;
                 }
             }
-            
+
             if(isset($this->settings['channels']))
             {
                 foreach($this->settings['channels'] as $k => $channel)
@@ -315,7 +315,7 @@ class Blueprints_ext {
             
             $carousel_templates = $this->_get_assigned_templates($channel_templates);
             $carousel_options = array();
-
+            
             foreach($carousel_templates as $template)
             {
                 $carousel_options[] = array(
@@ -331,6 +331,7 @@ class Blueprints_ext {
 
             $blueprints_options = '
             var blueprints_options = {
+                autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
                 layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
                 enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
                 get_autosave_entry_url: "'. $this->EE->config->item('site_url') .'?ACT='. $action_id .'",
@@ -913,21 +914,19 @@ class Blueprints_ext {
             // Get the current Site ID
             $site_id = $this->EE->config->item('site_id');
             
+            $this->EE->db->select('template_groups.group_name, templates.template_name, templates.template_id');
+            $this->EE->db->where('template_groups.site_id', $site_id);
+            $this->EE->db->order_by('template_groups.group_name, templates.template_name');
+            $this->EE->db->join('template_groups', 'template_groups.group_id = templates.group_id');
+            
             if($ids)
             {
-                $query = $this->EE->db->select('template_groups.group_name, templates.template_name, templates.template_id')
-                                      ->where_in('templates.template_id', $ids)
-                                      ->where('template_groups.site_id', $site_id)
-                                      ->order_by('template_groups.group_name, templates.template_name')
-                                      ->join('template_groups', 'template_groups.group_id = templates.group_id')
-                                      ->get('templates');
+                $this->EE->db->where_in('templates.template_id', $ids);
+            }
+            
+            $query = $this->EE->db->get('templates');
 
-                $this->cache['assigned_templates'] = $query->result_array();
-            }
-            else
-            {
-                $this->cache['assigned_templates'] = array();
-            }
+            $this->cache['assigned_templates'] = $query->result_array();
         }
         
         return $this->cache['assigned_templates'];

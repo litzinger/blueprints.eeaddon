@@ -4,11 +4,17 @@ var init_carousel = function(template_id)
     pages_field = $('#hold_field_pages__pages_template_id');
     old_template_id = template_id;
     
+    autosave_entry_id_field = $("#publishForm input[name=autosave_entry_id]");
+    if(blueprints_options.autosave_entry_id && autosave_entry_id_field.val() == 0)
+    {
+        autosave_entry_id_field.val(blueprints_options.autosave_entry_id);
+    }
+    
     // Make sure either of these divs are visible first
     if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
         
         // Find the template to select/start on
-        if(blueprints_options.layout_preview){
+        if(blueprints_options.layout_preview) {
             start_template = $("#blueprints_carousel").find("[data-layout='" + blueprints_options.layout_preview +"']");
             old_template_id = start_template.attr("data-id");
         } else {
@@ -94,12 +100,12 @@ var init_autosave = function(layout_preview)
                     
                     entry_id = $("#publishForm input[name=entry_id]").val();
                     channel_id = $("#publishForm input[name=channel_id]").val();
-                    autosave_entry_id = $("#publishForm input[name=autosave_entry_id]").val();
+                    autosave_entry_id = data.autosave_entry_id;
                     new_autosave_entry_id = false;
-                    
-                    // If no autosave entry_id exists, go to the table and find it
-                    // reported as bug: http://expressionengine.com/bug_tracker/bug/15478/
-                    if(autosave_entry_id == 0)
+
+                    // If no autosave_entry_id exists, go to the table and find it
+                    // Or if EE reports the autosave_entry_id incorrectly... I swear this is a bug.
+                    if(autosave_entry_id == 0 || autosave_entry_id == entry_id)
                     {
                         $.ajax({
                             type: "POST",
@@ -125,15 +131,27 @@ var autosave_redirect = function(autosave_entry_id, layout_preview)
 {
     href = window.location.href;
     
+    // Clean up the current URL to make sure the params are set correctly,
+    // and we don't have more than 1 of each.
     if(href.indexOf('layout_preview') != -1) {
         href = href.replace(/&layout_preview=(\d+)/, '&layout_preview='+ layout_preview);
     } else {
         href = href +'&layout_preview='+ layout_preview;
     }
     
-    href = href.replace(/&entry_id=(\d+)/, '&entry_id='+ autosave_entry_id);
+    if(href.indexOf('use_autosave') != -1) {
+        href = href.replace(/&use_autosave=(\w+)/, '&use_autosave=y');
+    } else {
+        href = href +'&use_autosave=y';
+    }
     
-    window.location.href = href + '&use_autosave=y';
+    if(href.indexOf('entry_id') != -1) {
+        href = href.replace(/&entry_id=(\d+)/, '&entry_id='+ autosave_entry_id);
+    } else {
+        href = href +'&entry_id='+ autosave_entry_id;
+    }
+    
+    window.location.href = href;
 }
 
 jQuery(function(){
@@ -141,7 +159,7 @@ jQuery(function(){
     var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
 
     // Only create the carousel if turned on
-    if(blueprints_options.enable_carousel == 'y')
+    if(blueprints_options.enable_carousel == 'y' && blueprints_options.carousel_options.length > 0)
     {
         carousel = blueprints_options.carousel_options;
         out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints" style="display: none">';
@@ -221,14 +239,14 @@ jQuery(function(){
                 $(this).remove();
             }
         });
-    
-        $("body")
-            .ajaxStart(function () {
-                $(this).addClass("loading");
-            })
-            .ajaxStop(function () {
-                $(this).removeClass("loading");
-            });
+        
+        // $("body")
+        //     .ajaxStart(function () {
+        //         $(this).addClass("loading");
+        //     })
+        //     .ajaxStop(function () {
+        //         $(this).removeClass("loading");
+        //     });
     }
 });
 
