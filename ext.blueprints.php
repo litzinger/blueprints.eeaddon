@@ -138,6 +138,8 @@ class Blueprints_ext {
                 $_GET['layout_preview'] = isset($_GET['layout_preview']) ? $_GET['layout_preview'] : $layout_group;
             }
         }
+        
+        return $sess;
     }
     
     /*
