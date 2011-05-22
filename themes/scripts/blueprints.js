@@ -16,11 +16,11 @@ Blueprints.carousel = function(template_id)
     if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
 
         // Find the template to select/start on
-        if(Blueprints.config.layout_preview) {
+        if(Blueprints.config.layout_preview != "NULL") {
             start_template = $("#blueprints_carousel").find("li[data-layout='" + Blueprints.config.layout_preview +"']");
             old_template_id = start_template.attr("data-id");
         } else {
-            start_template = $("#blueprints_carousel").find("[data-id='" + template_id +"']");
+            start_template = $("#blueprints_carousel").find("li[data-id='" + template_id +"']");
         }
 
         jQuery("#blueprints_carousel").show().jcarousel({

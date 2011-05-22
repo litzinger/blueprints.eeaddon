@@ -110,6 +110,8 @@ class Blueprints_ext {
                 $template_id = $query->row('configuration_value');
             }
             
+            $this->cache['active_template_id'] = $template_id;
+            
             // And hi-jack it if we have a custom layout_group
             if($layout_group = $this->_find_layout_group($template_id, $channel_id, $entry_id))
             {
@@ -327,6 +329,7 @@ class Blueprints_ext {
 
             // This was added when building the carousel feature in 2.1.4 to account for a bug, 
             // but should be fixed in 2.1.5+, but keeping this here just incase.
+            // http://expressionengine.com/bug_tracker/bug/15529/
             $action_id = $this->EE->db->where(array('class' => 'Blueprints_mcp', 'method' => 'get_autosave_entry'))->get('actions')->row('action_id');
 
             $blueprints_config = '
