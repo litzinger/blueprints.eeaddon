@@ -325,6 +325,8 @@ class Blueprints_ext {
                 ); 
             }
 
+            // This was added when building the carousel feature in 2.1.4 to account for a bug, 
+            // but should be fixed in 2.1.5+, but keeping this here just incase.
             $action_id = $this->EE->db->where(array('class' => 'Blueprints_mcp', 'method' => 'get_autosave_entry'))->get('actions')->row('action_id');
 
             $blueprints_config = '

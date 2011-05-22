@@ -103,7 +103,10 @@ Blueprints.autosave = function(layout_preview)
                     new_autosave_entry_id = false;
 
                     // If no autosave_entry_id exists, go to the table and find it
-                    // Or if EE reports the autosave_entry_id incorrectly... I swear this is a bug.
+                    // Or if EE reports the autosave_entry_id incorrectly. Confirmed as a bug.
+                    
+                    // This was added when building the carousel feature in 2.1.4 to account for the bug, 
+                    // but should be fixed in 2.1.5+, but keeping this here just incase.
                     if(autosave_entry_id == 0 || autosave_entry_id == entry_id)
                     {
                         $.ajax({
