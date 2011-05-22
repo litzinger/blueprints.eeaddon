@@ -11,11 +11,12 @@ if (! defined('BLUEPRINTS_VERSION'))
 
 class Blueprints_acc {
 
-    var $name       = 'Blueprints Accessory';
-    var $id         = 'blueprints';
-    var $version        = BLUEPRINTS_VERSION;
-    var $description    = BLUEPRINTS_DESC;
-    var $sections       = array();
+    public $name       = 'Blueprints Accessory';
+    public $id         = 'blueprints';
+    public $version        = BLUEPRINTS_VERSION;
+    public $description    = BLUEPRINTS_DESC;
+    public $sections       = array();
+    public $required_by    = array('module');
 
     /**
      * Constructor

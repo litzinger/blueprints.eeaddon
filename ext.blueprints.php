@@ -22,18 +22,19 @@ if (! defined('BLUEPRINTS_VERSION'))
  
 class Blueprints_ext {
 
-    var $settings       = array();
-    var $global_settings = array();
-    var $name           = BLUEPRINTS_NAME;
-    var $version        = BLUEPRINTS_VERSION;
-    var $description    = BLUEPRINTS_DESC;
-    var $settings_exist = 'y';
-    var $docs_url       = 'http://boldminded.com/add-ons/blueprints';
-    var $cache;
-    var $thumbnail_directory_url = '';
-    var $thumbnail_directory_path = '';
-    var $layout_info    = '';
-    var $layout_id      = 2000; // Starting number for our fake member groups.
+    public $settings       = array();
+    public $global_settings = array();
+    public $name           = BLUEPRINTS_NAME;
+    public $version        = BLUEPRINTS_VERSION;
+    public $description    = BLUEPRINTS_DESC;
+    public $settings_exist = 'y';
+    public $docs_url       = 'http://boldminded.com/add-ons/blueprints';
+    public $cache;
+    public $thumbnail_directory_url = '';
+    public $thumbnail_directory_path = '';
+    public $layout_info    = '';
+    public $layout_id      = 2000; // Starting number for our fake member groups.
+    // public $required_by    = array('module');
     
     /**
      * Constructor
@@ -326,8 +327,10 @@ class Blueprints_ext {
 
             $action_id = $this->EE->db->where(array('class' => 'Blueprints_mcp', 'method' => 'get_autosave_entry'))->get('actions')->row('action_id');
 
-            $blueprints_options = '
-            var blueprints_options = {
+            $blueprints_config = '
+            if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
+
+            Blueprints.config = {
                 autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
                 layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
                 enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
@@ -345,7 +348,7 @@ class Blueprints_ext {
                 theme_url: "'. $this->_get_theme_folder_url() .'"
             };';
             
-            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_options .'</script><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->_get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
