@@ -158,6 +158,9 @@ Blueprints.autosave_redirect = function(autosave_entry_id, layout_preview)
 
 Blueprints.is_array = function(input){ return typeof(input)=="object"&&(input instanceof Array); }
 
+/*
+    Normal Structure or Pages select menu, pre 1.4 version or when Carousel is turned off.
+*/
 Blueprints.select_change = function(ele)
 {
     var template = $(ele).find("option:selected").val();
@@ -180,6 +183,9 @@ Blueprints.select_change = function(ele)
     
 }
 
+/*
+    1.4+ version if Carousel option is turned on.
+*/
 Blueprints.carousel_change = function(template)
 {
     if(Blueprints.config.publish_layout_takeover)
