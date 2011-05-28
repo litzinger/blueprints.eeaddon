@@ -5,12 +5,12 @@ Blueprints.carousel = function(template_id)
     var structure_field = $('#hold_field_structure__template_id');
     var pages_field = $('#hold_field_pages__pages_template_id');
     var old_template_id = template_id;
-    var autosave_entry_id_field = $("#publishForm input[name=autosave_entry_id]");
-
-    if(Blueprints.config.autosave_entry_id && autosave_entry_id_field.val() == 0)
-    {
-        autosave_entry_id_field.val(Blueprints.config.autosave_entry_id);
-    }
+    // var autosave_entry_id_field = $("#publishForm input[name=autosave_entry_id]");
+    // 
+    // if(Blueprints.config.autosave_entry_id && autosave_entry_id_field.val() == 0)
+    // {
+    //     autosave_entry_id_field.val(Blueprints.config.autosave_entry_id);
+    // }
 
     // Make sure either of these divs are visible first
     if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
@@ -99,30 +99,29 @@ Blueprints.autosave = function(layout_preview)
 
                     entry_id = $("#publishForm input[name=entry_id]").val();
                     channel_id = $("#publishForm input[name=channel_id]").val();
+                    // This is the entry_id column value, not original_entry_id
                     autosave_entry_id = data.autosave_entry_id;
                     new_autosave_entry_id = false;
-
+                    
                     // If no autosave_entry_id exists, go to the table and find it
                     // Or if EE reports the autosave_entry_id incorrectly. Confirmed as a bug.
-                    
-                    // This was added when building the carousel feature in 2.1.4 to account for the bug, 
-                    // but should be fixed in 2.1.5+, but keeping this here just incase.
-                    if(autosave_entry_id == 0 || autosave_entry_id == entry_id)
-                    {
-                        $.ajax({
-                            type: "POST",
-                            dataType: "text",
-                            url: Blueprints.config.get_autosave_entry_url,
-                            data: "entry_id="+ entry_id +"&channel_id="+ channel_id,
-                            success: function (autosave_entry_id, status, xhr) {
-                                Blueprints.autosave_redirect(autosave_entry_id, layout_preview);
-                            }
-                        });
-                    }
-                    else
-                    {
+                    // if(autosave_entry_id == 0 || autosave_entry_id == entry_id)
+                    // {
+                    //     $.ajax({
+                    //         type: "POST",
+                    //         dataType: "text",
+                    //         url: Blueprints.config.get_autosave_entry_url,
+                    //         data: "entry_id="+ entry_id +"&channel_id="+ channel_id,
+                    //         success: function (autosave_entry_id, status, xhr) {
+                    //             // Blueprints.autosave_redirect(autosave_entry_id, layout_preview);
+                    //         }
+                    //     });
+                    // }
+                    // else
+                    // {
+                        // console.log(autosave_entry_id);
                         Blueprints.autosave_redirect(autosave_entry_id, layout_preview);
-                    }
+                    // }
                 }
             }.run, 500);
         }
@@ -152,7 +151,7 @@ Blueprints.autosave_redirect = function(autosave_entry_id, layout_preview)
     } else {
         href = href +'&entry_id='+ autosave_entry_id;
     }
-
+    // console.log(href);
     window.location.href = href;
 }
 
