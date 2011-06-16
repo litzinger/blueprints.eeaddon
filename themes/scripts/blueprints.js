@@ -5,6 +5,7 @@ Blueprints.carousel = function(template_id)
     var structure_field = $('#hold_field_structure__template_id');
     var pages_field = $('#hold_field_pages__pages_template_id');
     var old_template_id = template_id;
+    
     // var autosave_entry_id_field = $("#publishForm input[name=autosave_entry_id]");
     // 
     // if(Blueprints.config.autosave_entry_id && autosave_entry_id_field.val() == 0)
@@ -16,7 +17,7 @@ Blueprints.carousel = function(template_id)
     if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
 
         // Find the template to select/start on
-        if(Blueprints.config.layout_preview != "NULL") {
+        if(Blueprints.config.layout_preview != "NULL" && Blueprints.config.layout_preview != "") {
             start_template = $("#blueprints_carousel").find("li[data-layout='" + Blueprints.config.layout_preview +"']");
             old_template_id = start_template.attr("data-id");
         } else {
@@ -32,7 +33,7 @@ Blueprints.carousel = function(template_id)
         Blueprints.carousel_change(old_template_id);
 
         // On load set the active template
-        start_template.addClass('active');
+        start_template.addClass('current');
 
         // On click set active template
         $('.jcarousel-item').click(function(){
@@ -54,15 +55,15 @@ Blueprints.carousel = function(template_id)
             layout_preview = Blueprints.carousel_change(id);
 
             // Make it visually active
-            // item.siblings().removeClass('active');
-            // item.addClass('active');
+            item.siblings().removeClass('active');
+            item.addClass('active');
 
             item.siblings().find('.submit').remove();
             item.siblings().find('.overlay').remove();
             item.siblings().find('.ajax_loader').remove();
 
-            // Add zee button
-            if(old_template_id != id)
+            // Add zee button, but only if the choosen template is assigned to a Publish Layout
+            if(old_template_id != id && id in Blueprints.config.layout_groups)
             {
                 item.find('.carousel_thumbnail').append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
                 item.find('.carousel_thumbnail').append('<div class="overlay"></div>');

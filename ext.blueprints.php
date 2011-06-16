@@ -192,7 +192,7 @@ class Blueprints_ext {
             $post_template_id = $this->EE->input->post('pages__pages_template_id');
         }
         
-        if($post_template_id AND $this->EE->input->post('layout_preview'))
+        if($post_template_id AND $this->EE->input->post('layout_preview') AND $this->EE->input->post('layout_preview') != "NULL")
         {
             $settings[$site_id]['template_layout'][$entry_id] = array('template_id' => $post_template_id, 'layout_group_id' => $this->EE->input->post('layout_preview'));
         
@@ -356,7 +356,7 @@ class Blueprints_ext {
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->_get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
-            // $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
+            $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->_get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
         }
         
         return $data;
