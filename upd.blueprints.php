@@ -22,14 +22,14 @@ if (! defined('BLUEPRINTS_VERSION'))
 
 class Blueprints_upd {
 
-    var $version = BLUEPRINTS_VERSION;
+    public $version = BLUEPRINTS_VERSION;
 
-    function Blueprints_upd($switch = TRUE)
+    function __construct()
     {
         $this->EE =& get_instance();
     }
 
-    function install()
+    public function install()
     {
         // Module data
         $data = array(
@@ -54,10 +54,12 @@ class Blueprints_upd {
             $this->EE->db->insert('actions', $data);
         }
         
+        $this->_add_tables();
+        
         return TRUE;
     }
     
-    function uninstall()
+    public function uninstall()
     {
         $this->EE->db->where('module_name', BLUEPRINTS_NAME);
         $this->EE->db->delete('modules');
@@ -67,8 +69,107 @@ class Blueprints_upd {
         return TRUE;
     }
     
-    function update($current = '')
+    public function update($current = '')
     {
+        if ($current == $this->version)
+        {
+            return FALSE;
+        }
+
+        if($current < '2.0')
+        {
+            $this->_add_tables();
+            $this->_migrate_settings();
+        }
+        
         return TRUE;
+    }
+    
+    private function _migrate_settings()
+    {
+        $qry = $this->EE->db->select('settings')
+                            ->from('extensions')
+                            ->where('enabled', 'y')
+                            ->where('class', 'Blueprints_ext')
+                            ->limit(1)
+                            ->get();
+                            
+        $settings = unserialize($qry->row('settings'));
+
+        foreach($settings as $site_id => $setting)
+        {
+            foreach($setting['layout_group_names'] as $k => $v)
+            {
+                $data = array(
+                    'site_id'       => $site_id,
+                    'group_id'      => $setting['layout_group_ids'][$k],
+                    'template'      => $setting['template'][$k],
+                    'thumbnail'     => $setting['thumbnails'][$k],
+                    'name'          => $setting['layout_group_names'][$k],
+                );
+            
+                $this->EE->db->insert('blueprints_layouts', $data);
+            }
+        
+            foreach($setting['template_layout'] as $entry_id => $v)
+            {
+                $data = array(
+                    'site_id'       => $site_id,
+                    'entry_id'      => $entry_id,
+                    'template_id'   => $v['template_id'],
+                    'group_id'      => $v['layout_group_id']
+                );
+            
+                $this->EE->db->insert('blueprints_entries', $data);
+            }
+        }
+    }
+    
+    // Added in 2.0
+    private function _add_tables()
+    {
+        // Create our external tables
+        $this->EE->load->dbforge();
+        
+        if (! $this->EE->db->table_exists('blueprints_layouts'))
+        {
+            $this->EE->dbforge->add_field(array(
+                'id'            => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE, 'auto_increment' => TRUE),
+                'site_id'       => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'group_id'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'template'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'thumbnail'     => array('type' => 'text'),
+                'name'          => array('type' => 'text')
+            ));
+
+            $this->EE->dbforge->add_key('id', TRUE);
+            $this->EE->dbforge->add_key('group_id', TRUE);
+            $this->EE->dbforge->create_table('blueprints_layouts');
+        }
+        
+        if (! $this->EE->db->table_exists('blueprints_entries'))
+        {
+            $this->EE->dbforge->add_field(array(
+                'id'            => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE, 'auto_increment' => TRUE),
+                'site_id'       => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'entry_id'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'template_id'   => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'group_id'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE)
+            ));
+
+            $this->EE->dbforge->add_key('id', TRUE);
+            $this->EE->dbforge->add_key('entry_id', TRUE);
+            $this->EE->dbforge->add_key('group_id', TRUE);
+            $this->EE->dbforge->create_table('blueprints_entries');
+        }
+    }
+    
+    private function debug($str, $die = false)
+    {
+        echo '<pre>';
+        var_dump($str);
+        echo '</pre>';
+        
+        if($die) die('debug terminated');
     }
 }

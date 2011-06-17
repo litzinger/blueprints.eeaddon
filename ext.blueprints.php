@@ -36,12 +36,23 @@ class Blueprints_ext {
     public $layout_id      = 2000; // Starting number for our fake member groups.
     // public $required_by    = array('module');
     
+    private $site_id;
+    private $layouts;
+    
     /**
      * Constructor
      */
     function Blueprints_ext($settings = '') 
     {
         $this->EE =& get_instance();
+        
+        // Create cache
+        if (! isset($this->EE->session->cache[__CLASS__]))
+        {
+            $this->EE->session->cache[__CLASS__] = array();
+        }
+        $this->cache =& $this->EE->session->cache[__CLASS__];
+        
         $settings = $this->_get_settings();
         
         // $this->debug($settings, true);
@@ -50,15 +61,13 @@ class Blueprints_ext {
         $this->global_settings = $settings;
         
         // Site specific settings
-        $site_id = $this->EE->config->item('site_id');
-        $this->settings = isset($settings[$site_id]) ? $settings[$site_id] : array();
-
-        // Create cache
-        if (! isset($this->EE->session->cache[__CLASS__]))
-        {
-            $this->EE->session->cache[__CLASS__] = array();
-        }
-        $this->cache =& $this->EE->session->cache[__CLASS__];
+        $this->site_id = $this->EE->config->item('site_id');
+        $this->settings = isset($settings[$this->site_id]) ? $settings[$this->site_id] : array();
+        
+        $this->layouts = $this->_get_settings_layouts();
+        $this->entries = $this->_get_settings_entries();
+        
+        // $this->debug($this->entries, true);
         
         $this->_set_paths();
     }
@@ -145,9 +154,9 @@ class Blueprints_ext {
         else
         {
             
-            if(isset($this->settings['template_layout'][$entry_id]['layout_group_id']))
+            if(isset($this->entries[$entry_id]['layout_group_id']))
             {
-                $layout_group = $this->settings['template_layout'][$entry_id]['layout_group_id'];
+                $layout_group = $this->entries[$entry_id]['layout_group_id'];
             }
             else
             {
@@ -534,6 +543,7 @@ class Blueprints_ext {
     
     function save_settings()
     {
+        // TODO, it still saves to the settings array
         $channels = $this->EE->input->post('channels');
         $channel_show_selected = $this->EE->input->post('channel_show_selected');
         $channel_templates = $this->EE->input->post('channel_templates');
@@ -586,11 +596,11 @@ class Blueprints_ext {
         if($delete)
         {
             // Remove from all existing entries
-            foreach($this->settings['template_layout'] as $entry_id => $data)
+            foreach($this->entries as $entry_id => $data)
             {
                 if(isset($data['layout_group_id']) AND in_array($data['layout_group_id'], $delete))
                 {
-                    unset($this->settings['template_layout'][$entry_id]);
+                    unset($this->entries[$entry_id]);
                 }
             }
             
@@ -599,9 +609,23 @@ class Blueprints_ext {
             $this->EE->db->delete('layout_publish');
         }
 
-        // Settings page will want to delete this key, lets make sure it hangs around, it is kind of important
-        // Our settings form does not actually update this data, it is set when saving an entry
-        $insert['template_layout'] = isset($this->settings['template_layout']) ? $this->settings['template_layout'] : array();
+        foreach($insert['layout_group_names'] as $k => $v)
+        {
+            $data = array(
+                'site_id'       => $this->site_id,
+                'group_id'      => $insert['layout_group_ids'][$k],
+                'template'      => $insert['template'][$k],
+                'thumbnail'     => $insert['thumbnails'][$k],
+                'name'          => $insert['layout_group_names'][$k],
+            );
+        
+            $where = array(
+                'site_id'       => $this->site_id,
+                'group_id'      => $insert['layout_group_ids'][$k]
+            );
+        
+            $this->_insert_or_update('blueprints_layouts', $data, $where);
+        }
 
         // Save our settings to the current site ID for MSM.
         $site_id = $this->EE->config->item('site_id');
@@ -612,6 +636,32 @@ class Blueprints_ext {
         $this->EE->db->update('extensions', array('settings' => serialize($settings)));
         
         $this->EE->session->set_flashdata('message_success', $this->EE->lang->line('preferences_updated'));
+    }
+    
+    /*
+    @param - string
+    @param - array of data to be inserted, key => value pairs
+    @param - array of data used to find the row to update, key => value pairs
+    
+    _insert_or_update('some_table', array('foo' => 'bar'), array('id' => 1, 'something' => 'another-thing'))
+    
+    */
+    private function _insert_or_update($table, $data, $where)
+    {
+        $query = $this->EE->db->get_where($table, $where);
+
+        // No records were found, so insert
+        if($query->num_rows() == 0)
+        {
+            $this->EE->db->insert($table, $data);
+            return $this->EE->db->insert_id();
+        }
+        // Update existing record
+        elseif($query->num_rows() == 1)
+        {
+            $this->EE->db->where($where)->update($table, $data);
+            return false;
+        }
     }
     
     /**
@@ -1093,6 +1143,59 @@ class Blueprints_ext {
         }
 
         return $settings;
+    }
+    
+    private function _get_settings_layouts($force_refresh = FALSE)
+    {
+        // Get the settings for the extension
+        if(isset($this->cache['layouts']) === FALSE || $force_refresh === TRUE)
+        {
+            // check the db for extension settings
+            $query = $this->EE->db->get_where('blueprints_layouts', array('site_id' => $this->EE->config->item('site_id')));
+
+            // save them to the cache
+            $this->cache['layouts'] = $query->result_array();
+        }
+
+        // check to see if the session has been set
+        // if it has return the session
+        // if not return false
+        if(empty($this->cache['layouts']) !== TRUE)
+        {
+            $layouts = $this->cache['layouts'];
+        }
+
+        return $layouts;
+    }
+    
+    private function _get_settings_entries($force_refresh = FALSE)
+    {
+        // Get the settings for the extension
+        if(isset($this->cache['entries']) === FALSE || $force_refresh === TRUE)
+        {
+            // check the db for extension settings
+            $query = $this->EE->db->get_where('blueprints_entries', array('site_id' => $this->EE->config->item('site_id')));
+
+            $entries = array();
+            
+            foreach($query->result_array() as $entry)
+            {
+                $entries[$entry['entry_id']] = $entry;
+            }
+
+            // save them to the cache
+            $this->cache['entries'] = $entries;
+        }
+
+        // check to see if the session has been set
+        // if it has return the session
+        // if not return false
+        if(empty($this->cache['entries']) !== TRUE)
+        {
+            $layouts = $this->cache['entries'];
+        }
+
+        return $layouts;
     }
     
     /**

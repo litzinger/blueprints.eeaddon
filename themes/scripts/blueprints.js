@@ -247,7 +247,7 @@ jQuery(function(){
         
             thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ Blueprints.config.thumbnail_path + template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
         
-            out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span>'+ layout_name +'</span>'+ thumbnail +'</li>';
+            out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span>'+ layout_name +'</span><div class="carousel_thumbnail_wrapper">'+ thumbnail +'</div></li>';
         }
     
         out = out + '</ul><div id="layout_change"></div><div class="clear"></div>';
