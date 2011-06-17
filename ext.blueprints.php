@@ -55,8 +55,6 @@ class Blueprints_ext {
         
         $settings = $this->_get_settings();
         
-        // $this->debug($settings, true);
-        
         // All settings
         $this->global_settings = $settings;
         
@@ -67,6 +65,8 @@ class Blueprints_ext {
         $this->layouts = $this->_get_settings_layouts();
         $this->entries = $this->_get_settings_entries();
         
+        // $this->debug($settings, true);
+        // $this->debug($this->layouts);
         // $this->debug($this->entries, true);
         
         $this->_set_paths();
@@ -171,14 +171,23 @@ class Blueprints_ext {
     {
         $layout_group = false;
 
-        foreach($this->settings['template'] as $key => $setting_template_id)
+        foreach($this->layouts as $layout)
         {
-            if($template_id == $setting_template_id AND isset($this->settings['layout_group_ids'][$key]))
+            if($template_id == $layout['template_id'])
             {
-                $layout_group = $this->settings['layout_group_ids'][$key];
+                $layout_group = $layout['group_id'];
                 break;
             }
         }
+
+        // foreach($this->settings['template'] as $key => $setting_template_id)
+        //         {
+        //             if($template_id == $setting_template_id AND isset($this->settings['layout_group_ids'][$key]))
+        //             {
+        //                 $layout_group = $this->settings['layout_group_ids'][$key];
+        //                 break;
+        //             }
+        //         }
 
         return $layout_group;
     }
@@ -203,10 +212,23 @@ class Blueprints_ext {
         
         if($post_template_id AND $this->EE->input->post('layout_preview') AND $this->EE->input->post('layout_preview') != "NULL")
         {
-            $settings[$site_id]['template_layout'][$entry_id] = array('template_id' => $post_template_id, 'layout_group_id' => $this->EE->input->post('layout_preview'));
+            $data = array(
+                'site_id'       => $this->site_id,
+                'group_id'      => $this->EE->input->post('layout_preview'),
+                'entry_id'      => $entry_id,
+                'template_id'   => $post_template_id
+            );
         
-            $this->EE->db->where('class', strtolower(__CLASS__));
-            $this->EE->db->update('extensions', array('settings' => serialize($settings)));
+            $where = array(
+                'site_id'       => $this->site_id,
+                'entry_id'      => $entry_id
+            );
+        
+            $this->_insert_or_update('blueprints_entries', $data, $where);
+            
+            // $settings[$site_id]['template_layout'][$entry_id] = array('template_id' => $post_template_id, 'layout_group_id' => $this->EE->input->post('layout_preview'));
+            // $this->EE->db->where('class', strtolower(__CLASS__));
+            // $this->EE->db->update('extensions', array('settings' => serialize($settings)));
         }
     }
     
@@ -217,12 +239,16 @@ class Blueprints_ext {
         if($this->_is_publish_form())
         {
             $templates = array();
+            
             $thumbnails = array();
             $thumbnail_options = array();
-            $layout_groups = array();
-            $layout_group_names = array();
+            
+            $layouts = array();
+            $layout_options = array();
+            
             $channel_templates = array();
             $channel_id = $this->EE->input->get_post('channel_id');
+            
             $entry_id = $this->EE->input->get_post('entry_id');
             $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->thumbnail_directory_path;
             
@@ -236,27 +262,47 @@ class Blueprints_ext {
             }
             $active_publish_layouts = 'new Array('. trim(implode(',', $active_publish_layout_array), ',') .')';
 
-            if(isset($this->settings['template']) AND $this->settings['template'] != '')
+            if(!empty($this->layouts))
             {
-                foreach($this->settings['template'] as $k => $template)
+                foreach($this->layouts as $layout)
                 {
-                    $thumbnail = isset($this->settings['thumbnails'][$k]) ? $this->settings['thumbnails'][$k] : '[NO THUMBNAIL DEFINED]';
-                    $thumbnails[] = '"'. $template .'":"'. $thumbnail .'"';
-                    $thumbnail_options[$template] = $thumbnail; 
+                    $thumbnail = ($layout['thumbnail']) ? $layout['thumbnail'] : '[NO THUMBNAIL DEFINED]';
+                    $thumbnails[] = '"'. $layout['template'] .'":"'. $thumbnail .'"';
+                    $thumbnail_options[$layout['template']] = $thumbnail; 
                     
-                    // Get our group names
-                    $layout_group_name = isset($this->settings['layout_group_names'][$k]) ? $this->settings['layout_group_names'][$k] : '[NO LAYOUT GROUP DEFINED]';
-                    // And get the ID
-                    $layout_group_id = isset($this->settings['layout_group_ids'][$k]) ? $this->settings['layout_group_ids'][$k] : 0;
+                    $layout_name = ($layout['name']) ? $layout['name'] : '[NO LAYOUT NAME DEFINED]';
+                    $layout_id = $layout['group_id'];
                     
-                    $layout_groups[] = '"'. $template .'":"'. $layout_group_id .'"';
-                    $layout_group_names[$layout_group_id] = $layout_group_name;
+                    $layouts[] = '"'. $layout['template'] .'":"'. $layout_id .'"';
+                    $layout_options[$layout_id] = $layout_name;
                     
                     // For use in the Carousel below
-                    $layout_group_carousel_ids[$template] = $layout_group_id;
-                    $layout_group_carousel_names[$template] = $layout_group_name;
+                    $layout_carousel_ids[$layout['template']] = $layout_id;
+                    $layout_carousel_names[$layout['template']] = $layout_name;
                 }
             }
+
+            // if(isset($this->settings['template']) AND $this->settings['template'] != '')
+            // {
+            //     foreach($this->settings['template'] as $k => $template)
+            //     {
+            //         $thumbnail = isset($this->settings['thumbnails'][$k]) ? $this->settings['thumbnails'][$k] : '[NO THUMBNAIL DEFINED]';
+            //         $thumbnails[] = '"'. $template .'":"'. $thumbnail .'"';
+            //         $thumbnail_options[$template] = $thumbnail; 
+            //         
+            //         // Get our group names
+            //         $layout_group_name = isset($this->settings['layout_group_names'][$k]) ? $this->settings['layout_group_names'][$k] : '[NO LAYOUT GROUP DEFINED]';
+            //         // And get the ID
+            //         $layout_group_id = isset($this->settings['layout_group_ids'][$k]) ? $this->settings['layout_group_ids'][$k] : 0;
+            //         
+            //         $layout_groups[] = '"'. $template .'":"'. $layout_group_id .'"';
+            //         $layout_group_names[$layout_group_id] = $layout_group_name;
+            //         
+            //         // For use in the Carousel below
+            //         $layout_group_carousel_ids[$template] = $layout_group_id;
+            //         $layout_group_carousel_names[$template] = $layout_group_name;
+            //     }
+            // }
 
             if(isset($this->settings['channels']))
             {
@@ -311,15 +357,15 @@ class Blueprints_ext {
             }
             
             // Add our custom layout group options to the list, with "member group ids" starting at 2000
-            $layout_group_options = '';
-            if(count($layout_group_names) > 0)
+            $layout_checkbox_options = '';
+            if(count($layout_options) > 0)
             {
-                foreach($layout_group_names as $k => $name)
+                foreach($layout_options as $k => $name)
                 {
-                    $layout_group_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $k .'\" class=\"toggle_member_groups\" /> '. $name .'</label><br />';
+                    $layout_checkbox_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $k .'\" class=\"toggle_member_groups\" /> '. $name .'</label><br />';
                 }
             
-                $layout_group_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
+                $layout_checkbox_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
             }
             
             $carousel_templates = $this->_get_assigned_templates($channel_templates);
@@ -336,11 +382,6 @@ class Blueprints_ext {
                 ); 
             }
 
-            // This was added when building the carousel feature in 2.1.4 to account for a bug, 
-            // but should be fixed in 2.1.5+, but keeping this here just incase.
-            // http://expressionengine.com/bug_tracker/bug/15529/
-            $action_id = $this->EE->db->where(array('class' => 'Blueprints_mcp', 'method' => 'get_autosave_entry'))->get('actions')->row('action_id');
-
             $blueprints_config = '
             if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
 
@@ -352,8 +393,8 @@ class Blueprints_ext {
                 carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
                 thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
                 thumbnails: {'. implode(',', $thumbnails) .'},
-                layout_groups: {'. implode(',', $layout_groups) .'},
-                layout_group_options: "'. $layout_group_options .'",
+                layouts: {'. implode(',', $layouts) .'},
+                layout_checkbox_options: "'. $layout_checkbox_options .'",
                 active_publish_layouts: '. $active_publish_layouts .',
                 channel_templates: '. $channel_templates_options .',
                 edit_templates_link: "'. $edit_templates_link .'",
@@ -429,102 +470,183 @@ class Blueprints_ext {
                 $channel_options[$row['channel_id']] = $row['channel_title'];
             }
         }
-
-        if($this->settings)
+        
+        // Create our fields from our saved settings in the DB
+        if(!empty($this->layouts))
         {
-            foreach($this->settings as $key => $value)
+            foreach($this->layouts as $k => $layout)
             {
-                // Only if settings are saved, and layouts are created the first save
-                if($key == 'template' AND count($value) > 0)
-                {
-                    foreach($value as $k => $row)
-                    {
-                        // Create fields
-                        $fields[] = array(
-                            'tmpl_name' => 'template['. $k .']',
-                            'tmpl_options' => $template_options,
-                            'tmpl_options_selected' => isset($vars['template'][$k]) ? $vars['template'][$k] : '',
-                            
-                            'thb_name' => 'thumbnails['. $k .']',
-                            'thb_options' => $thumbnail_options,
-                            'thb_options_selected' => isset($vars['thumbnails'][$k]) ? $vars['thumbnails'][$k] : '',
-                            
-                            'layout_group_id' => 'layout_group_ids['. $k .']',
-                            'layout_group_id_value' => isset($vars['layout_group_ids'][$k]) ? $vars['layout_group_ids'][$k] : (int) $this->layout_id + $k,
-                            'layout_group_name' => 'layout_group_names['. $k .']',
-                            'layout_group_name_value' => isset($vars['layout_group_names'][$k]) ? $vars['layout_group_names'][$k] : ''
-                        );
-                    }
-                }
-                // This can happen if settings are saved, but not layouts are created
-                elseif($key == 'template')
-                {
-                    $k = '0';
-                    $fields[] = array(
-                        'tmpl_name' => 'template['. $k .']',
-                        'tmpl_options' => $template_options,
-                        'tmpl_options_selected' => isset($vars['template'][$k]) ? $vars['template'][$k] : '',
-                        
-                        'thb_name' => 'thumbnails['. $k .']',
-                        'thb_options' => $thumbnail_options,
-                        'thb_options_selected' => isset($vars['thumbnails'][$k]) ? $vars['thumbnails'][$k] : '',
-
-                        'layout_group_id' => 'layout_group_ids['. $k .']',
-                        'layout_group_id_value' => isset($vars['layout_group_ids'][$k]) ? $vars['layout_group_ids'][$k] : $this->layout_id,
-                        'layout_group_name' => 'layout_group_names['. $k .']',
-                        'layout_group_name_value' => isset($vars['layout_group_names'][$k]) ? $vars['layout_group_names'][$k] : ''
-                    );
-                }
-                
-                if($key == 'channels')
-                {
-                    foreach($value as $k => $row)
-                    {
-                        $channel_fields[] = array(
-                            'channel_name' => 'channels['. $k .']',
-                            'channel_options' => $channel_options,
-                            'channel_options_selected' => isset($vars['channels'][$k]) ? $vars['channels'][$k] : '',
-                            
-                            'channel_templates_name' => 'channel_templates['. $k .'][]',
-                            'channel_templates_options' => $template_options,
-                            'channel_templates_options_selected' => isset($vars['channel_templates'][$k]) ? $vars['channel_templates'][$k] : '',
-                            
-                            'channel_checkbox_options' => $this->_get_checkbox_options($k)
-                        );
-                    }
-                }
+                // Recreate saved fields
+                $fields[] = array(
+                    'tmpl_name' => 'template['. $k .']',
+                    'tmpl_options' => $template_options,
+                    'tmpl_options_selected' => isset($layout['template']) ? $layout['template'] : '',
+                    
+                    'thb_name' => 'thumbnails['. $k .']',
+                    'thb_options' => $thumbnail_options,
+                    'thb_options_selected' => isset($layout['thumbnail']) ? $layout['thumbnail'] : '',
+                    
+                    'layout_group_id' => 'layout_group_ids['. $k .']',
+                    'layout_group_id_value' => isset($layout['group_id']) ? $layout['group_id'] : (int) $this->layout_id + $k,
+                    'layout_group_name' => 'layout_group_names['. $k .']',
+                    'layout_group_name_value' => isset($layout['name']) ? $layout['name'] : ''
+                );
             }
-        } 
+        }
         else
         {
-            $k = '0';
+            // Create blank row
+            $k = 0;
+            
             $fields[] = array(
                 'tmpl_name' => 'template['. $k .']',
                 'tmpl_options' => $template_options,
-                'tmpl_options_selected' => (isset($vars['template']) AND isset($vars['template'][$k])) ? $vars['template'][$k] : '',
-
+                'tmpl_options_selected' => isset($layout['template']) ? $layout['template'] : '',
+                
                 'thb_name' => 'thumbnails['. $k .']',
                 'thb_options' => $thumbnail_options,
-                'thb_options_selected' => (isset($vars['thumbnails']) AND isset($vars['thumbnails'][$k])) ? $vars['thumbnails'][$k] : '',
+                'thb_options_selected' => isset($layout['thumbnail']) ? $layout['thumbnail'] : '',
                 
                 'layout_group_id' => 'layout_group_ids['. $k .']',
-                'layout_group_id_value' => (isset($vars['layout_group_ids']) AND isset($vars['layout_group_ids'][$k])) ? $vars['layout_group_ids'][$k] : $this->layout_id,
+                'layout_group_id_value' => isset($layout['group_id']) ? $layout['group_id'] : (int) $this->layout_id + $k,
                 'layout_group_name' => 'layout_group_names['. $k .']',
-                'layout_group_name_value' => (isset($vars['layout_group_names']) AND isset($vars['layout_group_names'][$k])) ? $vars['layout_group_names'][$k] : ''
-            );
-            
-            $channel_fields[] = array(
-                'channel_name' => 'channels['. $k .']',
-                'channel_options' => $channel_options,
-                'channel_options_selected' => (isset($vars['channels']) AND isset($vars['channels'][$k])) ? $vars['channels'][$k] : '',
-                
-                'channel_templates_name' => 'channel_templates['. $k .'][]',
-                'channel_templates_options' => $template_options,
-                'channel_templates_options_selected' => (isset($vars['channel_templates']) AND isset($vars['channel_templates'][$k])) ? $vars['channel_templates'][$k] : '',
-                
-                'channel_checkbox_options' => $this->_get_checkbox_options($k)
+                'layout_group_name_value' => isset($layout['name']) ? $layout['name'] : ''
             );
         }
+        
+        // Create our fields from the serialized save settings in the extension
+        if($this->settings)
+        {
+            if(!empty($this->settings['channels']))
+            {
+                foreach($this->settings['channels'] as $k => $row)
+                {
+                    $channel_fields[] = array(
+                        'channel_name' => 'channels['. $k .']',
+                        'channel_options' => $channel_options,
+                        'channel_options_selected' => isset($vars['channels'][$k]) ? $vars['channels'][$k] : '',
+                    
+                        'channel_templates_name' => 'channel_templates['. $k .'][]',
+                        'channel_templates_options' => $template_options,
+                        'channel_templates_options_selected' => (isset($vars['channel_templates']) AND isset($vars['channel_templates'][$k])) ? $vars['channel_templates'][$k] : '',
+                    
+                        'channel_checkbox_options' => $this->_get_checkbox_options($k)
+                    );
+                }
+            }
+            else
+            {
+                $k = 0;
+                
+                $channel_fields[] = array(
+                    'channel_name' => 'channels['. $k .']',
+                    'channel_options' => $channel_options,
+                    'channel_options_selected' => (isset($vars['channels']) AND isset($vars['channels'][$k])) ? $vars['channels'][$k] : '',
+
+                    'channel_templates_name' => 'channel_templates['. $k .'][]',
+                    'channel_templates_options' => $template_options,
+                    'channel_templates_options_selected' => (isset($vars['channel_templates']) AND isset($vars['channel_templates'][$k])) ? $vars['channel_templates'][$k] : '',
+
+                    'channel_checkbox_options' => $this->_get_checkbox_options($k)
+                );
+            }
+        }
+        
+        // if($this->settings)
+        // {
+        //     foreach($this->settings as $key => $value)
+        //     {
+        //         // Only if settings are saved, and layouts are created the first save
+        //         if($key == 'template' AND count($value) > 0)
+        //         {
+        //             foreach($value as $k => $row)
+        //             {
+        //                 // Create fields
+        //                 $fields[] = array(
+        //                     'tmpl_name' => 'template['. $k .']',
+        //                     'tmpl_options' => $template_options,
+        //                     'tmpl_options_selected' => isset($vars['template'][$k]) ? $vars['template'][$k] : '',
+        //                     
+        //                     'thb_name' => 'thumbnails['. $k .']',
+        //                     'thb_options' => $thumbnail_options,
+        //                     'thb_options_selected' => isset($vars['thumbnails'][$k]) ? $vars['thumbnails'][$k] : '',
+        //                     
+        //                     'layout_group_id' => 'layout_group_ids['. $k .']',
+        //                     'layout_group_id_value' => isset($vars['layout_group_ids'][$k]) ? $vars['layout_group_ids'][$k] : (int) $this->layout_id + $k,
+        //                     'layout_group_name' => 'layout_group_names['. $k .']',
+        //                     'layout_group_name_value' => isset($vars['layout_group_names'][$k]) ? $vars['layout_group_names'][$k] : ''
+        //                 );
+        //             }
+        //         }
+        //         // This can happen if settings are saved, but no layouts are created
+        //         elseif($key == 'template')
+        //         {
+        //             $k = '0';
+        //             $fields[] = array(
+        //                 'tmpl_name' => 'template['. $k .']',
+        //                 'tmpl_options' => $template_options,
+        //                 'tmpl_options_selected' => isset($vars['template'][$k]) ? $vars['template'][$k] : '',
+        //                 
+        //                 'thb_name' => 'thumbnails['. $k .']',
+        //                 'thb_options' => $thumbnail_options,
+        //                 'thb_options_selected' => isset($vars['thumbnails'][$k]) ? $vars['thumbnails'][$k] : '',
+        // 
+        //                 'layout_group_id' => 'layout_group_ids['. $k .']',
+        //                 'layout_group_id_value' => isset($vars['layout_group_ids'][$k]) ? $vars['layout_group_ids'][$k] : $this->layout_id,
+        //                 'layout_group_name' => 'layout_group_names['. $k .']',
+        //                 'layout_group_name_value' => isset($vars['layout_group_names'][$k]) ? $vars['layout_group_names'][$k] : ''
+        //             );
+        //         }
+        //         
+        //         if($key == 'channels')
+        //         {
+        //             foreach($value as $k => $row)
+        //             {
+        //                 $channel_fields[] = array(
+        //                     'channel_name' => 'channels['. $k .']',
+        //                     'channel_options' => $channel_options,
+        //                     'channel_options_selected' => isset($vars['channels'][$k]) ? $vars['channels'][$k] : '',
+        //                     
+        //                     'channel_templates_name' => 'channel_templates['. $k .'][]',
+        //                     'channel_templates_options' => $template_options,
+        //                     'channel_templates_options_selected' => isset($vars['channel_templates'][$k]) ? $vars['channel_templates'][$k] : '',
+        //                     
+        //                     'channel_checkbox_options' => $this->_get_checkbox_options($k)
+        //                 );
+        //             }
+        //         }
+        //     }
+        // } 
+        // else
+        // {
+        //     $k = '0';
+        //     $fields[] = array(
+        //         'tmpl_name' => 'template['. $k .']',
+        //         'tmpl_options' => $template_options,
+        //         'tmpl_options_selected' => (isset($vars['template']) AND isset($vars['template'][$k])) ? $vars['template'][$k] : '',
+        // 
+        //         'thb_name' => 'thumbnails['. $k .']',
+        //         'thb_options' => $thumbnail_options,
+        //         'thb_options_selected' => (isset($vars['thumbnails']) AND isset($vars['thumbnails'][$k])) ? $vars['thumbnails'][$k] : '',
+        //         
+        //         'layout_group_id' => 'layout_group_ids['. $k .']',
+        //         'layout_group_id_value' => (isset($vars['layout_group_ids']) AND isset($vars['layout_group_ids'][$k])) ? $vars['layout_group_ids'][$k] : $this->layout_id,
+        //         'layout_group_name' => 'layout_group_names['. $k .']',
+        //         'layout_group_name_value' => (isset($vars['layout_group_names']) AND isset($vars['layout_group_names'][$k])) ? $vars['layout_group_names'][$k] : ''
+        //     );
+        //     
+        //     $channel_fields[] = array(
+        //         'channel_name' => 'channels['. $k .']',
+        //         'channel_options' => $channel_options,
+        //         'channel_options_selected' => (isset($vars['channels']) AND isset($vars['channels'][$k])) ? $vars['channels'][$k] : '',
+        //         
+        //         'channel_templates_name' => 'channel_templates['. $k .'][]',
+        //         'channel_templates_options' => $template_options,
+        //         'channel_templates_options_selected' => (isset($vars['channel_templates']) AND isset($vars['channel_templates'][$k])) ? $vars['channel_templates'][$k] : '',
+        //         
+        //         'channel_checkbox_options' => $this->_get_checkbox_options($k)
+        //     );
+        // }
 
         $vars['enable_publish_layout_takeover'] = isset($this->settings['enable_publish_layout_takeover']) ? $this->settings['enable_publish_layout_takeover'] : 'n';
         $vars['enable_edit_menu_tweaks'] = isset($this->settings['enable_edit_menu_tweaks']) ? $this->settings['enable_edit_menu_tweaks'] : 'n';
@@ -543,21 +665,27 @@ class Blueprints_ext {
     
     function save_settings()
     {
-        // TODO, it still saves to the settings array
         $channels = $this->EE->input->post('channels');
         $channel_show_selected = $this->EE->input->post('channel_show_selected');
         $channel_templates = $this->EE->input->post('channel_templates');
         $channel_show_group = $this->EE->input->post('channel_show_group');
         $delete = $this->EE->input->post('delete', false);
         
-        $insert['enable_publish_layout_takeover'] = $this->EE->input->post('enable_publish_layout_takeover');
-        $insert['enable_edit_menu_tweaks'] = $this->EE->input->post('enable_edit_menu_tweaks');
-        $insert['enable_carousel'] = $this->EE->input->post('enable_carousel');
+        // Save to ext settings
+        $save = array();
+        
+        // Insert into custom tables
+        $insert = array();
+        
+        $save['enable_publish_layout_takeover'] = $this->EE->input->post('enable_publish_layout_takeover');
+        $save['enable_edit_menu_tweaks'] = $this->EE->input->post('enable_edit_menu_tweaks');
+        $save['enable_carousel'] = $this->EE->input->post('enable_carousel');
+        $save['thumbnail_path'] = $this->EE->input->post('thumbnail_path');
+        
         $insert['template'] = $this->EE->input->post('template');
         $insert['thumbnails'] = $this->EE->input->post('thumbnails');
         $insert['layout_group_ids'] = $this->EE->input->post('layout_group_ids');
         $insert['layout_group_names'] = $this->EE->input->post('layout_group_names');
-        $insert['thumbnail_path'] = $this->EE->input->post('thumbnail_path');
         
         // If no name is given, but the row exists, unset everything for that row so it isn't saved
         if(isset($insert['layout_group_names']) AND $insert['layout_group_names'] != '')
@@ -579,17 +707,17 @@ class Blueprints_ext {
         {
             if(count($channels) > 0)
             {
-                $insert['channels'][$k] = $channel_id;
+                $save['channels'][$k] = $channel_id;
             }
             
             if(isset($channel_show_group[$k]))
             {
-                $insert['channel_show_group'][$k] = $channel_show_group[$k];
+                $save['channel_show_group'][$k] = $channel_show_group[$k];
             }
             elseif(isset($channel_show_selected[$k]) AND $channel_show_selected[$k] == 'y' AND $channel_templates)
             {
-                $insert['channel_show_selected'][$k] = $channel_show_selected[$k];
-                $insert['channel_templates'][$k] = $channel_templates[$k];
+                $save['channel_show_selected'][$k] = $channel_show_selected[$k];
+                $save['channel_templates'][$k] = $channel_templates[$k];
             }
         }
         
@@ -630,7 +758,7 @@ class Blueprints_ext {
         // Save our settings to the current site ID for MSM.
         $site_id = $this->EE->config->item('site_id');
         $settings = $this->global_settings;
-        $settings[$site_id] = $insert;
+        $settings[$site_id] = $save;
 
         $this->EE->db->where('class', strtolower(__CLASS__));
         $this->EE->db->update('extensions', array('settings' => serialize($settings)));

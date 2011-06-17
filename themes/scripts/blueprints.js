@@ -63,7 +63,7 @@ Blueprints.carousel = function(template_id)
             item.siblings().find('.ajax_loader').remove();
 
             // Add zee button, but only if the choosen template is assigned to a Publish Layout
-            if(old_template_id != id && id in Blueprints.config.layout_groups)
+            if(old_template_id != id && id in Blueprints.config.layouts)
             {
                 item.find('.carousel_thumbnail').append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
                 item.find('.carousel_thumbnail').append('<div class="overlay"></div>');
@@ -173,8 +173,8 @@ Blueprints.select_change = function(ele)
 
     if(Blueprints.config.publish_layout_takeover)
     {
-        if(Blueprints.config.layout_groups[template] != undefined && Blueprints.config.layout_groups[template] != "") {
-            $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ Blueprints.config.layout_groups[template] +'" />');
+        if(Blueprints.config.layouts[template] != undefined && Blueprints.config.layouts[template] != "") {
+            $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ Blueprints.config.layouts[template] +'" />');
             $("#revision_button").clone(true).appendTo( jQuery("#layout_change") );
         } else {
             $("#layout_change").html('<input type="hidden" name="layout_preview" value="NULL" />');
@@ -190,7 +190,7 @@ Blueprints.carousel_change = function(template)
 {
     if(Blueprints.config.publish_layout_takeover)
     {
-        layout_preview = Blueprints.config.layout_groups[template];
+        layout_preview = Blueprints.config.layouts[template];
         
         if(layout_preview != undefined && layout_preview != "") {
             $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
