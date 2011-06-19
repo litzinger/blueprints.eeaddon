@@ -31,6 +31,30 @@ class Blueprints_upd {
 
     public function install()
     {
+        // Delete old hooks
+        $this->EE->db->query("DELETE FROM exp_extensions WHERE class = 'Blueprints_ext'");
+        
+        // Add new hooks
+        $ext_template = array(
+            'class'    => 'Blueprints_ext',
+            'settings' => '',
+            'priority' => 8,
+            'version'  => $this->version,
+            'enabled'  => 'y'
+        );
+        
+        $extensions = array(
+            array('hook'=>'publish_form_channel_preferences', 'method'=>'publish_form_channel_preferences'),
+            array('hook'=>'sessions_end', 'method'=>'sessions_end'),
+            array('hook'=>'entry_submission_absolute_end', 'method'=>'entry_submission_absolute_end')
+        );
+        
+        foreach($extensions as $extension)
+        {
+            $ext = array_merge($ext_template, $extension);
+            $this->EE->db->insert('exp_extensions', $ext);
+        }
+        
         // Module data
         $data = array(
             'module_name' => BLUEPRINTS_NAME,
@@ -66,6 +90,14 @@ class Blueprints_upd {
         
         $this->EE->db->where('class', 'Blueprints_mcp')->delete('actions');
         
+        // Delete records
+        $this->EE->db->where('class', 'Blueprints_ext');
+        $this->EE->db->delete('exp_extensions');
+        
+        // Remove layout from the DB
+        $this->EE->db->where('member_group', '>= 2000');
+        $this->EE->db->delete('layout_publish');
+        
         return TRUE;
     }
     
@@ -75,6 +107,34 @@ class Blueprints_upd {
         {
             return FALSE;
         }
+        
+        if($current < '1.3.2')
+        {
+            // Save our settings to the current site ID for MSM.
+            $site_id = $this->EE->config->item('site_id');
+            $settings = $this->global_settings;
+
+            if(!isset($settings[$site_id]) OR $settings[$site_id] == '')
+            {
+                $new_settings[$site_id] = $settings;
+                $this->EE->db->where('class', strtolower(__CLASS__));
+                $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
+            }
+        }
+        
+        if($current < '1.3.5')
+        {
+            $this->EE->db->where('class', strtolower(__CLASS__));
+            $this->EE->db->where('method', 'submit_new_entry_start');
+            $this->EE->db->update('extensions', array(
+                'method' => 'entry_submission_absolute_end',
+                'hook' => 'entry_submission_absolute_end'
+            ));
+        }
+        
+        // Update version #
+        $this->EE->db->where('class', __CLASS__);
+        $this->EE->db->update('exp_extensions', array('version' => $this->version));
 
         if($current < '2.0')
         {

@@ -35,14 +35,18 @@ class Blueprints_acc {
             $("#accessoryTabs").find("a.blueprints").parent("li").remove();
         ';
         
-        require_once PATH_THIRD . 'blueprints/ext.blueprints.php';
-        $blueprints = new Blueprints_ext;
+        if(!class_exists('Blueprints_helper'))
+        {
+            require PATH_THIRD . 'blueprints/blueprints_helper.php';
+        }
+        
+        $this->EE->blueprints_helper = new Blueprints_helper;
         
         // Replace single quotes, otherwise the JS blows up.
         $pages_html = "";
-        if($blueprints->_is_structure_installed() OR $blueprints->_is_pages_installed())
+        if($this->EE->blueprints_helper->is_structure_installed() OR $this->EE->blueprints_helper->is_pages_installed())
         {
-            $pages_html = str_replace("'", "&raquo;", $blueprints->_get_pages());
+            $pages_html = str_replace("'", "&raquo;", $this->EE->blueprints_helper->get_pages());
         }
         
         $header = '
@@ -52,7 +56,7 @@ class Blueprints_acc {
             </h1>
         ';
         
-        if($blueprints->_is_structure_installed() OR $blueprints->_is_pages_installed())
+        if($this->EE->blueprints_helper->is_structure_installed() OR $this->EE->blueprints_helper->is_pages_installed())
         {
             $script .= '
                 $("#sidebarContent").prepend(\'<div class="structure_pages_sidebar contents">'. $header . $pages_html .'</div>\');

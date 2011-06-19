@@ -6,13 +6,6 @@ Blueprints.carousel = function(template_id)
     var pages_field = $('#hold_field_pages__pages_template_id');
     var old_template_id = template_id;
     
-    // var autosave_entry_id_field = $("#publishForm input[name=autosave_entry_id]");
-    // 
-    // if(Blueprints.config.autosave_entry_id && autosave_entry_id_field.val() == 0)
-    // {
-    //     autosave_entry_id_field.val(Blueprints.config.autosave_entry_id);
-    // }
-
     // Make sure either of these divs are visible first
     if((structure_field.length > 0 && structure_field.is(':visible')) || (pages_field.length > 0 && pages_field.is(':visible'))){
 
@@ -96,33 +89,12 @@ Blueprints.autosave = function(layout_preview)
         data: post_data,
         success: function (data, status, xhr) {
             setTimeout({
-                run: function() {
-
+                run: function() 
+                {
                     entry_id = $("#publishForm input[name=entry_id]").val();
                     channel_id = $("#publishForm input[name=channel_id]").val();
-                    // This is the entry_id column value, not original_entry_id
-                    autosave_entry_id = data.autosave_entry_id;
-                    new_autosave_entry_id = false;
-                    
-                    // If no autosave_entry_id exists, go to the table and find it
-                    // Or if EE reports the autosave_entry_id incorrectly. Confirmed as a bug.
-                    // if(autosave_entry_id == 0 || autosave_entry_id == entry_id)
-                    // {
-                    //     $.ajax({
-                    //         type: "POST",
-                    //         dataType: "text",
-                    //         url: Blueprints.config.get_autosave_entry_url,
-                    //         data: "entry_id="+ entry_id +"&channel_id="+ channel_id,
-                    //         success: function (autosave_entry_id, status, xhr) {
-                    //             // Blueprints.autosave_redirect(autosave_entry_id, layout_preview);
-                    //         }
-                    //     });
-                    // }
-                    // else
-                    // {
-                        // console.log(autosave_entry_id);
-                        Blueprints.autosave_redirect(autosave_entry_id, layout_preview);
-                    // }
+
+                    Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
                 }
             }.run, 500);
         }
@@ -173,14 +145,15 @@ Blueprints.select_change = function(ele)
 
     if(Blueprints.config.publish_layout_takeover)
     {
-        if(Blueprints.config.layouts[template] != undefined && Blueprints.config.layouts[template] != "") {
-            $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ Blueprints.config.layouts[template] +'" />');
+        layout_preview = Blueprints.config.layouts[template];
+        
+        if(layout_preview != undefined && layout_preview != "") {
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
             $("#revision_button").clone(true).appendTo( jQuery("#layout_change") );
         } else {
-            $("#layout_change").html('<input type="hidden" name="layout_preview" value="NULL" />');
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="layout_preview" value="NULL" />');
         }
     }
-    
 }
 
 /*
@@ -193,11 +166,11 @@ Blueprints.carousel_change = function(template)
         layout_preview = Blueprints.config.layouts[template];
         
         if(layout_preview != undefined && layout_preview != "") {
-            $("#layout_change").html('<input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
             $("#blueprints_template_id").val(template);
             return layout_preview;
         } else {
-            $("#layout_change").html('<input type="hidden" name="layout_preview" value="NULL" />');
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="layout_preview" value="NULL" />');
             return false;
         }
     }
@@ -216,7 +189,7 @@ jQuery(function(){
         jQuery(function(){
             $("#showToolbarLink a").toggle(function() {
                 if($(".blueprints_layout_groups_holder").length == 0){
-                    $("#layout_groups_holder").prepend('<div class="blueprints_layout_groups_holder">'+ Blueprints.config.layout_group_options +'</div>');
+                    $("#layout_groups_holder").prepend('<div class="blueprints_layout_groups_holder">'+ Blueprints.config.layout_checkbox_options +'</div>');
                 }
                 active_layouts = Blueprints.config.active_publish_layouts;
                 $("#layout_groups_holder input").each(function(){
