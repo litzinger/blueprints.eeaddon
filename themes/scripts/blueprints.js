@@ -201,7 +201,7 @@ jQuery(function(){
             }, function() {
                 $(".active_publish_layout").remove();
             });
-            
+
             if(Blueprints.config.layout_group == "")
             {
                 $('#showToolbarLink').prepend('<span class="blueprints_no_layout">No Publish Layout defined. Create one now &rarr;</span>');

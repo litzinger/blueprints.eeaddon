@@ -7,7 +7,27 @@ if (! defined('BLUEPRINTS_VERSION'))
     define('BLUEPRINTS_VERSION', $config['version']);
     define('BLUEPRINTS_NAME', $config['name']);
     define('BLUEPRINTS_DESC', $config['description']);
+    define('BLUEPRINTS_DOCS', $config['docs_url']);
 }
+
+/*
+
+TODO
+
+install Structure, test with it.
+    - Uninstall, create new templates, pages, etc.
+    - Create new icons, Channels (Pages) etc for demo, use or remove Agile themes crap?
+Add "Load Layout" button to the old style select menu
+Change the old style select menu thumbnail preview site restriction
+Add/change the "No Publish layout exists" message styles
+    - Add a tooltip with Assets style (white), fade it out after a few seconds?
+    - Change the existing text to be more noticable, but not obnoxious
+Double check the _find_layout_group_from_settings method
+Test in IE (ugh)
+
+
+
+*/
 
 /**
  * ExpressionEngine Extension Class
@@ -23,15 +43,16 @@ if (! defined('BLUEPRINTS_VERSION'))
 class Blueprints_ext {
 
     public $settings       = array();
-    public $global_settings = array();
+    public $global_settings= array();
     public $name           = BLUEPRINTS_NAME;
     public $version        = BLUEPRINTS_VERSION;
     public $description    = BLUEPRINTS_DESC;
+    public $docs_url       = BLUEPRINTS_DOCS;
     public $settings_exist = 'y';
-    public $docs_url       = 'http://boldminded.com/add-ons/blueprints';
+    public $required_by    = array('module');
+    
     public $layout_info    = '';
     public $layout_id      = 2000; // Starting number for our fake member groups.
-    public $required_by    = array('module');
     
     private $site_id;
     private $layouts;
@@ -50,6 +71,10 @@ class Blueprints_ext {
         }
         
         $this->EE->blueprints_helper = new Blueprints_helper;
+        
+        // Stop here if we're not in the CP, and it's not a Publish form
+        if(!$this->EE->blueprints_helper->is_publish_form())
+            return;
         
         $settings = $this->EE->blueprints_helper->get_settings();
         
@@ -206,7 +231,8 @@ class Blueprints_ext {
         // We have sibling/similar channel = field_group setups, so clone them.
         foreach($qry->result() as $row)
         {
-            // Re-run the original query until we find a match... hopefully.
+            // Re-run the original query until we find a match... hopefully. This means multiple
+            // channels are using the same field_group and default template.
             $qry = $this->EE->db->select('bl.group_id')
                                 ->from('blueprints_layouts AS bl')
                                 ->join('layout_publish AS lp', 'lp.member_group = bl.group_id')
@@ -259,6 +285,7 @@ class Blueprints_ext {
             $post_template_id = $this->EE->input->post('pages__pages_template_id');
         }
         
+        // Save our entry
         if($post_template_id AND $this->EE->input->post('layout_preview') AND $this->EE->input->post('layout_preview') != "NULL")
         {
             $data = array(
@@ -412,6 +439,7 @@ class Blueprints_ext {
                 ); 
             }
 
+            // Create global config to use in our JS file
             $blueprints_config = '
             if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
 
