@@ -17,18 +17,23 @@
 }
 .clear { clear: both; }
 
+.blueprints_no_layout {
+    display: inline-block;
+    margin-right: 2em;
+}
+
 
 .jcarousel-skin-blueprints .jcarousel-direction-rtl {
 	direction: rtl;
 }
 
 .jcarousel-skin-blueprints .jcarousel-container-horizontal {
-    width: 775px;
+    width: 780px;
     padding: 10px 40px;
 }
 
 .jcarousel-skin-blueprints .jcarousel-clip-horizontal {
-    width:  775px;
+    width:  780px;
     height: 240px;
 }
 
@@ -49,7 +54,21 @@
     background-color: #fff;
     opacity: 0.55;
     z-index: 90;
+    
+    -webkit-box-shadow: inset 0px 0px 40px 0px rgba(0,0,0,0.3);
+    -moz-box-shadow: inset 0px 0px 40px 0px rgba(0,0,0,0.3);
+    box-shadow: inset 0px 0px 40px 0px rgba(0,0,0,0.3);
 }
+
+.glass {
+    background: rgba(0,0,0,0.25);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px rgba(255,255,255,0.2), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.3);
+    -o-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px rgba(255,255,255,0.2), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.3);
+    -webkit-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px rgba(255,255,255,0.2), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.3);
+    -moz-box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px rgba(255,255,255,0.3), inset 0 10px rgba(255,255,255,0.2), inset 0 10px 20px rgba(255,255,255,0.25), inset 0 -15px 30px rgba(0,0,0,0.3);
+}
+
+
 .jcarousel-skin-blueprints .jcarousel-item .overlay.loading {
     opacity: 1;
 }
@@ -69,15 +88,15 @@
     z-index: 91;
 }
 .jcarousel-skin-blueprints .jcarousel-item.current .carousel_thumbnail_wrapper,
-.jcarousel-skin-blueprints .jcarousel-item.current span {
+.jcarousel-skin-blueprints .jcarousel-item.current span.carousel_template_name {
     background-color: #FAFCAE;
 }
 .jcarousel-skin-blueprints .jcarousel-item.active .carousel_thumbnail_wrapper,
-.jcarousel-skin-blueprints .jcarousel-item.active span {
+.jcarousel-skin-blueprints .jcarousel-item.active span.carousel_template_name {
     background-color: #3A4850; /* ABB7C3 3A4850 */
     color: #fff;
 }
-.jcarousel-skin-blueprints .jcarousel-item span {
+.jcarousel-skin-blueprints .jcarousel-item span.carousel_template_name {
     display: inline-block;
     text-align: left;
     padding: 3px 7px;
@@ -93,6 +112,10 @@
     -moz-border-radius-topright: 5px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+}
+.jcarousel-skin-blueprints .jcarousel-item span.is_publish_layout {
+    padding: 3px 6px 3px 0;
+    color: #28C916;
 }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail_wrapper {
     background-image: url(../images/no_template.png);

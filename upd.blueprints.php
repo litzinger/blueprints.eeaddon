@@ -95,8 +95,10 @@ class Blueprints_upd {
         $this->EE->db->delete('exp_extensions');
         
         // Remove layout from the DB
-        $this->EE->db->where('member_group', '>= 2000');
-        $this->EE->db->delete('layout_publish');
+        // $this->EE->db->where('member_group', '>= 2000');
+        // $this->EE->db->delete('layout_publish');
+        
+        // @TODO - Drop blueprints_* tables
         
         return TRUE;
     }
