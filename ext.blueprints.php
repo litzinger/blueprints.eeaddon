@@ -17,8 +17,6 @@ TODO
 install Structure, test with it.
     - Uninstall, create new templates, pages, etc.
     - Create new icons, Channels (Pages) etc for demo, use or remove Agile themes crap?
-Add "Load Layout" button to the old style select menu
-Change the old style select menu thumbnail preview site restriction
 Add/change the "No Publish layout exists" message styles
     - Add a tooltip with Assets style (white), fade it out after a few seconds?
     - Change the existing text to be more noticable, but not obnoxious
@@ -72,16 +70,16 @@ class Blueprints_ext {
         }
         $this->cache =& $this->EE->session->cache[__CLASS__];
         
-        // Stop here if we're not in the CP, and it's not a Publish form
-        if(REQ != 'CP')
-            return;
-            
         if(!class_exists('Blueprints_helper'))
         {
             require PATH_THIRD . 'blueprints/blueprints_helper.php';
         }
         
         $this->EE->blueprints_helper = new Blueprints_helper;
+        
+        // Stop here if we're not in the CP, and it's not a Publish form
+        if(REQ != 'CP')
+            return;
             
         $settings = $this->EE->blueprints_helper->get_settings();
         
