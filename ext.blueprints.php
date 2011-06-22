@@ -65,17 +65,24 @@ class Blueprints_ext {
     {
         $this->EE =& get_instance();
         
+        // Create cache
+        if (! isset($this->EE->session->cache[__CLASS__]))
+        {
+            $this->EE->session->cache[__CLASS__] = array();
+        }
+        $this->cache =& $this->EE->session->cache[__CLASS__];
+        
+        // Stop here if we're not in the CP, and it's not a Publish form
+        if(REQ != 'CP')
+            return;
+            
         if(!class_exists('Blueprints_helper'))
         {
             require PATH_THIRD . 'blueprints/blueprints_helper.php';
         }
         
         $this->EE->blueprints_helper = new Blueprints_helper;
-        
-        // Stop here if we're not in the CP, and it's not a Publish form
-        if(!$this->EE->blueprints_helper->is_publish_form())
-            return;
-        
+            
         $settings = $this->EE->blueprints_helper->get_settings();
         
         // All settings
@@ -93,70 +100,69 @@ class Blueprints_ext {
         $this->EE->blueprints_helper->layouts = $this->layouts;
         $this->EE->blueprints_helper->entries = $this->entries;
         
-        // $this->debug($this->settings, true);
+        // $this->debug($this->settings);
         // $this->debug($this->layouts);
         // $this->debug($this->entries, true);
         
         $this->EE->blueprints_helper->set_paths();
     }
     
-    function sessions_end($sess)
+    function sessions_end($session)
     {
-        // If user disabled publish layout takeover, then stop here
         if( ! $this->EE->blueprints_helper->enable_publish_layout_takeover())
-            return;
+            return $session;
             
-        if(($this->EE->blueprints_helper->is_structure_installed() OR 
-            $this->EE->blueprints_helper->is_pages_installed()) AND 
+        if(($this->EE->blueprints_helper->is_module_installed('Structure') OR 
+            $this->EE->blueprints_helper->is_module_installed('Pages')) AND 
             $this->EE->blueprints_helper->is_publish_form())
         {
             // Get our basic data
             $channel_id = $this->EE->input->get_post('channel_id');
             $entry_id = $this->EE->input->get_post('entry_id');
             $site_assets = false;
-            
+
             // If Structure is installed, get it's data
-            if($this->EE->blueprints_helper->is_structure_installed())
+            if($this->EE->blueprints_helper->is_module_installed('Structure'))
             {
                 require_once(PATH_THIRD.'structure/mod.structure.php');
                 $structure = new Structure();
 
-                $structure_settings = $structure->get_structure_channels();
+                $structure_settings = $this->EE->blueprints_helper->get_structure_settings();
                 $site_pages = $structure->get_site_pages();
                 $this->page_module = 'structure';
             }
             // Get Pages data
-            elseif($this->EE->blueprints_helper->is_pages_installed())
+            elseif($this->EE->blueprints_helper->is_module_installed('Pages'))
             {   
                 $site_pages = $this->EE->config->item('site_pages');
                 $this->page_module = 'pages';
             }
-            
+
             // Get previously set data for either Structure or Pages set to the requested entry_id
             if ($entry_id && isset($site_pages['uris'][$entry_id]))
             {
                 $template_id = $site_pages['templates'][$entry_id];
             }
             // Get default Structure settings
-            elseif($this->EE->blueprints_helper->is_structure_installed())
+            elseif($this->EE->blueprints_helper->is_module_installed('Structure'))
             {
                 $template_id = $structure_settings[$channel_id]['template_id'];
             }
             // Get default Pages settings
-            elseif($this->EE->blueprints_helper->is_pages_installed())
+            elseif($this->EE->blueprints_helper->is_module_installed('Pages'))
             {
                 $query = $this->EE->db->get_where('pages_configuration', array('configuration_name' => 'template_channel_'. $channel_id), 1, 0);
                 $template_id = $query->row('configuration_value');
             }
             
             // And hi-jack it if we have a custom layout_group
-            if($layout_group = $this->_find_layout_group($template_id, $channel_id, $entry_id, $sess))
+            if($layout_group = $this->_find_layout_group($template_id, $channel_id, $entry_id, $session))
             {
                 $_GET['layout_preview'] = isset($_GET['layout_preview']) ? $_GET['layout_preview'] : $layout_group;
             }
         }
         
-        return $sess;
+        return $session;
     }
     
     /*
@@ -192,7 +198,14 @@ class Blueprints_ext {
         }
 
         // Set our cache with the found layout_group
-        $session->set_cache(__CLASS__, 'layout_group', $layout_group);
+        if($session)
+        {
+             $session->cache['layout_group'] = $layout_group;
+        }
+        else
+        {
+             $this->cache['layout_group'] = $layout_group;
+        }
         
         return $layout_group;
     }
@@ -438,7 +451,7 @@ class Blueprints_ext {
                     'layout_name' => isset($layout_carousel_names[$template['template_id']]) ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
                 ); 
             }
-
+            
             // Create global config to use in our JS file
             $blueprints_config = '
             if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
@@ -615,8 +628,8 @@ class Blueprints_ext {
         $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->EE->blueprints_helper->thumbnail_directory_url;
         $vars['site_path'] = $this->EE->blueprints_helper->site_path();
         $vars['hidden'] = array('file' => 'blueprints');
-        $vars['structure_installed'] = $this->EE->blueprints_helper->is_structure_installed();
-        $vars['pages_installed'] = $this->EE->blueprints_helper->is_pages_installed();
+        $vars['structure_installed'] = $this->EE->blueprints_helper->is_module_installed('Structure');
+        $vars['pages_installed'] = $this->EE->blueprints_helper->is_module_installed('Pages');
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
 
@@ -649,7 +662,7 @@ class Blueprints_ext {
         $insert['layout_group_names'] = $this->EE->input->post('layout_group_names');
         
         // If no name is given, but the row exists, unset everything for that row so it isn't saved
-        if(isset($insert['layout_group_names']) AND $insert['layout_group_names'] != '')
+        if(!empty($insert['layout_group_names']))
         {
             foreach($insert['layout_group_names'] as $k => $value)
             {
@@ -701,22 +714,25 @@ class Blueprints_ext {
             $this->EE->db->delete('layout_publish');
         }
         
-        foreach($insert['layout_group_names'] as $k => $v)
+        if(!empty($insert['layout_group_names']))
         {
-            $data = array(
-                'site_id'       => $this->site_id,
-                'group_id'      => $insert['layout_group_ids'][$k],
-                'template'      => $insert['template'][$k],
-                'thumbnail'     => $insert['thumbnails'][$k],
-                'name'          => $insert['layout_group_names'][$k],
-            );
+            foreach($insert['layout_group_names'] as $k => $v)
+            {
+                $data = array(
+                    'site_id'       => $this->site_id,
+                    'group_id'      => $insert['layout_group_ids'][$k],
+                    'template'      => $insert['template'][$k],
+                    'thumbnail'     => $insert['thumbnails'][$k],
+                    'name'          => $insert['layout_group_names'][$k],
+                );
         
-            $where = array(
-                'site_id'       => $this->site_id,
-                'group_id'      => $insert['layout_group_ids'][$k]
-            );
+                $where = array(
+                    'site_id'       => $this->site_id,
+                    'group_id'      => $insert['layout_group_ids'][$k]
+                );
         
-            $this->EE->blueprints_helper->insert_or_update('blueprints_layouts', $data, $where);
+                $this->EE->blueprints_helper->insert_or_update('blueprints_layouts', $data, $where);
+            }
         }
 
         // Save our settings to the current site ID for MSM.

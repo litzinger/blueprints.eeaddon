@@ -98,7 +98,9 @@ class Blueprints_upd {
         // $this->EE->db->where('member_group', '>= 2000');
         // $this->EE->db->delete('layout_publish');
         
-        // @TODO - Drop blueprints_* tables
+		$this->EE->load->dbforge();
+		$this->EE->dbforge->drop_table('blueprints_layouts');
+		$this->EE->dbforge->drop_table('blueprints_entries');
         
         return TRUE;
     }

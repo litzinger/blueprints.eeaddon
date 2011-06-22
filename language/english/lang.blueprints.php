@@ -30,7 +30,7 @@ $lang = array(
 "Thumbnails Path",
 
 "thumbnail_path_detail" =>
-"Change the path to your thumbnail files. If changed to something other than the default, the settings must be saved and reloaded. Path must be below your web root. Images will be displayed at 200px wide.",
+"Change the path to your thumbnail files. If changed to something other than the default, the settings must be saved and reloaded. Path must be below your web root. Optimal image sizes are 155px by 180px.",
 
 "enable_publish_layout_takeover" =>
 "Enable Publish Layout Takeover?",

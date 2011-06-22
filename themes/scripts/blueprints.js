@@ -138,7 +138,7 @@ Blueprints.select_change = function(ele)
     var template = $(ele).find("option:selected").val();
     thumbnail = Blueprints.config.thumbnail_path + Blueprints.config.thumbnails[template];
     if(Blueprints.config.thumbnails[template] != "" && Blueprints.config.thumbnails[template] != undefined) {
-        $("#template_thumbnail").show().html('<img src="'+ thumbnail +'" width="125" />');
+        $("#template_thumbnail").show().html('<img src="'+ thumbnail +'" width="155" />');
     } else {
         $("#template_thumbnail").hide().html('');
     }
@@ -153,11 +153,19 @@ Blueprints.select_change = function(ele)
         } else {
             $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="layout_preview" value="NULL" />');
         }
+        
+        $("#template_thumbnail").append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
+        $("#template_thumbnail .submit").click(function(e){
+            e.preventDefault();
+            $(this).after('<img class="ajax_loader" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
+            $(this).remove();
+            Blueprints.autosave(layout_preview); 
+        });
     }
 }
 
 /*
-    1.4+ version if Carousel option is turned on.
+    2.0+ version if Carousel option is turned on.
 */
 Blueprints.carousel_change = function(template)
 {

@@ -44,7 +44,7 @@ class Blueprints_acc {
         
         // Replace single quotes, otherwise the JS blows up.
         $pages_html = "";
-        if($this->EE->blueprints_helper->is_structure_installed() OR $this->EE->blueprints_helper->is_pages_installed())
+        if($this->EE->blueprints_helper->is_module_installed('Structure') OR $this->EE->blueprints_helper->is_module_installed('Pages'))
         {
             $pages_html = str_replace("'", "&raquo;", $this->EE->blueprints_helper->get_pages());
         }
@@ -56,7 +56,7 @@ class Blueprints_acc {
             </h1>
         ';
         
-        if($this->EE->blueprints_helper->is_structure_installed() OR $this->EE->blueprints_helper->is_pages_installed())
+        if($this->EE->blueprints_helper->is_module_installed('Structure') OR $this->EE->blueprints_helper->is_module_installed('Pages'))
         {
             $script .= '
                 $("#sidebarContent").prepend(\'<div class="structure_pages_sidebar contents">'. $header . $pages_html .'</div>\');
