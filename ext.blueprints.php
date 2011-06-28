@@ -17,6 +17,7 @@ TODO
 install Structure, test with it.
     - Uninstall, create new templates, pages, etc.
     - Create new icons, Channels (Pages) etc for demo, use or remove Agile themes crap?
+on post save, loop through layout_publish and make sure the Structure and Pages template field is expanded if carousel is enabled
 Add/change the "No Publish layout exists" message styles
     - Add a tooltip with Assets style (white), fade it out after a few seconds?
     - Change the existing text to be more noticable, but not obnoxious
@@ -54,7 +55,6 @@ class Blueprints_ext {
     
     private $site_id;
     private $layouts;
-    private $page_module;
     
     /**
      * Constructor
@@ -127,13 +127,11 @@ class Blueprints_ext {
 
                 $structure_settings = $this->EE->blueprints_helper->get_structure_settings();
                 $site_pages = $structure->get_site_pages();
-                $this->page_module = 'structure';
             }
             // Get Pages data
             elseif($this->EE->blueprints_helper->is_module_installed('Pages'))
             {   
                 $site_pages = $this->EE->config->item('site_pages');
-                $this->page_module = 'pages';
             }
 
             // Get previously set data for either Structure or Pages set to the requested entry_id
