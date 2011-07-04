@@ -10,24 +10,6 @@ if (! defined('BLUEPRINTS_VERSION'))
     define('BLUEPRINTS_DOCS', $config['docs_url']);
 }
 
-/*
-
-TODO
-
-install Structure, test with it.
-    - Uninstall, create new templates, pages, etc.
-    - Create new icons, Channels (Pages) etc for demo, use or remove Agile themes crap?
-on post save, loop through layout_publish and make sure the Structure and Pages template field is expanded if carousel is enabled
-Add/change the "No Publish layout exists" message styles
-    - Add a tooltip with Assets style (white), fade it out after a few seconds?
-    - Change the existing text to be more noticable, but not obnoxious
-Double check the _find_layout_group_from_settings method
-Test in IE (ugh)
-
-
-
-*/
-
 /**
  * ExpressionEngine Extension Class
  *
