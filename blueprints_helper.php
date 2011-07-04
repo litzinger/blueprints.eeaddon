@@ -73,16 +73,16 @@ class Blueprints_helper
         return $checkbox_options;
     }
     
-    public function is_module_installed($module)
-    {       
-        if(!isset($this->cache[$module.'_installed']))
-        {
-            $qry = $this->EE->db->get_where('modules', array('module_name' => $module));
-            $this->cache[$module.'_installed'] = ($qry->num_rows() == 1) ? true : false;
-        }
-        
-        return $this->cache[$module.'_installed'];
-    }
+    // public function is_module_installed($module)
+    // {       
+    //     if(!isset($this->cache[$module.'_installed']))
+    //     {
+    //         $qry = $this->EE->db->get_where('modules', array('module_name' => $module));
+    //         $this->cache[$module.'_installed'] = ($qry->num_rows() == 1) ? true : false;
+    //     }
+    //     
+    //     return $this->cache[$module.'_installed'];
+    // }
     
     public function get_pages()
     {
@@ -92,13 +92,13 @@ class Blueprints_helper
         {
             $this->cache['pages'] = "";
             
-            if($this->is_module_installed('Structure'))
+            if(array_key_exists('structure', $this->EE->addons->get_installed()))
             {
                 require_once $this->get_theme_folder_path().'boldminded_themes/libraries/structure_pages.php';
                 $pages = Structure_Pages::get_instance();
                 $this->cache['pages'] = $pages->get_pages($this->EE);
             }
-            elseif($this->is_module_installed('Pages'))
+            elseif(array_key_exists('pages', $this->EE->addons->get_installed()))
             {
                 require_once $this->get_theme_folder_path().'boldminded_themes/libraries/pages.php';
                 $pages = Pages::get_instance();
@@ -335,7 +335,7 @@ class Blueprints_helper
         // Get the settings for the extension
         if(isset($this->cache['layouts']) === FALSE || $force_refresh === TRUE)
         {
-            if($this->is_module_installed('Blueprints'))
+            if(array_key_exists('blueprints', $this->EE->addons->get_installed()))
             {
                 // check the db for extension settings
                 $query = $this->EE->db->get_where('blueprints_layouts', array('site_id' => $this->EE->config->item('site_id')));
@@ -360,7 +360,7 @@ class Blueprints_helper
         // Get the settings for the extension
         if(isset($this->cache['entries']) === FALSE || $force_refresh === TRUE)
         {
-            if($this->is_module_installed('Blueprints'))
+            if(array_key_exists('blueprints', $this->EE->addons->get_installed()))
             {
                 // check the db for extension settings
                 $query = $this->EE->db->get_where('blueprints_entries', array('site_id' => $this->EE->config->item('site_id')));

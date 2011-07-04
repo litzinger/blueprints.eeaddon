@@ -107,11 +107,11 @@ class Blueprints_ext {
     
     function sessions_end($session)
     {
-        if( ! $this->EE->blueprints_helper->enable_publish_layout_takeover())
+        if ( ! $this->EE->blueprints_helper->enable_publish_layout_takeover())
             return $session;
             
-        if(($this->EE->blueprints_helper->is_module_installed('Structure') OR 
-            $this->EE->blueprints_helper->is_module_installed('Pages')) AND 
+        if ((array_key_exists('structure', $this->EE->addons->get_installed()) OR
+            array_key_exists('pages', $this->EE->addons->get_installed())) AND
             $this->EE->blueprints_helper->is_publish_form())
         {
             // Get our basic data
@@ -120,7 +120,7 @@ class Blueprints_ext {
             $site_assets = false;
 
             // If Structure is installed, get it's data
-            if($this->EE->blueprints_helper->is_module_installed('Structure'))
+            if (array_key_exists('structure', $this->EE->addons->get_installed()))
             {
                 require_once(PATH_THIRD.'structure/mod.structure.php');
                 $structure = new Structure();
@@ -129,7 +129,7 @@ class Blueprints_ext {
                 $site_pages = $structure->get_site_pages();
             }
             // Get Pages data
-            elseif($this->EE->blueprints_helper->is_module_installed('Pages'))
+            elseif (array_key_exists('pages', $this->EE->addons->get_installed()))
             {   
                 $site_pages = $this->EE->config->item('site_pages');
             }
@@ -140,12 +140,12 @@ class Blueprints_ext {
                 $template_id = $site_pages['templates'][$entry_id];
             }
             // Get default Structure settings
-            elseif($this->EE->blueprints_helper->is_module_installed('Structure'))
+            elseif (array_key_exists('structure', $this->EE->addons->get_installed()))
             {
                 $template_id = $structure_settings[$channel_id]['template_id'];
             }
             // Get default Pages settings
-            elseif($this->EE->blueprints_helper->is_module_installed('Pages'))
+            elseif (array_key_exists('pages', $this->EE->addons->get_installed()))
             {
                 $query = $this->EE->db->get_where('pages_configuration', array('configuration_name' => 'template_channel_'. $channel_id), 1, 0);
                 $template_id = $query->row('configuration_value');
@@ -196,11 +196,11 @@ class Blueprints_ext {
         // Set our cache with the found layout_group
         if($session)
         {
-             $session->cache['layout_group'] = $layout_group;
+            $session->cache[__CLASS__]['layout_group'] = $layout_group;
         }
         else
         {
-             $this->cache['layout_group'] = $layout_group;
+            $this->cache['layout_group'] = $layout_group;
         }
         
         return $layout_group;
@@ -228,7 +228,7 @@ class Blueprints_ext {
         $qry = $this->EE->db->select('field_group')
                             ->where('channel_id', $channel_id)
                             ->get('channels');
-          
+
         // Get the channel_id of other channels that share the same field_group. This way, if multiple
         // channels share the same field group, the layout only needs to be created once.
         $qry = $this->EE->db->select('channel_id')
@@ -455,7 +455,7 @@ class Blueprints_ext {
             Blueprints.config = {
                 autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
                 layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
-                layout_group: "'. $this->EE->session->cache(__CLASS__, 'layout_group') . '",
+                layout_group: "'. $this->cache['layout_group'] . '",
                 enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
                 carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
                 thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
@@ -472,7 +472,7 @@ class Blueprints_ext {
             
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
-            $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
+            // $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
         }
         
@@ -624,8 +624,8 @@ class Blueprints_ext {
         $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->EE->blueprints_helper->thumbnail_directory_url;
         $vars['site_path'] = $this->EE->blueprints_helper->site_path();
         $vars['hidden'] = array('file' => 'blueprints');
-        $vars['structure_installed'] = $this->EE->blueprints_helper->is_module_installed('Structure');
-        $vars['pages_installed'] = $this->EE->blueprints_helper->is_module_installed('Pages');
+        $vars['structure_installed'] = array_key_exists('structure', $this->EE->addons->get_installed());
+        $vars['pages_installed'] = array_key_exists('pages', $this->EE->addons->get_installed());
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
 

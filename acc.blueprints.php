@@ -35,7 +35,7 @@ class Blueprints_acc {
             $("#accessoryTabs").find("a.blueprints").parent("li").remove();
         ';
         
-        if(!class_exists('Blueprints_helper'))
+        if (!class_exists('Blueprints_helper'))
         {
             require PATH_THIRD . 'blueprints/blueprints_helper.php';
         }
@@ -44,7 +44,8 @@ class Blueprints_acc {
         
         // Replace single quotes, otherwise the JS blows up.
         $pages_html = "";
-        if($this->EE->blueprints_helper->is_module_installed('Structure') OR $this->EE->blueprints_helper->is_module_installed('Pages'))
+        if (array_key_exists('structure', $this->EE->addons->get_installed()) OR 
+            array_key_exists('pages', $this->EE->addons->get_installed()))
         {
             $pages_html = str_replace("'", "&raquo;", $this->EE->blueprints_helper->get_pages());
         }
@@ -56,7 +57,8 @@ class Blueprints_acc {
             </h1>
         ';
         
-        if($this->EE->blueprints_helper->is_module_installed('Structure') OR $this->EE->blueprints_helper->is_module_installed('Pages'))
+        if (array_key_exists('structure', $this->EE->addons->get_installed()) OR 
+            array_key_exists('pages', $this->EE->addons->get_installed()))
         {
             $script .= '
                 $("#sidebarContent").prepend(\'<div class="structure_pages_sidebar contents">'. $header . $pages_html .'</div>\');
@@ -98,18 +100,13 @@ class Blueprints_acc {
                 });';
         }
         
-        /*
-        $query = $this->EE->db->get_where('extensions', array('class' => 'Blueprints_ext'), 1, 0);
-        $settings = $query->row('settings') ? unserialize($query->row('settings')) : array('enable_edit_menu_tweaks' => '');
-        */
-        
-        //Fix from John D. Wells        
+        // Fix from John D. Wells        
         // first create default settings array
         $settings = array('enable_edit_menu_tweaks' => '');
         
         // now attempt to override from DB
         $query = $this->EE->db->get_where('extensions', array('class' => 'Blueprints_ext'), 1, 0);
-        if($query->num_rows() > 0)
+        if ($query->num_rows() > 0)
         {
             $row = unserialize($query->row('settings'));
             $site_id = $this->EE->config->item('site_id');
@@ -119,7 +116,7 @@ class Blueprints_acc {
             }
         }
         
-        if(isset($settings['enable_edit_menu_tweaks']) AND $settings['enable_edit_menu_tweaks'] == 'y')
+        if (isset($settings['enable_edit_menu_tweaks']) AND $settings['enable_edit_menu_tweaks'] == 'y')
         {
             $script .= '
                 var bp_ul = $("#navigationTabs li:eq(1) ul:eq(0) li.parent ul:eq(0)").html();
