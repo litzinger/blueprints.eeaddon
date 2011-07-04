@@ -133,11 +133,35 @@ class Blueprints_ext {
             {   
                 $site_pages = $this->EE->config->item('site_pages');
             }
+            
+            //
+            // Figure out what our template_id is
+            //
 
             // Get previously set data for either Structure or Pages set to the requested entry_id
             if ($entry_id && isset($site_pages['uris'][$entry_id]))
             {
                 $template_id = $site_pages['templates'][$entry_id];
+            }
+            // If viewing autosaved entry, find out what template it is using. It may not be the
+            // default one, and it won't exist in $site_pages yet.
+            elseif ($this->EE->input->get('use_autosave') == 'y')
+            {
+                $qry = $this->EE->db->select('entry_data')
+                                    ->where('entry_id', $entry_id)
+                                    ->where('channel_id', $channel_id)
+                                    ->get('channel_entries_autosave');
+                                    
+                $entry_data = unserialize($qry->row('entry_data'));
+                
+                if (array_key_exists('structure', $this->EE->addons->get_installed()))
+                {
+                    $template_id = isset($entry_data['structure__template_id']) ? $entry_data['structure__template_id'] : false;
+                }
+                else
+                {
+                    $template_id = isset($entry_data['pages__pages_template_id']) ? $entry_data['pages__pages_template_id'] : false;
+                }
             }
             // Get default Structure settings
             elseif (array_key_exists('structure', $this->EE->addons->get_installed()))
@@ -145,7 +169,7 @@ class Blueprints_ext {
                 $template_id = $structure_settings[$channel_id]['template_id'];
             }
             // Get default Pages settings
-            elseif (array_key_exists('pages', $this->EE->addons->get_installed()))
+            else
             {
                 $query = $this->EE->db->get_where('pages_configuration', array('configuration_name' => 'template_channel_'. $channel_id), 1, 0);
                 $template_id = $query->row('configuration_value');
@@ -183,10 +207,12 @@ class Blueprints_ext {
         // If this is an existing entry, then the template/layout_group has already been saved to our settings.
         else
         {
+            // Easy find
             if(isset($this->entries[$entry_id]['group_id']))
             {
                 $layout_group = $this->entries[$entry_id]['group_id'];
             }
+            // Uh oh, more work is needed :(
             else
             {
                 $layout_group = $this->_find_layout_group_from_settings($template_id, $channel_id);
@@ -472,7 +498,6 @@ class Blueprints_ext {
             
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
-            // $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/jquery.jcarousel.min.js"></script><!-- END Blueprints assets -->');
             $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
         }
         

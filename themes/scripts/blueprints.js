@@ -225,7 +225,7 @@ jQuery(function(){
             if(Blueprints.config.layout_group == "")
             {
                 // $('#showToolbarLink').prepend('<span class="blueprints_no_layout">No Publish Layout defined. Create one now &rarr;</span>');
-                $('#showToolbarLink a span').text('No Publish Layout defined. Create one now.');
+                $('#showToolbarLink a span').text('No Publish Layout defined for the current template and channel combination. Create one now.');
             }
         });
     }
