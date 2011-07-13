@@ -362,11 +362,11 @@ class Blueprints_ext {
             {
                 foreach($this->layouts as $layout)
                 {
-                    $thumbnail = ($layout['thumbnail']) ? $layout['thumbnail'] : '[NO THUMBNAIL DEFINED]';
+                    $thumbnail = ($layout['thumbnail']) ? $layout['thumbnail'] : '';
                     $thumbnails[] = '"'. $layout['template'] .'":"'. $thumbnail .'"';
                     $thumbnail_options[$layout['template']] = $thumbnail; 
                     
-                    $layout_name = ($layout['name']) ? $layout['name'] : '[NO LAYOUT NAME DEFINED]';
+                    $layout_name = ($layout['name']) ? $layout['name'] : '';
                     $layout_id = $layout['group_id'];
                     
                     $layouts[] = '"'. $layout['template'] .'":"'. $layout_id .'"';
@@ -452,7 +452,7 @@ class Blueprints_ext {
                     'template_name' => $template['template_name'], 
                     'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
                     'layout_preview' => isset($layout_carousel_ids[$template['template_id']]) ? $layout_carousel_ids[$template['template_id']] : '',
-                    'layout_name' => isset($layout_carousel_names[$template['template_id']]) ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
+                    'layout_name' => (isset($layout_carousel_names[$template['template_id']]) AND $layout_carousel_names[$template['template_id']] != '') ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
                 ); 
             }
             
@@ -463,7 +463,7 @@ class Blueprints_ext {
             Blueprints.config = {
                 autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
                 layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
-                layout_group: "'. $this->cache['layout_group'] . '",
+                layout_group: "'. (isset($this->cache['layout_group']) ? $this->cache['layout_group'] : '') .'",
                 enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
                 carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
                 thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
@@ -664,21 +664,6 @@ class Blueprints_ext {
         $insert['layout_group_ids'] = $this->EE->input->post('layout_group_ids');
         $insert['layout_group_names'] = $this->EE->input->post('layout_group_names');
         
-        // If no name is given, but the row exists, unset everything for that row so it isn't saved
-        if(!empty($insert['layout_group_names']))
-        {
-            foreach($insert['layout_group_names'] as $k => $value)
-            {
-                if($value == "")
-                {
-                    unset($insert['layout_group_names'][$k]);
-                    unset($insert['thumbnails'][$k]);
-                    unset($insert['template'][$k]);
-                    unset($insert['layout_group_ids'][$k]);
-                }
-            }
-        }
-        
         if($channels)
         {
             // Figure out what templates to show for each channel
@@ -701,41 +686,45 @@ class Blueprints_ext {
             }
         }
         
+        // If the user decided to remove the publish layout data from EE entirely
         if($delete)
         {
-            // Remove from all existing entries
-            foreach($this->entries as $entry_id => $data)
-            {
-                if(isset($data['group_id']) AND in_array($data['group_id'], $delete))
-                {
-                    unset($this->entries[$entry_id]);
-                }
-            }
+            // Remove entry so when the entry is loaded in the 
+            // publish page we don't try to load a layout for it.
+            $this->EE->db->where_in('group_id', $delete);
+            $this->EE->db->delete('blueprints_entries');
             
-            // Remove layout from the DB
+            // Remove layout from the DB entirely
             $this->EE->db->where_in('member_group', $delete);
             $this->EE->db->delete('layout_publish');
         }
         
-        if(!empty($insert['layout_group_names']))
+        // Loop through our existing layouts, if a layout/group_id is not present
+        // in what is to be the newly submitted array, then the user must have deleted the row.
+        foreach($this->layouts as $group_id => $layout)
         {
-            foreach($insert['layout_group_names'] as $k => $v)
+            if(!in_array($layout['group_id'], $insert['layout_group_ids']))
             {
-                $data = array(
-                    'site_id'       => $this->site_id,
-                    'group_id'      => $insert['layout_group_ids'][$k],
-                    'template'      => $insert['template'][$k],
-                    'thumbnail'     => $insert['thumbnails'][$k],
-                    'name'          => $insert['layout_group_names'][$k],
-                );
-        
-                $where = array(
-                    'site_id'       => $this->site_id,
-                    'group_id'      => $insert['layout_group_ids'][$k]
-                );
-        
-                $this->EE->blueprints_helper->insert_or_update('blueprints_layouts', $data, $where);
+                $this->EE->db->where('group_id', $layout['group_id'])->delete('blueprints_layouts');
             }
+        }
+        
+        foreach($insert['template'] as $k => $v)
+        {
+            $data = array(
+                'site_id'       => $this->site_id,
+                'group_id'      => $insert['layout_group_ids'][$k],
+                'template'      => $insert['template'][$k],
+                'thumbnail'     => $insert['thumbnails'][$k],
+                'name'          => $insert['layout_group_names'][$k],
+            );
+    
+            $where = array(
+                'site_id'       => $this->site_id,
+                'group_id'      => $insert['layout_group_ids'][$k]
+            );
+    
+            $this->EE->blueprints_helper->insert_or_update('blueprints_layouts', $data, $where);
         }
 
         // Save our settings to the current site ID for MSM.
