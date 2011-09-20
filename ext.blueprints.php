@@ -59,7 +59,7 @@ class Blueprints_ext {
         
         $this->EE->blueprints_helper = new Blueprints_helper;
         
-        // Stop here if we're not in the CP, and it's not a Publish form
+        // Stop here if we're not in the CP
         if(REQ != 'CP')
             return;
             
@@ -284,7 +284,7 @@ class Blueprints_ext {
         return false;
     }
     
-    function entry_submission_absolute_end($entry_id, $meta, $data)
+    function entry_submission_ready($entry_id, $meta, $data)
     {
         $post_template_id = false;
         

@@ -46,7 +46,7 @@ class Blueprints_upd {
         $extensions = array(
             array('hook'=>'publish_form_channel_preferences', 'method'=>'publish_form_channel_preferences'),
             array('hook'=>'sessions_end', 'method'=>'sessions_end'),
-            array('hook'=>'entry_submission_absolute_end', 'method'=>'entry_submission_absolute_end')
+            array('hook'=>'entry_submission_ready', 'method'=>'entry_submission_ready')
         );
         
         foreach($extensions as $extension)
@@ -133,6 +133,16 @@ class Blueprints_upd {
             $this->EE->db->update('extensions', array(
                 'method' => 'entry_submission_absolute_end',
                 'hook' => 'entry_submission_absolute_end'
+            ));
+        }
+        
+        if($current < '1.3.7.4')
+        {
+            $this->EE->db->where('class', strtolower(__CLASS__));
+            $this->EE->db->where('method', 'entry_submission_absolute_end');
+            $this->EE->db->update('extensions', array(
+                'method' => 'entry_submission_ready',
+                'hook' => 'entry_submission_ready'
             ));
         }
         
