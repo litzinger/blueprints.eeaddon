@@ -46,22 +46,25 @@ class Blueprints_ext {
         $this->EE =& get_instance();
         
         // Create cache
-        if (! isset($this->EE->session->cache[__CLASS__]))
+        if (! isset($this->EE->session->cache['blueprints']))
         {
-            $this->EE->session->cache[__CLASS__] = array();
+            $this->EE->session->cache['blueprints'] = array();
         }
-        $this->cache =& $this->EE->session->cache[__CLASS__];
+        $this->cache =& $this->EE->session->cache['blueprints'];
         
+        // Because I don't like how CI helpers work...
         if(!class_exists('Blueprints_helper'))
         {
-            require PATH_THIRD . 'blueprints/blueprints_helper.php';
+            require PATH_THIRD . 'blueprints/helper.blueprints.php';
         }
-        
         $this->EE->blueprints_helper = new Blueprints_helper;
         
         // Stop here if we're not in the CP
         if(REQ != 'CP')
             return;
+            
+        $this->EE->load->add_package_path(PATH_THIRD . 'blueprints/');
+        $this->EE->load->model('blueprints_model');
             
         $settings = $this->EE->blueprints_helper->get_settings();
         
@@ -72,13 +75,13 @@ class Blueprints_ext {
         $this->site_id = $this->EE->config->item('site_id');
         $this->settings = isset($settings[$this->site_id]) ? $settings[$this->site_id] : array();
         
-        $this->layouts = $this->EE->blueprints_helper->get_layouts();
-        $this->entries = $this->EE->blueprints_helper->get_entries();
+        $this->layouts = $this->EE->blueprints_model->get_layouts();
+        $this->entries = $this->EE->blueprints_model->get_entries();
         
         // Send settings to the helper for usage there
-        $this->EE->blueprints_helper->settings = $this->settings;
-        $this->EE->blueprints_helper->layouts = $this->layouts;
-        $this->EE->blueprints_helper->entries = $this->entries;
+        $this->EE->blueprints_model->settings = $this->settings;
+        $this->EE->blueprints_model->layouts = $this->layouts;
+        $this->EE->blueprints_model->entries = $this->entries;
         
         // $this->debug($this->settings);
         // $this->debug($this->layouts);
@@ -107,7 +110,7 @@ class Blueprints_ext {
                 require_once(PATH_THIRD.'structure/mod.structure.php');
                 $structure = new Structure();
 
-                $structure_settings = $this->EE->blueprints_helper->get_structure_settings();
+                $structure_settings = $this->EE->blueprints_model->get_structure_settings();
                 $site_pages = $structure->get_site_pages();
             }
             // Get Pages data
@@ -284,9 +287,10 @@ class Blueprints_ext {
         return false;
     }
     
-    function entry_submission_ready($entry_id, $meta, $data)
+    function entry_submission_ready($meta, $data, $autosave)
     {
         $post_template_id = false;
+        $entry_id = $data['entry_id'];
         
         // Save our settings to the current site ID for MSM.
         $site_id = $this->EE->config->item('site_id');
@@ -316,8 +320,8 @@ class Blueprints_ext {
                 'site_id'       => $this->site_id,
                 'entry_id'      => $entry_id
             );
-        
-            $this->EE->blueprints_helper->insert_or_update('blueprints_entries', $data, $where);
+            
+            $this->EE->blueprints_model->insert_or_update('blueprints_entries', $data, $where);
         }
         
         // If the new template does not have a publish layout, delete from our entries table, otherwise it
@@ -349,7 +353,7 @@ class Blueprints_ext {
             $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->EE->blueprints_helper->thumbnail_directory_path;
             
             // Lets get our active layouts into a JavaScrip array to use with jQuery below
-            $active_publish_layout = $this->EE->blueprints_helper->get_active_publish_layout($channel_id);
+            $active_publish_layout = $this->EE->blueprints_model->get_active_publish_layout($channel_id);
             $active_publish_layout_array = array();
             
             foreach($active_publish_layout as $id => $name)
@@ -392,7 +396,7 @@ class Blueprints_ext {
                                 $groups[] = "'". $group ."'";
                             }
                         
-                            $templates_result = $this->EE->blueprints_helper->get_templates(implode(',', $groups));
+                            $templates_result = $this->EE->blueprints_model->get_templates(implode(',', $groups));
                         
                             $channel_templates = array();
                             foreach($templates_result->result_array() as $row)
@@ -442,7 +446,7 @@ class Blueprints_ext {
                 $layout_checkbox_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
             }
             
-            $carousel_templates = $this->EE->blueprints_helper->get_assigned_templates($channel_templates);
+            $carousel_templates = $this->EE->blueprints_model->get_assigned_templates($channel_templates);
             $carousel_options = array();
             
             foreach($carousel_templates as $template)
@@ -499,9 +503,9 @@ class Blueprints_ext {
         $channel_fields = array();
         
         // Get our data
-        $templates = $this->EE->blueprints_helper->get_templates();
-        $thumbnails = $this->EE->blueprints_helper->get_thumbnails();
-        $channels = $this->EE->blueprints_helper->get_channels();
+        $templates  = $this->EE->blueprints_model->get_templates();
+        $thumbnails = $this->EE->blueprints_model->get_thumbnails();
+        $channels   = $this->EE->blueprints_model->get_channels();
         
         // $vars sent from core are basically the settings, 
         // but to make it MSM compat, we need to grab our settings instead.
@@ -724,7 +728,7 @@ class Blueprints_ext {
                 'group_id'      => $insert['layout_group_ids'][$k]
             );
     
-            $this->EE->blueprints_helper->insert_or_update('blueprints_layouts', $data, $where);
+            $this->EE->blueprints_model->insert_or_update('blueprints_layouts', $data, $where);
         }
 
         // Save our settings to the current site ID for MSM.

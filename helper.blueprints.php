@@ -1,0 +1,217 @@
+<?php
+
+class Blueprints_helper
+{
+    private $EE;
+    private $site_id;
+    private $cache;
+    
+    public $settings; // Blueprints extension settings
+    public $session;
+    public $thumbnail_directory_url;
+    public $thumbnail_directory_path;
+    
+    public function __construct()
+    {
+        $this->EE =& get_instance();
+        $this->site_id = $this->EE->config->item('site_id');
+        
+        // Create cache
+        if (! isset($session->cache['blueprints']))
+        {
+            $session->cache['blueprints'] = array();
+        }
+        $this->cache =& $session->cache['blueprints'];
+    }
+    
+    public function get_checkbox_options($k)
+    {
+        $templates = $this->get_templates();
+        
+        $checkbox_options = '';
+        $groups = array();
+        
+        foreach($templates->result_array() as $template)
+        {
+            if(!in_array($template['group_name'], $groups))
+            {
+                $checked = ((
+                        isset($template['group_name']) AND 
+                        isset($this->settings['channel_show_group']) AND
+                        isset($this->settings['channel_show_group'][$k]) AND 
+                        in_array($template['group_name'], $this->settings['channel_show_group'][$k])
+                )) ? TRUE : FALSE;
+                
+                $checkbox_options .= '<p>';
+                $checkbox_options .= form_checkbox(
+                                        'channel_show_group['. $k .'][]', 
+                                        $template['group_name'], 
+                                        $checked, 
+                                        'class="show_group" id="channel_show_group['. $k .']['. $template['group_name'] .']"'
+                                    );
+                
+                $checkbox_options .= ' <label for="channel_show_group['. $k .']['. $template['group_name'] .']">Show all <i>'. $template['group_name'] .'</i> templates</label>';
+            }
+            $groups[] = $template['group_name'];
+        }
+        
+        $checked = (
+            isset($this->settings['channel_show_selected']) AND
+            isset($this->settings['channel_show_selected'][$k]) AND 
+            $this->settings['channel_show_selected'][$k] == 'y'
+        ) ? TRUE : FALSE;
+        
+        $checkbox_options .= '<p>'. form_checkbox(
+                                        'channel_show_selected['. $k .']', 
+                                        'y',
+                                        $checked,
+                                        'id="channel_show_selected['. $k .']" class="show_selected"'
+                                    );
+                                    
+        $checkbox_options .= ' <label for="channel_show_selected['. $k .']">Show only specific templates</label></p>';
+        
+        return $checkbox_options;
+    }
+    
+    public function get_pages()
+    {
+        // Make sure pages cache is empty, and also see if we are in the CP. Since fieldtype files get loaded
+        // on the front end, I don't want unecessary queries/processing to be done when not needed.
+        if(!isset($this->cache['pages']) AND REQ == 'CP')
+        {
+            $this->cache['pages'] = "";
+            
+            if(array_key_exists('structure', $this->EE->addons->get_installed()))
+            {
+                require_once $this->get_theme_folder_path().'boldminded_themes/libraries/structure_pages.php';
+                $pages = Structure_Pages::get_instance();
+                $this->cache['pages'] = $pages->get_pages($this->EE);
+            }
+            elseif(array_key_exists('pages', $this->EE->addons->get_installed()))
+            {
+                require_once $this->get_theme_folder_path().'boldminded_themes/libraries/pages.php';
+                $pages = Pages::get_instance();
+                $this->cache['pages'] = $pages->get_pages($this->EE);
+            }
+        }
+
+        return $this->cache['pages'];
+    }
+    
+    public function get_theme_folder_path()
+    {
+        return PATH_THEMES . 'third_party/';
+    }
+    
+    public function get_theme_folder_url()
+    {
+        return $this->EE->config->slash_item('theme_folder_url') .'third_party/';
+    }
+    
+    public function enable_publish_layout_takeover()
+    {
+        if(!isset($this->cache['enable_publish_layout_takeover']))
+        {
+            $this->cache['enable_publish_layout_takeover'] = (isset($this->settings['enable_publish_layout_takeover']) AND $this->settings['enable_publish_layout_takeover'] == 'y') ? true : false;
+        }
+        
+        return $this->cache['enable_publish_layout_takeover'];
+    }
+    
+    public function is_publish_form()
+    {
+        if(REQ != "CP")
+        {
+            return false;
+        }
+        
+        if($this->EE->input->get('C') == 'content_publish' AND $this->EE->input->get('M') == 'entry_form')
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    /**
+      * Retrieve site path
+      */
+    public function site_path()
+    {
+        $site_url = $this->EE->config->slash_item('site_path');
+        return $site_url ? $site_url : str_replace('themes/', '', PATH_THEMES);
+    }
+    
+    /*
+        Allow config overrides
+    */
+    public function set_paths()
+    {
+        // If path and url is set in the user's config file, use them.
+        if($this->EE->config->item('blueprints.thumbnail_directory_url') AND $this->EE->config->item('blueprints.thumbnail_directory_path'))
+        {
+            $this->thumbnail_directory_url = $this->EE->config->item('blueprints.thumbnail_directory_url');
+            $this->thumbnail_directory_path = $this->EE->config->item('blueprints.thumbnail_directory_path');
+        }
+        else
+        {
+            $this->thumbnail_directory_url = 'images/template_thumbnails/';
+            
+            // If the user set the site_path var, use it.
+            if($this->EE->config->item('site_path'))
+            {
+                $this->thumbnail_directory_path = 'images' . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
+            }
+            // Or fallback and try to find the site root path.
+            else
+            {
+                // Really? I would think BASEPATH would be the absolute root of the site, not the base of the EE install?
+                // Is there a variable I don't know about to get the EE webroot path?
+                $images_path = str_replace('themes', 'images', PATH_THEMES);
+                $this->thumbnail_directory_path = $images_path . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
+            }
+        }
+    }
+    
+    /**
+    * Get the site specific settings from the extensions table
+    * Originally written by Leevi Graham? Modified for EE2.0
+    *
+    * @param $force_refresh     bool    Get the settings from the DB even if they are in the session
+    * @return array                     If settings are found otherwise false. Site settings are returned by default.
+    */
+    public function get_settings($force_refresh = FALSE)
+    {
+        // assume there are no settings
+        $settings = FALSE;
+        $this->EE->load->helper('string');
+
+        // Get the settings for the extension
+        if(isset($this->cache['settings']) === FALSE || $force_refresh === TRUE)
+        {
+            // check the db for extension settings
+            $query = $this->EE->db->query("SELECT settings FROM exp_extensions WHERE enabled = 'y' AND class = 'Blueprints_ext' LIMIT 1");
+
+            // if there is a row and the row has settings
+            if ($query->num_rows() > 0 && $query->row('settings') != '')
+            {
+                // save them to the cache
+                $this->cache['settings'] = strip_slashes(unserialize($query->row('settings')));
+            }
+        }
+
+        return isset($this->cache['settings']) ? $this->cache['settings'] : array();
+    }
+    
+    private function debug($str, $die = false)
+    {
+        echo '<pre>';
+        var_dump($str);
+        echo '</pre>';
+        
+        if($die) die('debug terminated');
+    }
+    
+}
