@@ -78,10 +78,14 @@ class Blueprints_ext {
         $this->layouts = $this->EE->blueprints_model->get_layouts();
         $this->entries = $this->EE->blueprints_model->get_entries();
         
-        // Send settings to the helper for usage there
+        // Send settings to the helper and for usage there
+        // (TODO: Is there a better way to do this? Yes, move this to the cache, duh!)
         $this->EE->blueprints_model->settings = $this->settings;
         $this->EE->blueprints_model->layouts = $this->layouts;
         $this->EE->blueprints_model->entries = $this->entries;
+        $this->EE->blueprints_helper->settings = $this->settings;
+        $this->EE->blueprints_helper->layouts = $this->layouts;
+        $this->EE->blueprints_helper->entries = $this->entries;
         
         // $this->debug($this->settings);
         // $this->debug($this->layouts);
@@ -187,7 +191,7 @@ class Blueprints_ext {
         // If this is a new entry, find out what template is assigned to which layout_group from our settings.
         if(!$entry_id)
         {
-            $layout_group = $this->_find_layout_group_from_settings($template_id, $channel_id);
+            $layout_group = $this->EE->blueprints_model->find_layout_group_from_settings($template_id, $channel_id);
         }
         // If this is an existing entry, then the template/layout_group has already been saved to our settings.
         else
@@ -200,7 +204,7 @@ class Blueprints_ext {
             // Uh oh, more work is needed :(
             else
             {
-                $layout_group = $this->_find_layout_group_from_settings($template_id, $channel_id);
+                $layout_group = $this->EE->blueprints_model->find_layout_group_from_settings($template_id, $channel_id);
             }
         }
 
@@ -215,76 +219,6 @@ class Blueprints_ext {
         }
         
         return $layout_group;
-    }
-    
-    private function _find_layout_group_from_settings($template_id, $channel_id)
-    {
-        // Compare our saved layouts to the existing publish layouts and see if our template matches
-        // up to a channel in layout_publish based on group_id, e.g. the saved Publish Layout
-        $qry = $this->EE->db->select('bl.group_id')
-                            ->from('blueprints_layouts AS bl')
-                            ->join('layout_publish AS lp', 'lp.member_group = bl.group_id')
-                            ->where('bl.template', $template_id)
-                            ->where('lp.channel_id', $channel_id)
-                            ->get();
-        
-        if($qry->row('group_id'))
-        {
-            return $qry->row('group_id');
-        }
-        
-        // No existing Publish Layout was found? Lets try harder...
-        
-        // See if this channel shares a field group with another channel that has a publish layout
-        $qry = $this->EE->db->select('field_group')
-                            ->where('channel_id', $channel_id)
-                            ->get('channels');
-
-        // Get the channel_id of other channels that share the same field_group. This way, if multiple
-        // channels share the same field group, the layout only needs to be created once.
-        $qry = $this->EE->db->select('channel_id')
-                            ->where('field_group', $qry->row('field_group'))
-                            ->where('channel_id !=', $channel_id)
-                            ->get('channels');
-                            
-        // Loop over the found channels and see if an existing Publish Layout has been used before.
-        // We have sibling/similar channel = field_group setups, so clone them.
-        foreach($qry->result() as $row)
-        {
-            // Re-run the original query until we find a match... hopefully. This means multiple
-            // channels are using the same field_group and default template.
-            $qry = $this->EE->db->select('bl.group_id')
-                                ->from('blueprints_layouts AS bl')
-                                ->join('layout_publish AS lp', 'lp.member_group = bl.group_id')
-                                ->where('bl.template', $template_id)
-                                ->where('lp.channel_id', $row->channel_id)
-                                ->get();
-
-            // Found a match? Return it and duplicate the Publish Layout row so it actually works.
-            // Next time we won't get this far b/c it will find the row above first.
-            if($group_id = $qry->row('group_id'))
-            {
-                $data = array(
-                    'member_group'  => $group_id, 
-                    'channel_id'    => $row->channel_id
-                );
-                
-                $qry = $this->EE->db->get_where('layout_publish', $data)->result();
-
-                $insert = array_merge($data, array(
-                    'field_layout'  => $qry[0]->field_layout,
-                    'site_id'       => $qry[0]->site_id,
-                    'channel_id'    => $channel_id
-                ));
-                
-                $this->EE->db->insert('layout_publish', $insert);
-                
-                return $group_id;
-            }
-        }
-        
-        // Did everything we could to find a working layout :(
-        return false;
     }
     
     function entry_submission_ready($meta, $data, $autosave)
@@ -424,7 +358,7 @@ class Blueprints_ext {
             }
             else
             {
-                $channel_templates_options = '';
+                $channel_templates_options = '""';
             }
             
             // If the current user is an Admin, give them a link to edit the templates that appear

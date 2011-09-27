@@ -22,11 +22,13 @@ class Blueprints_helper
             $session->cache['blueprints'] = array();
         }
         $this->cache =& $session->cache['blueprints'];
+        
+        $this->EE->load->model('blueprints_model');
     }
     
     public function get_checkbox_options($k)
     {
-        $templates = $this->get_templates();
+        $templates = $this->EE->blueprints_model->get_templates();
         
         $checkbox_options = '';
         $groups = array();

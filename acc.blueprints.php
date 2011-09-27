@@ -11,12 +11,12 @@ if (! defined('BLUEPRINTS_VERSION'))
 
 class Blueprints_acc {
 
-    public $name       = 'Blueprints Accessory';
-    public $id         = 'blueprints';
-    public $version        = BLUEPRINTS_VERSION;
-    public $description    = BLUEPRINTS_DESC;
-    public $sections       = array();
-    public $required_by    = array('module');
+    public $name            = 'Blueprints Accessory';
+    public $id              = 'blueprints';
+    public $version         = BLUEPRINTS_VERSION;
+    public $description     = BLUEPRINTS_DESC;
+    public $sections        = array();
+    public $required_by     = array('module');
 
     /**
      * Constructor
@@ -106,6 +106,7 @@ class Blueprints_acc {
         
         // now attempt to override from DB
         $query = $this->EE->db->get_where('extensions', array('class' => 'Blueprints_ext'), 1, 0);
+        
         if ($query->num_rows() > 0)
         {
             $row = unserialize($query->row('settings'));

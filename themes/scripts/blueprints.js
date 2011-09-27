@@ -203,12 +203,12 @@ Blueprints.carousel_change = function(template)
 jQuery(function(){
     
     var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
-    
+
     if(Blueprints.config.publish_layout_takeover)
     {
         jQuery(function(){
             $("#showToolbarLink a").toggle(function() {
-                if($(".blueprints_layout_groups_holder").length == 0){
+                if($(".blueprints_layout_groups_holder").length == 0) {
                     $("#layout_groups_holder").prepend('<div class="blueprints_layout_groups_holder">'+ Blueprints.config.layout_checkbox_options +'</div>');
                 }
                 active_layouts = Blueprints.config.active_publish_layouts;
