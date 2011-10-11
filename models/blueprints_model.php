@@ -191,7 +191,7 @@ class Blueprints_model
             
             if($qry->num_rows() > 0)
             {
-                foreach($result->result() as $row)
+                foreach($qry->result() as $row)
                 {
                     $this->cache['active_publish_layout'][$row->group_id] = $row->group_title;
                 }
@@ -244,7 +244,7 @@ class Blueprints_model
             if($qry->num_rows() > 0)
             {
                 $group_titles = array();
-                foreach($result->result() as $row)
+                foreach($qry->result() as $row)
                 {
                     $this->cache['active_publish_layout'][] = $row->group_title;
                 }
