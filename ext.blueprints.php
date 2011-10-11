@@ -77,46 +77,30 @@ class Blueprints_ext {
         }
         $this->cache =& $this->EE->session->cache['blueprints'];
         
+        // Stop here if we're not in the CP
+        if(REQ != 'CP')
+            return;
+            
         // Because I don't like how CI helpers work...
         if(!class_exists('Blueprints_helper'))
         {
             require PATH_THIRD . 'blueprints/helper.blueprints.php';
         }
         $this->EE->blueprints_helper = new Blueprints_helper;
-        
-        // Stop here if we're not in the CP
-        if(REQ != 'CP')
-            return;
             
-        $this->EE->load->add_package_path(PATH_THIRD . 'blueprints/');
+        // Load up our model. Our cache vars are set here.
+        $this->EE->load->add_package_path(PATH_THIRD.'blueprints/');
         $this->EE->load->model('blueprints_model');
-            
-        $settings = $this->EE->blueprints_helper->get_settings();
         
         // All settings
-        $this->global_settings = $settings;
+        $this->global_settings = isset($this->cache['settings']) ? $this->cache['settings'] : array();
         
         // Site specific settings
         $this->site_id = $this->EE->config->item('site_id');
-        $this->settings = isset($settings[$this->site_id]) ? $settings[$this->site_id] : array();
+        $this->settings = isset($this->cache['settings'][$this->site_id]) ? $this->cache['settings'][$this->site_id] : array();
         
-        $this->layouts = $this->EE->blueprints_model->get_layouts();
-        $this->entries = $this->EE->blueprints_model->get_entries();
-        
-        // Send settings to the helper and for usage there
-        // (TODO: Is there a better way to do this? Yes, move this to the cache, duh!)
-        $this->EE->blueprints_model->settings = $this->settings;
-        $this->EE->blueprints_model->layouts = $this->layouts;
-        $this->EE->blueprints_model->entries = $this->entries;
-        $this->EE->blueprints_helper->settings = $this->settings;
-        $this->EE->blueprints_helper->layouts = $this->layouts;
-        $this->EE->blueprints_helper->entries = $this->entries;
-        
-        // $this->debug($this->settings);
-        // $this->debug($this->layouts);
-        // $this->debug($this->entries, true);
-        
-        $this->EE->blueprints_helper->set_paths();
+        // $this->EE->blueprints_helper->set_paths();
+        // $this->debug($this->cache, true);
     }
     
     function sessions_end($session)
@@ -222,9 +206,9 @@ class Blueprints_ext {
         else
         {
             // Easy find
-            if(isset($this->entries[$entry_id]['group_id']))
+            if(isset($this->cache['entries'][$entry_id]['group_id']))
             {
-                $layout_group = $this->entries[$entry_id]['group_id'];
+                $layout_group = $this->cache['entries'][$entry_id]['group_id'];
             }
             // Uh oh, more work is needed :(
             else
@@ -309,7 +293,7 @@ class Blueprints_ext {
             $channel_id = $this->EE->input->get_post('channel_id');
             
             $entry_id = $this->EE->input->get_post('entry_id');
-            $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->EE->blueprints_helper->thumbnail_directory_path;
+            $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_path'];
             
             // Lets get our active layouts into a JavaScrip array to use with jQuery below
             $active_publish_layout = $this->EE->blueprints_model->get_active_publish_layout($channel_id);
@@ -321,9 +305,9 @@ class Blueprints_ext {
             }
             $active_publish_layouts = 'new Array('. trim(implode(',', $active_publish_layout_array), ',') .')';
 
-            if(!empty($this->layouts))
+            if(!empty($this->cache['layouts']))
             {
-                foreach($this->layouts as $layout)
+                foreach($this->cache['layouts'] as $layout)
                 {
                     $thumbnail = ($layout['thumbnail']) ? $layout['thumbnail'] : '';
                     $thumbnails[] = '"'. $layout['template'] .'":"'. $thumbnail .'"';
@@ -512,9 +496,9 @@ class Blueprints_ext {
         $k = 0;
         
         // Create our fields from our saved settings in the DB
-        if(!empty($this->layouts))
+        if(!empty($this->cache['layouts']))
         {
-            foreach($this->layouts as $layout)
+            foreach($this->cache['layouts'] as $layout)
             {
                 // Recreate saved fields
                 $fields[] = array(
@@ -591,7 +575,7 @@ class Blueprints_ext {
         $vars['enable_publish_layout_takeover'] = isset($this->settings['enable_publish_layout_takeover']) ? $this->settings['enable_publish_layout_takeover'] : 'n';
         $vars['enable_edit_menu_tweaks'] = isset($this->settings['enable_edit_menu_tweaks']) ? $this->settings['enable_edit_menu_tweaks'] : 'n';
         $vars['enable_carousel'] = isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n';
-        $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->EE->blueprints_helper->thumbnail_directory_url;
+        $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_url'];
         $vars['site_path'] = $this->EE->blueprints_helper->site_path();
         $vars['hidden'] = array('file' => 'blueprints');
         $vars['structure_installed'] = array_key_exists('structure', $this->EE->addons->get_installed());
@@ -664,7 +648,7 @@ class Blueprints_ext {
         
         // Loop through our existing layouts, if a layout/group_id is not present
         // in what is to be the newly submitted array, then the user must have deleted the row.
-        foreach($this->layouts as $group_id => $layout)
+        foreach($this->cache['layouts'] as $group_id => $layout)
         {
             if(!in_array($layout['group_id'], $insert['layout_group_ids']))
             {

@@ -38,6 +38,10 @@
 
 class Blueprints_model
 {
+    private $cache;
+    private $thumbnail_directory_url = '';
+    private $thumbnail_directory_path = '';
+    
     public $settings;
     public $entries;
     public $layouts;
@@ -53,6 +57,14 @@ class Blueprints_model
             $this->EE->session->cache['blueprints'] = array();
         }
         $this->cache =& $this->EE->session->cache['blueprints'];
+        
+        $this->settings = $this->get_settings();
+        $this->layouts = $this->get_layouts();
+        $this->entries = $this->get_entries();
+
+        $this->cache['settings'] = $this->settings;
+        $this->cache['layouts'] = $this->layouts;
+        $this->cache['entries'] = $this->entries;
     }
     
     /*
@@ -295,7 +307,7 @@ class Blueprints_model
         if(!isset($this->cache['thumbnails']))
         {
             $thumbnails = array();
-            $path = isset($this->settings['thumbnail_path']) ? $this->EE->blueprints_helper->site_path() . $this->settings['thumbnail_path'] : $this->thumbnail_directory_path;
+            $path = isset($this->cache['settings']['thumbnail_path']) ? $this->EE->blueprints_helper->site_path() . $this->cache['settings']['thumbnail_path'] : $this->thumbnail_directory_path;
 
             if( ! class_exists('Image_lib')) 
             {
@@ -412,6 +424,63 @@ class Blueprints_model
         }
         
         return $this->cache['structure_settings'];
+    }
+    
+    /**
+    * Get the site specific settings from the extensions table
+    * Originally written by Leevi Graham? Modified for EE2.0
+    *
+    * @param $force_refresh     bool    Get the settings from the DB even if they are in the session
+    * @return array                     If settings are found otherwise false. Site settings are returned by default.
+    */
+    public function get_settings($force_refresh = FALSE)
+    {
+        // assume there are no settings
+        $settings = FALSE;
+        $this->EE->load->helper('string');
+
+        // Get the settings for the extension
+        if(isset($this->cache['settings']) === FALSE || $force_refresh === TRUE)
+        {
+            // check the db for extension settings
+            $query = $this->EE->db->query("SELECT settings FROM exp_extensions WHERE enabled = 'y' AND class = 'Blueprints_ext' LIMIT 1");
+
+            // if there is a row and the row has settings
+            if ($query->num_rows() > 0 && $query->row('settings') != '')
+            {
+                // save them to the cache
+                $this->cache['settings'] = strip_slashes(unserialize($query->row('settings')));
+            }
+            
+            // If path and url is set in the user's config file, use them.
+            if($this->EE->config->item('blueprints.thumbnail_directory_url') AND $this->EE->config->item('blueprints.thumbnail_directory_path'))
+            {
+                $this->cache['settings']['thumbnail_directory_url'] = $this->EE->config->item('blueprints.thumbnail_directory_url');
+                $this->cache['settings']['thumbnail_directory_path'] = $this->EE->config->item('blueprints.thumbnail_directory_path');
+            }
+            else
+            {
+                $this->cache['settings']['thumbnail_directory_url'] = 'images/template_thumbnails/';
+
+                // If the user set the site_path var, use it.
+                if($this->EE->config->item('site_path'))
+                {
+                    $this->cache['settings']['thumbnail_directory_path'] = 'images' . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
+                }
+                // Or fallback and try to find the site root path.
+                else
+                {
+                    // Really? I would think BASEPATH would be the absolute root of the site, not the base of the EE install?
+                    // Is there a variable I don't know about to get the EE webroot path?
+                    $images_path = str_replace('themes', 'images', PATH_THEMES);
+                    $this->cache['settings']['thumbnail_directory_path'] = $images_path . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
+                }
+            }
+        }
+        
+        // echo '<pre>'; var_dump($this->cache); die;
+        
+        return isset($this->cache['settings']) ? $this->cache['settings'] : array();
     }
     
 }
