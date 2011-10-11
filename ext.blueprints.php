@@ -92,8 +92,13 @@ class Blueprints_ext {
         $this->EE->load->add_package_path(PATH_THIRD.'blueprints/');
         $this->EE->load->model('blueprints_model');
         
-        // All settings
-        $this->global_settings = isset($this->cache['settings']) ? $this->cache['settings'] : array();
+        // Get our settings
+        $this->cache['settings'] = $this->EE->blueprints_model->get_settings();
+        $this->cache['layouts'] = $this->EE->blueprints_model->get_layouts();
+        $this->cache['entries'] = $this->EE->blueprints_model->get_entries();
+        
+        // Save all settings for reference later
+        $this->global_settings = $this->cache['settings'];
         
         // Site specific settings
         $this->site_id = $this->EE->config->item('site_id');

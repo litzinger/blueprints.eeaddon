@@ -58,13 +58,11 @@ class Blueprints_model
         }
         $this->cache =& $this->EE->session->cache['blueprints'];
         
-        $this->settings = $this->get_settings();
-        $this->layouts = $this->get_layouts();
-        $this->entries = $this->get_entries();
-
-        $this->cache['settings'] = $this->settings;
-        $this->cache['layouts'] = $this->layouts;
-        $this->cache['entries'] = $this->entries;
+        // if(!class_exists('Blueprints_helper'))
+        // {
+        //     require PATH_THIRD . 'blueprints/helper.blueprints.php';
+        // }
+        // $this->EE->blueprints_helper = new Blueprints_helper;
     }
     
     /*
@@ -473,12 +471,10 @@ class Blueprints_model
                     // Really? I would think BASEPATH would be the absolute root of the site, not the base of the EE install?
                     // Is there a variable I don't know about to get the EE webroot path?
                     $images_path = str_replace('themes', 'images', PATH_THEMES);
-                    $this->cache['settings']['thumbnail_directory_path'] = $images_path . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
+                    $this->cache['settings']['thumbnail_directory_path'] = $images_path . 'template_thumbnails' . DIRECTORY_SEPARATOR;
                 }
             }
         }
-        
-        // echo '<pre>'; var_dump($this->cache); die;
         
         return isset($this->cache['settings']) ? $this->cache['settings'] : array();
     }
