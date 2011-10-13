@@ -48,20 +48,21 @@ if (! defined('BLUEPRINTS_VERSION'))
  
 class Blueprints_ext {
 
-    public $settings       = array();
-    public $global_settings= array();
-    public $name           = BLUEPRINTS_NAME;
-    public $version        = BLUEPRINTS_VERSION;
-    public $description    = BLUEPRINTS_DESC;
-    public $docs_url       = BLUEPRINTS_DOCS;
-    public $settings_exist = 'y';
-    public $required_by    = array('module');
+    public $settings        = array();
+    public $global_settings = array();
+    public $name            = BLUEPRINTS_NAME;
+    public $version         = BLUEPRINTS_VERSION;
+    public $description     = BLUEPRINTS_DESC;
+    public $docs_url        = BLUEPRINTS_DOCS;
+    public $settings_exist  = 'y';
+    public $required_by     = array('module');
     
-    public $layout_info    = '';
-    public $layout_id      = 2000; // Starting number for our fake member groups.
+    public $layout_info     = '';
+    public $layout_id       = 2000; // Starting number for our fake member groups.
     
     private $site_id;
     private $layouts;
+    private $cache;
     
     /**
      * Constructor
@@ -69,6 +70,7 @@ class Blueprints_ext {
     function Blueprints_ext($settings = '') 
     {
         $this->EE =& get_instance();
+        $this->site_id = $this->EE->config->item('site_id');
         
         // Create cache
         if (! isset($this->EE->session->cache['blueprints']))
@@ -77,10 +79,6 @@ class Blueprints_ext {
         }
         $this->cache =& $this->EE->session->cache['blueprints'];
         
-        // Stop here if we're not in the CP
-        if(REQ != 'CP')
-            return;
-            
         // Because I don't like how CI helpers work...
         if(!class_exists('Blueprints_helper'))
         {
@@ -88,117 +86,126 @@ class Blueprints_ext {
         }
         $this->EE->blueprints_helper = new Blueprints_helper;
             
-        // Load up our model. Our cache vars are set here.
+        // Load up our model
         $this->EE->load->add_package_path(PATH_THIRD.'blueprints/');
         $this->EE->load->model('blueprints_model');
         
         // Get our settings
-        $this->cache['settings'] = $this->EE->blueprints_model->get_settings();
+        $this->cache['settings'] = $this->EE->blueprints_model->get_settings(true);
         $this->cache['layouts'] = $this->EE->blueprints_model->get_layouts();
         $this->cache['entries'] = $this->EE->blueprints_model->get_entries();
         
-        // Save all settings for reference later
-        $this->global_settings = $this->cache['settings'];
-        
-        // Site specific settings
-        $this->site_id = $this->EE->config->item('site_id');
-        $this->settings = isset($this->cache['settings'][$this->site_id]) ? $this->cache['settings'][$this->site_id] : array();
-        
-        // $this->EE->blueprints_helper->set_paths();
-        // $this->debug($this->cache, true);
+        $this->settings = $this->cache['settings'];
     }
     
+    /*
+        Determine what we should set $_GET['layout_preview'] to for hi-jacking.
+    */
     function sessions_end($session)
     {
-        if ( ! $this->EE->blueprints_helper->enable_publish_layout_takeover())
+        // Stop here if we shouldn't be hi-jacking the publish layouts
+        if(
+            REQ != 'CP' OR 
+            !$this->EE->blueprints_helper->enable_publish_layout_takeover() OR
+            (!array_key_exists('structure', $this->EE->addons->get_installed()) AND !array_key_exists('pages', $this->EE->addons->get_installed())) OR
+            !$this->EE->blueprints_helper->is_publish_form()
+        ){
             return $session;
-            
-        if ((array_key_exists('structure', $this->EE->addons->get_installed()) OR
-            array_key_exists('pages', $this->EE->addons->get_installed())) AND
-            $this->EE->blueprints_helper->is_publish_form())
-        {
-            // Get our basic data
-            $channel_id = $this->EE->input->get_post('channel_id');
-            $entry_id = $this->EE->input->get_post('entry_id');
-            $site_assets = false;
+        }
+        
+        // Get our basic data
+        $channel_id = $this->EE->input->get_post('channel_id');
+        $entry_id = $this->EE->input->get_post('entry_id');
+        $site_assets = false;
 
-            // If Structure is installed, get it's data
+        // If Structure is installed, get it's data
+        if (array_key_exists('structure', $this->EE->addons->get_installed()))
+        {
+            require_once(PATH_THIRD.'structure/mod.structure.php');
+            $structure = new Structure();
+
+            $structure_settings = $this->EE->blueprints_model->get_structure_settings();
+            $site_pages = $structure->get_site_pages();
+        }
+        // Get Pages data
+        elseif (array_key_exists('pages', $this->EE->addons->get_installed()))
+        {   
+            $site_pages = $this->EE->config->item('site_pages');
+        }
+        
+        // B/c BASE isn't defined yet apparently...
+        $s = ($this->EE->config->item('admin_session_type') != 'c') ? $session->userdata('session_id') : 0;
+        $base_url = SELF.'?S='.$s.'&amp;D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP;
+        
+        //
+        // Figure out what our template_id is
+        //
+
+        // Get previously set data for either Structure or Pages set to the requested entry_id
+        if ($entry_id && isset($site_pages['uris'][$entry_id]))
+        {
+            $template_id = $site_pages['templates'][$entry_id];
+        }
+        // If viewing autosaved entry, find out what template it is using. It may not be the
+        // default one, and it won't exist in $site_pages yet.
+        elseif ($this->EE->input->get('use_autosave') == 'y')
+        {
+            $entry_data = $this->EE->blueprints_model->get_autosave_data($channel_id, $entry_id);
+            
             if (array_key_exists('structure', $this->EE->addons->get_installed()))
             {
-                require_once(PATH_THIRD.'structure/mod.structure.php');
-                $structure = new Structure();
-
-                $structure_settings = $this->EE->blueprints_model->get_structure_settings();
-                $site_pages = $structure->get_site_pages();
+                $template_id = isset($entry_data['structure__template_id']) ? $entry_data['structure__template_id'] : false;
             }
-            // Get Pages data
-            elseif (array_key_exists('pages', $this->EE->addons->get_installed()))
-            {   
-                $site_pages = $this->EE->config->item('site_pages');
-            }
-            
-            //
-            // Figure out what our template_id is
-            //
-
-            // Get previously set data for either Structure or Pages set to the requested entry_id
-            if ($entry_id && isset($site_pages['uris'][$entry_id]))
-            {
-                $template_id = $site_pages['templates'][$entry_id];
-            }
-            // If viewing autosaved entry, find out what template it is using. It may not be the
-            // default one, and it won't exist in $site_pages yet.
-            elseif ($this->EE->input->get('use_autosave') == 'y')
-            {
-                $qry = $this->EE->db->select('entry_data')
-                                    ->where('entry_id', $entry_id)
-                                    ->where('channel_id', $channel_id)
-                                    ->get('channel_entries_autosave');
-                                    
-                $entry_data = unserialize($qry->row('entry_data'));
-                
-                if (array_key_exists('structure', $this->EE->addons->get_installed()))
-                {
-                    $template_id = isset($entry_data['structure__template_id']) ? $entry_data['structure__template_id'] : false;
-                }
-                else
-                {
-                    $template_id = isset($entry_data['pages__pages_template_id']) ? $entry_data['pages__pages_template_id'] : false;
-                }
-            }
-            // Get default Structure settings
-            elseif (array_key_exists('structure', $this->EE->addons->get_installed()))
-            {
-                $template_id = $structure_settings[$channel_id]['template_id'];
-            }
-            // Get default Pages settings
             else
             {
-                $query = $this->EE->db->get_where('pages_configuration', array('configuration_name' => 'template_channel_'. $channel_id), 1, 0);
+                $template_id = isset($entry_data['pages__pages_template_id']) ? $entry_data['pages__pages_template_id'] : false;
+            }
+        }
+        // Get default Structure settings
+        elseif (array_key_exists('structure', $this->EE->addons->get_installed()))
+        {
+            if(!$template_id = $structure_settings[$channel_id]['template_id'])
+            {
+                $link = $base_url.'module=structure'.AMP.'method=channel_setings';
+                show_error('Please define a default template for Channel ID: '. $channel_id .' in the <a href="'. $link .'">Structure module configuration</a>.');
+            }
+        }
+        // Get default Pages settings
+        else
+        {
+            $query = $this->EE->db->get_where('pages_configuration', array('configuration_name' => 'template_channel_'. $channel_id), 1, 0);
+            
+            if($query->num_rows() == 0)
+            {
+                $link = $base_url.'module=pages'.AMP.'method=configuration';
+                show_error('Please define a default template for Channel ID: '. $channel_id .' in the <a href="'. $link .'">Pages module configuration</a>.');
+            }
+            else
+            {
                 $template_id = $query->row('configuration_value');
             }
-            
-            // And hi-jack it if we have a custom layout_group
-            if($layout_group = $this->_find_layout_group($template_id, $channel_id, $entry_id, $session))
-            {
-                $_GET['layout_preview'] = isset($_GET['layout_preview']) ? $_GET['layout_preview'] : $layout_group;
-            }
+        }
+        
+        // And hi-jack it if we have a custom layout_group
+        if($layout_group = $this->_find_layout_group($template_id, $channel_id, $entry_id, $session))
+        {
+            $_GET['layout_preview'] = isset($_GET['layout_preview']) ? $_GET['layout_preview'] : $layout_group;
         }
         
         return $session;
     }
     
     /*
-    This is where the magic happens, and what makes this extension possible. 
-    In content_publish, there are the following 2 lines. Luckily EllisLab
-    used get_post('layout_preview'), so we can inject a new value.
+        This is where the magic happens, and what makes this extension possible. 
+        In content_publish, there are the following 2 lines. Luckily EllisLab
+        used get_post('layout_preview'), so we can inject a new value.
 
-    $layout_group = (is_numeric($this->input->get_post('layout_preview'))) ? $this->input->get_post('layout_preview') : $this->session->userdata('group_id');
-    $layout_info  = $this->member_model->get_group_layout($layout_group, $channel_id);
+        $layout_group = (is_numeric($this->input->get_post('layout_preview'))) ? $this->input->get_post('layout_preview') : $this->session->userdata('group_id');
+        $layout_info  = $this->member_model->get_group_layout($layout_group, $channel_id);
 
-    What we're doing here is assigning a Structure template to a publish layout, and 
-    injecting the value into $_GET['layout_preview'], so when those 2 previous lines are called, 
-    it thinks we're previewing a publish layout on every page load. Genius.
+        What we're doing here is assigning a Structure template to a publish layout, and 
+        injecting the value into $_GET['layout_preview'], so when those 2 previous lines are called, 
+        it thinks we're previewing a publish layout on every page load. Genius.
     */
     private function _find_layout_group($template_id, $channel_id, $entry_id = false, $session = false)
     {
@@ -225,7 +232,7 @@ class Blueprints_ext {
         // Set our cache with the found layout_group
         if($session)
         {
-            $session->cache[__CLASS__]['layout_group'] = $layout_group;
+            $session->cache['blueprints']['layout_group'] = $layout_group;
         }
         else
         {
@@ -235,6 +242,9 @@ class Blueprints_ext {
         return $layout_group;
     }
     
+    /*
+        Only this hook is called when Save Revision and Submit are clicked.
+    */
     function entry_submission_ready($meta, $data, $autosave)
     {
         $post_template_id = false;
@@ -242,17 +252,11 @@ class Blueprints_ext {
         
         // Save our settings to the current site ID for MSM.
         $site_id = $this->EE->config->item('site_id');
-        $settings = $this->global_settings;
         
         // Look for a Structure template ID first, then default to the Pages module
-        if($this->EE->input->post('structure__template_id'))
-        {
-            $post_template_id = $this->EE->input->post('structure__template_id');
-        }
-        else
-        {
-            $post_template_id = $this->EE->input->post('pages__pages_template_id');
-        }
+        $post_template_id = $this->EE->input->post('structure__template_id') ? 
+                            $this->EE->input->post('structure__template_id') :
+                            $this->EE->input->post('pages__pages_template_id');
         
         // Save our entry
         if($post_template_id AND $this->EE->input->post('layout_preview') AND $this->EE->input->post('layout_preview') != "NULL")
@@ -280,161 +284,160 @@ class Blueprints_ext {
         }
     }
     
+    /*
+        This is kind of lame, but all the good hooks have been removed from 2.0. This is called at the 
+        beginning of a publish form load, so we'll use it to add JS to the footer.
+    */
     function publish_form_channel_preferences($data)
     {
-        // This is kind of lame, but all the good hooks have been removed from 2.0. This is called at the 
-        // beginning of a publish form load, so we'll use it to add JS to the footer.
-        if($this->EE->blueprints_helper->is_publish_form())
+        $templates = array();
+        
+        $thumbnails = array();
+        $thumbnail_options = array();
+        
+        $layouts = array();
+        $layout_options = array();
+        
+        $channel_templates = array();
+        $channel_id = $this->EE->input->get_post('channel_id');
+        
+        $entry_id = $this->EE->input->get_post('entry_id');
+        $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_path'];
+        
+        // Lets get our active layouts into a JavaScrip array to use with jQuery below
+        $active_publish_layout = $this->EE->blueprints_model->get_active_publish_layout($channel_id);
+        $active_publish_layout_array = array();
+        
+        foreach($active_publish_layout as $id => $name)
         {
-            $templates = array();
-            
-            $thumbnails = array();
-            $thumbnail_options = array();
-            
-            $layouts = array();
-            $layout_options = array();
-            
-            $channel_templates = array();
-            $channel_id = $this->EE->input->get_post('channel_id');
-            
-            $entry_id = $this->EE->input->get_post('entry_id');
-            $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_path'];
-            
-            // Lets get our active layouts into a JavaScrip array to use with jQuery below
-            $active_publish_layout = $this->EE->blueprints_model->get_active_publish_layout($channel_id);
-            $active_publish_layout_array = array();
-            
-            foreach($active_publish_layout as $id => $name)
-            {
-                $active_publish_layout_array[] = '"'. $id .'"';
-            }
-            $active_publish_layouts = 'new Array('. trim(implode(',', $active_publish_layout_array), ',') .')';
+            $active_publish_layout_array[] = '"'. $id .'"';
+        }
+        $active_publish_layouts = 'new Array('. trim(implode(',', $active_publish_layout_array), ',') .')';
 
-            if(!empty($this->cache['layouts']))
+        if(!empty($this->cache['layouts']))
+        {
+            foreach($this->cache['layouts'] as $layout)
             {
-                foreach($this->cache['layouts'] as $layout)
-                {
-                    $thumbnail = ($layout['thumbnail']) ? $layout['thumbnail'] : '';
-                    $thumbnails[] = '"'. $layout['template'] .'":"'. $thumbnail .'"';
-                    $thumbnail_options[$layout['template']] = $thumbnail; 
-                    
-                    $layout_name = ($layout['name']) ? $layout['name'] : '';
-                    $layout_id = $layout['group_id'];
-                    
-                    $layouts[] = '"'. $layout['template'] .'":"'. $layout_id .'"';
-                    $layout_options[$layout_id] = $layout_name;
-                    
-                    // For use in the Carousel below
-                    $layout_carousel_ids[$layout['template']] = $layout_id;
-                    $layout_carousel_names[$layout['template']] = $layout_name;
-                }
+                $thumbnail = ($layout['thumbnail']) ? $layout['thumbnail'] : '';
+                $thumbnails[] = '"'. $layout['template'] .'":"'. $thumbnail .'"';
+                $thumbnail_options[$layout['template']] = $thumbnail; 
+                
+                $layout_name = ($layout['name']) ? $layout['name'] : '';
+                $layout_id = $layout['group_id'];
+                
+                $layouts[] = '"'. $layout['template'] .'":"'. $layout_id .'"';
+                $layout_options[$layout_id] = $layout_name;
+                
+                // For use in the Carousel below
+                $layout_carousel_ids[$layout['template']] = $layout_id;
+                $layout_carousel_names[$layout['template']] = $layout_name;
             }
+        }
 
-            if(isset($this->settings['channels']))
+        if(isset($this->settings['channels']))
+        {
+            foreach($this->settings['channels'] as $k => $channel)
             {
-                foreach($this->settings['channels'] as $k => $channel)
+                if($channel == $channel_id OR $channel == '*')
                 {
-                    if($channel == $channel_id OR $channel == '*')
+                    if(isset($this->settings['channel_show_group'][$k]))
                     {
-                        if(isset($this->settings['channel_show_group'][$k]))
+                        $groups = array();
+                        foreach($this->settings['channel_show_group'][$k] as $group)
                         {
-                            $groups = array();
-                            foreach($this->settings['channel_show_group'][$k] as $group)
-                            {
-                                $groups[] = "'". $group ."'";
-                            }
-                        
-                            $templates_result = $this->EE->blueprints_model->get_templates(implode(',', $groups));
-                        
-                            $channel_templates = array();
-                            foreach($templates_result->result_array() as $row)
-                            {
-                                $channel_templates[] = $row['template_id'];
-                            }
+                            $groups[] = "'". $group ."'";
                         }
-                        else
+                    
+                        $templates_result = $this->EE->blueprints_model->get_templates(implode(',', $groups));
+                    
+                        $channel_templates = array();
+                        foreach($templates_result->result_array() as $row)
                         {
-                            $channel_templates = isset($this->settings['channel_templates'][$k]) ? $this->settings['channel_templates'][$k] : '';
+                            $channel_templates[] = $row['template_id'];
                         }
+                    }
+                    else
+                    {
+                        $channel_templates = isset($this->settings['channel_templates'][$k]) ? $this->settings['channel_templates'][$k] : '';
                     }
                 }
             }
-            
-            if(is_array($channel_templates) AND count($channel_templates) == 1)
-            {
-                // Reset the index and grab first value
-                sort($channel_templates);
-                $channel_templates_options = $channel_templates[0];
-            }
-            elseif(is_array($channel_templates))
-            {
-                $channel_templates_options = 'new Array('. trim(implode(',', $channel_templates), ',') .')';
-            }
-            else
-            {
-                $channel_templates_options = '""';
-            }
-            
-            // If the current user is an Admin, give them a link to edit the templates that appear
-            $edit_templates_link = '';
-            if($this->EE->session->userdata['group_id'] == 1)
-            {
-                $edit_templates_link = '<br /><small style=\"display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);\"><a href=\"'. BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=blueprints\">Edit Available Templates</a></small>';
-            }
-            
-            // Add our custom layout group options to the list, with "member group ids" starting at 2000
-            $layout_checkbox_options = '';
-            if(count($layout_options) > 0)
-            {
-                foreach($layout_options as $k => $name)
-                {
-                    $layout_checkbox_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $k .'\" class=\"toggle_member_groups\" /> '. $name .'</label><br />';
-                }
-            
-                $layout_checkbox_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
-            }
-            
-            $carousel_templates = $this->EE->blueprints_model->get_assigned_templates($channel_templates);
-            $carousel_options = array();
-            
-            foreach($carousel_templates as $template)
-            {
-                $carousel_options[] = array(
-                    'template_id' => $template['template_id'], 
-                    'template_name' => $template['template_name'], 
-                    'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
-                    'layout_preview' => isset($layout_carousel_ids[$template['template_id']]) ? $layout_carousel_ids[$template['template_id']] : '',
-                    'layout_name' => (isset($layout_carousel_names[$template['template_id']]) AND $layout_carousel_names[$template['template_id']] != '') ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
-                ); 
-            }
-            
-            // Create global config to use in our JS file
-            $blueprints_config = '
-            if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
-
-            Blueprints.config = {
-                autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
-                layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
-                layout_group: "'. (isset($this->cache['layout_group']) ? $this->cache['layout_group'] : '') .'",
-                enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
-                carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
-                thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
-                thumbnails: {'. implode(',', $thumbnails) .'},
-                layouts: {'. implode(',', $layouts) .'},
-                layout_checkbox_options: "'. $layout_checkbox_options .'",
-                active_publish_layouts: '. $active_publish_layouts .',
-                channel_templates: '. $channel_templates_options .',
-                edit_templates_link: "'. $edit_templates_link .'",
-                publish_layout_takeover: '. ($this->EE->blueprints_helper->enable_publish_layout_takeover() ? 'true' : 'false') .',
-                thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'",
-                theme_url: "'. $this->EE->blueprints_helper->get_theme_folder_url() .'"
-            };';
-            
-            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
-            $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
-            $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
         }
         
+        if(is_array($channel_templates) AND count($channel_templates) == 1)
+        {
+            // Reset the index and grab first value
+            sort($channel_templates);
+            $channel_templates_options = $channel_templates[0];
+        }
+        elseif(is_array($channel_templates))
+        {
+            $channel_templates_options = 'new Array('. trim(implode(',', $channel_templates), ',') .')';
+        }
+        else
+        {
+            $channel_templates_options = '""';
+        }
+        
+        // If the current user is an Admin, give them a link to edit the templates that appear
+        $edit_templates_link = '';
+        if($this->EE->session->userdata['group_id'] == 1)
+        {
+            $edit_templates_link = '<br /><small style=\"display: inline-block; margin-top: 5px; color: rgba(0,0,0, 0.5);\"><a href=\"'. BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=blueprints\">Edit Available Templates</a></small>';
+        }
+        
+        // Add our custom layout group options to the list, with "member group ids" starting at 2000
+        $layout_checkbox_options = '';
+        if(count($layout_options) > 0)
+        {
+            foreach($layout_options as $k => $name)
+            {
+                $layout_checkbox_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $k .'\" class=\"toggle_member_groups\" /> '. $name .'</label><br />';
+            }
+        
+            $layout_checkbox_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
+        }
+        
+        $carousel_templates = $this->EE->blueprints_model->get_assigned_templates($channel_templates);
+        $carousel_options = array();
+        
+        foreach($carousel_templates as $template)
+        {
+            $carousel_options[] = array(
+                'template_id' => $template['template_id'], 
+                'template_name' => $template['template_name'], 
+                'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
+                'layout_preview' => isset($layout_carousel_ids[$template['template_id']]) ? $layout_carousel_ids[$template['template_id']] : '',
+                'layout_name' => (isset($layout_carousel_names[$template['template_id']]) AND $layout_carousel_names[$template['template_id']] != '') ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
+            ); 
+        }
+
+        // Create global config to use in our JS file
+        $blueprints_config = '
+        if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
+
+        Blueprints.config = {
+            autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
+            layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
+            layout_group: "'. (isset($this->cache['layout_group']) ? $this->cache['layout_group'] : '') .'",
+            enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
+            carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
+            thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
+            thumbnails: {'. implode(',', $thumbnails) .'},
+            layouts: {'. implode(',', $layouts) .'},
+            layout_checkbox_options: "'. $layout_checkbox_options .'",
+            active_publish_layouts: '. $active_publish_layouts .',
+            channel_templates: '. $channel_templates_options .',
+            edit_templates_link: "'. $edit_templates_link .'",
+            publish_layout_takeover: '. ($this->EE->blueprints_helper->enable_publish_layout_takeover() ? 'true' : 'false') .',
+            thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'",
+            theme_url: "'. $this->EE->blueprints_helper->get_theme_folder_url() .'"
+        };';
+        
+        $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
+        $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
+        $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
+
         return $data;
     }
     

@@ -158,6 +158,11 @@ class Blueprints_helper
             return false;
         }
         
+        // if($this->EE->router->class == 'content_publish' AND $this->EE->router->method == 'entry_form')
+        // if(
+        //     ($this->EE->input->get('C') == 'content_publish' AND $this->EE->input->get('M') == 'entry_form') OR
+        //     ($this->EE->input->get('C') == 'javascript' AND $this->EE->input->get('M') == 'load')
+        // ){
         if($this->EE->input->get('C') == 'content_publish' AND $this->EE->input->get('M') == 'entry_form')
         {
             return true;

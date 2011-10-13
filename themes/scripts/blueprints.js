@@ -143,7 +143,7 @@ Blueprints.autosave_redirect = function(autosave_entry_id, layout_preview)
 Blueprints.is_array = function(input){ return typeof(input)=="object"&&(input instanceof Array); }
 
 /*
-    Normal Structure or Pages select menu, pre 1.4 version or when Carousel is turned off.
+    Normal Structure or Pages select menu, pre 2.0 version or when Carousel is turned off.
 */
 Blueprints.select_change = function(ele)
 {
@@ -221,7 +221,8 @@ jQuery(function(){
             }, function() {
                 $(".active_publish_layout").remove();
             });
-
+            // console.log(Blueprints.config);
+            // console.log(Blueprints.config.layout_group);
             if(Blueprints.config.layout_group == "")
             {
                 // $('#showToolbarLink').prepend('<span class="blueprints_no_layout">No Publish Layout defined. Create one now &rarr;</span>');
@@ -273,7 +274,7 @@ jQuery(function(){
         
         // When a tab is clicked...
         // $('a.menu_structure').click(function(){
-        $('#structure').appear(function(){
+        $('#structure, #pages').appear(function(){
             setTimeout({
                 run: function() {
                     Blueprints.carousel(select_value);

@@ -52,11 +52,11 @@ class Blueprints_model
         $this->site_id = $this->EE->config->item('site_id');
 
         // Create cache
-        if (! isset($this->EE->session->cache['blueprints']))
-        {
-            $this->EE->session->cache['blueprints'] = array();
-        }
-        $this->cache =& $this->EE->session->cache['blueprints'];
+        // if (! isset($this->EE->session->cache['blueprints']))
+        // {
+        //     $this->EE->session->cache['blueprints'] = array();
+        // }
+        // $this->cache =& $this->EE->session->cache['blueprints'];
         
         // if(!class_exists('Blueprints_helper'))
         // {
@@ -161,6 +161,16 @@ class Blueprints_model
         return false;
     }
     
+    public function get_autosave_data($channel_id, $entry_id)
+    {
+        $qry = $this->EE->db->select('entry_data')
+                            ->where('entry_id', $entry_id)
+                            ->where('channel_id', $channel_id)
+                            ->get('channel_entries_autosave');
+                            
+        return unserialize($qry->row('entry_data'));
+    }
+    
     public function get_active_publish_layout($channel_id = false)
     {
         // Get the current Site ID
@@ -214,7 +224,7 @@ class Blueprints_model
         
             if($qry->num_rows() > 0)
             {
-                foreach($result->result() as $row)
+                foreach($qry->result() as $row)
                 {
                     // $key = array_search($row['member_group'], $this->settings['layout_group_ids']);
                     // $this->cache['active_publish_layout'][$row['member_group']] = $this->settings['layout_group_names'][$key];
@@ -425,20 +435,16 @@ class Blueprints_model
     }
     
     /**
-    * Get the site specific settings from the extensions table
-    * Originally written by Leevi Graham? Modified for EE2.0
-    *
     * @param $force_refresh     bool    Get the settings from the DB even if they are in the session
     * @return array                     If settings are found otherwise false. Site settings are returned by default.
     */
     public function get_settings($force_refresh = FALSE)
     {
-        // assume there are no settings
-        $settings = FALSE;
+        $settings = array();
         $this->EE->load->helper('string');
-
+        
         // Get the settings for the extension
-        if(isset($this->cache['settings']) === FALSE || $force_refresh === TRUE)
+        if(!isset($this->cache['settings']) OR empty($this->cache['settings']) OR $force_refresh === TRUE)
         {
             // check the db for extension settings
             $query = $this->EE->db->query("SELECT settings FROM exp_extensions WHERE enabled = 'y' AND class = 'Blueprints_ext' LIMIT 1");
@@ -447,23 +453,28 @@ class Blueprints_model
             if ($query->num_rows() > 0 && $query->row('settings') != '')
             {
                 // save them to the cache
-                $this->cache['settings'] = strip_slashes(unserialize($query->row('settings')));
+                $settings = strip_slashes(unserialize($query->row('settings')));
+            }
+            
+            if(isset($settings[$this->site_id]))
+            {
+                $this->cache['settings'][$this->site_id] = $settings[$this->site_id];
             }
             
             // If path and url is set in the user's config file, use them.
             if($this->EE->config->item('blueprints.thumbnail_directory_url') AND $this->EE->config->item('blueprints.thumbnail_directory_path'))
             {
-                $this->cache['settings']['thumbnail_directory_url'] = $this->EE->config->item('blueprints.thumbnail_directory_url');
-                $this->cache['settings']['thumbnail_directory_path'] = $this->EE->config->item('blueprints.thumbnail_directory_path');
+                $this->cache['settings'][$this->site_id]['thumbnail_directory_url'] = $this->EE->config->item('blueprints.thumbnail_directory_url');
+                $this->cache['settings'][$this->site_id]['thumbnail_directory_path'] = $this->EE->config->item('blueprints.thumbnail_directory_path');
             }
             else
             {
-                $this->cache['settings']['thumbnail_directory_url'] = 'images/template_thumbnails/';
+                $this->cache['settings'][$this->site_id]['thumbnail_directory_url'] = 'images/template_thumbnails/';
 
                 // If the user set the site_path var, use it.
                 if($this->EE->config->item('site_path'))
                 {
-                    $this->cache['settings']['thumbnail_directory_path'] = 'images' . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
+                    $this->cache['settings'][$this->site_id]['thumbnail_directory_path'] = 'images' . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
                 }
                 // Or fallback and try to find the site root path.
                 else
@@ -471,12 +482,21 @@ class Blueprints_model
                     // Really? I would think BASEPATH would be the absolute root of the site, not the base of the EE install?
                     // Is there a variable I don't know about to get the EE webroot path?
                     $images_path = str_replace('themes', 'images', PATH_THEMES);
-                    $this->cache['settings']['thumbnail_directory_path'] = $images_path . 'template_thumbnails' . DIRECTORY_SEPARATOR;
+                    $this->cache['settings'][$this->site_id]['thumbnail_directory_path'] = $images_path . 'template_thumbnails' . DIRECTORY_SEPARATOR;
                 }
             }
         }
         
-        return isset($this->cache['settings']) ? $this->cache['settings'] : array();
+        return isset($this->cache['settings'][$this->site_id]) ? $this->cache['settings'][$this->site_id] : array();
+    }
+    
+    private function debug($str, $die = false)
+    {
+        echo '<pre>';
+        var_dump($str);
+        echo '</pre>';
+        
+        if($die) die('debug terminated');
     }
     
 }
