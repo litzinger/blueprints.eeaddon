@@ -52,17 +52,11 @@ class Blueprints_model
         $this->site_id = $this->EE->config->item('site_id');
 
         // Create cache
-        // if (! isset($this->EE->session->cache['blueprints']))
-        // {
-        //     $this->EE->session->cache['blueprints'] = array();
-        // }
-        // $this->cache =& $this->EE->session->cache['blueprints'];
-        
-        // if(!class_exists('Blueprints_helper'))
-        // {
-        //     require PATH_THIRD . 'blueprints/helper.blueprints.php';
-        // }
-        // $this->EE->blueprints_helper = new Blueprints_helper;
+        if (! isset($this->EE->session->cache['blueprints']))
+        {
+            $this->EE->session->cache['blueprints'] = array();
+        }
+        $this->cache =& $this->EE->session->cache['blueprints'];
     }
     
     /*
@@ -173,8 +167,6 @@ class Blueprints_model
     
     public function get_active_publish_layout($channel_id = false)
     {
-        // Get the current Site ID
-        $site_id = $this->EE->config->item('site_id');
         // See if we've hi-jacked the layout_preview
         $layout_preview = (isset($_GET['layout_preview']) AND $_GET['layout_preview'] !== false) ? $_GET['layout_preview'] : false;
         // Set default value to return if nothing else is found
@@ -188,16 +180,8 @@ class Blueprints_model
                                 ->from('layout_publish AS lp')
                                 ->join('member_groups AS m', 'lp.member_group = m.group_id')
                                 ->where('lp.channel_id', $channel_id)
-                                ->where('lp.site_id', $site_id)
+                                ->where('lp.site_id', $this->site_id)
                                 ->get();
-            
-            // $sql = "SELECT lp.member_group, lp.layout_id, m.group_id, m.group_title, lp.field_layout 
-            //     FROM exp_layout_publish lp, exp_member_groups m 
-            //     WHERE lp.member_group = m.group_id
-            //     AND lp.channel_id = '". $channel_id ."'
-            //     AND lp.site_id = '".$site_id."'";
-
-            // $result = $this->EE->db->query($sql);
             
             if($qry->num_rows() > 0)
             {
@@ -209,26 +193,14 @@ class Blueprints_model
             
             $qry = $this->EE->db->select('member_group, layout_id, field_layout')
                                 ->where('channel_id', $channel_id)
-                                ->where('site_id', $site_id)
+                                ->where('site_id', $this->site_id)
                                 ->where('member_group', $layout_preview)
                                 ->get('layout_publish');
             
-            // Get our fake member groups
-            // $sql = "SELECT lp.member_group, lp.layout_id, lp.field_layout 
-            //     FROM exp_layout_publish lp
-            //     WHERE lp.member_group = '". $layout_preview ."'
-            //     AND lp.channel_id = '". $channel_id ."'
-            //     AND lp.site_id = '".$site_id."'";
-
-            // $result = $this->EE->db->query($sql);
-        
             if($qry->num_rows() > 0)
             {
                 foreach($qry->result() as $row)
                 {
-                    // $key = array_search($row['member_group'], $this->settings['layout_group_ids']);
-                    // $this->cache['active_publish_layout'][$row['member_group']] = $this->settings['layout_group_names'][$key];
-                    
                     $this->cache['active_publish_layout'][$row->member_group] = $this->layouts[$row->member_group];
                 }
             }
@@ -240,17 +212,9 @@ class Blueprints_model
                                 ->from('layout_publish AS lp')
                                 ->join('member_groups AS m', 'lp.member_group = m.group_id')
                                 ->where('lp.channel_id', $this->EE->input->get_post('channel_id'))
-                                ->where('lp.site_id', $site_id)
+                                ->where('lp.site_id', $this->site_id)
                                 ->get();
             
-            // $sql = "SELECT lp.member_group, lp.layout_id, m.group_id, m.group_title, lp.field_layout 
-            //     FROM exp_layout_publish lp, exp_member_groups m 
-            //     WHERE lp.member_group = m.group_id
-            //     AND lp.channel_id = '". $this->EE->input->get_post('channel_id') ."'
-            //     AND lp.site_id = '".$site_id."'";
-                
-            // $result = $this->EE->db->query($sql);
-        
             if($qry->num_rows() > 0)
             {
                 $group_titles = array();
@@ -268,11 +232,8 @@ class Blueprints_model
     {
         if(!isset($this->cache['assigned_templates']))
         {
-            // Get the current Site ID
-            $site_id = $this->EE->config->item('site_id');
-            
             $this->EE->db->select('template_groups.group_name, templates.template_name, templates.template_id')
-                         ->where('template_groups.site_id', $site_id)
+                         ->where('template_groups.site_id', $this->site_id)
                          ->order_by('template_groups.group_name, templates.template_name')
                          ->join('template_groups', 'template_groups.group_id = templates.group_id');
             
@@ -293,15 +254,12 @@ class Blueprints_model
     {
         if(!isset($this->cache['templates']))
         {
-            // Get the current Site ID
-            $site_id = $this->EE->config->item('site_id');
-
             $groups = $groups ? " AND tg.group_name IN (". $groups .")" : '';
 
             $sql = "SELECT tg.group_name, t.template_name, t.template_id
                     FROM exp_template_groups tg, exp_templates t
                     WHERE tg.group_id = t.group_id
-                    AND tg.site_id = '".$site_id."'". $groups ."
+                    AND tg.site_id = '".$this->site_id."'". $groups ."
                     ORDER BY tg.group_name, t.template_name";
 
             $this->cache['templates'] = $this->EE->db->query($sql);
@@ -345,10 +303,7 @@ class Blueprints_model
     {
         if(!isset($this->cache['channels']))
         {
-            // Get the current Site ID
-            $site_id = $this->EE->config->item('site_id');
-
-            $sql = "SELECT channel_id, channel_name, channel_title FROM exp_channels WHERE site_id = '".$site_id."'";
+            $sql = "SELECT channel_id, channel_name, channel_title FROM exp_channels WHERE site_id = '".$this->site_id."'";
 
             $this->cache['channels'] = $this->EE->db->query($sql);
         }
@@ -410,13 +365,11 @@ class Blueprints_model
     {
         if(!isset($this->cache['structure_settings']))
         {
-            $site_id = $this->EE->config->item('site_id');
-
             // Get Structure Channel Data
             $sql = "SELECT ec.channel_id, ec.channel_title, esc.template_id, esc.type, ec.site_id
                     FROM exp_channels AS ec 
                     LEFT JOIN exp_structure_channels AS esc ON ec.channel_id = esc.channel_id
-                    WHERE ec.site_id = '$site_id'";
+                    WHERE ec.site_id = '$this->site_id'";
 
             $results = $this->EE->db->query($sql);
             

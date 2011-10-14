@@ -110,7 +110,7 @@ class Blueprints_helper
     {
         // Make sure pages cache is empty, and also see if we are in the CP. Since fieldtype files get loaded
         // on the front end, I don't want unecessary queries/processing to be done when not needed.
-        if(!isset($this->cache['pages']) AND REQ == 'CP')
+        if(!isset($this->cache['pages']))
         {
             $this->cache['pages'] = "";
             
@@ -149,6 +149,16 @@ class Blueprints_helper
         }
         
         return $this->cache['enable_publish_layout_takeover'];
+    }
+    
+    public function get_site_index()
+    {
+        $site_index = $this->EE->config->item('site_index');
+        $index_page = $this->EE->config->item('index_page');
+        
+        $index = ($site_index != '') ? $site_index : (($index_page != '') ? $index_page : 'index.php');
+        
+        return $this->EE->functions->remove_double_slashes($this->EE->config->slash_item('site_url') . $index);
     }
     
     public function is_publish_form()

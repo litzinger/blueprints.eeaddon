@@ -70,6 +70,13 @@ class Blueprints_mcp {
         $this->send_ajax_response($autosave_entry_id);
     }
     
+    function load_pages()
+    {
+        $pages = $this->EE->blueprints_helper->get_pages();
+        
+        $this->send_ajax_response($pages);
+    }
+    
     private function send_ajax_response($msg)
     {
         $this->EE->output->enable_profiler(FALSE);

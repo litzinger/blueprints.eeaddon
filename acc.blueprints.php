@@ -90,82 +90,88 @@ class Blueprints_acc {
     private function _sidebar()
     {
         $script = '';
-        // Replace single quotes, otherwise the JS blows up.
-         $pages_html = "";
-         if (array_key_exists('structure', $this->EE->addons->get_installed()) OR 
-             array_key_exists('pages', $this->EE->addons->get_installed()))
-         {
-             $pages_html = str_replace("'", "&raquo;", $this->EE->blueprints_helper->get_pages());
-         }
 
-         $header = '
-             <h1 class="round heading">
-                 <a href="#"><span class="blueprints_arrow"></span>Pages</a>
-                 <input type="text" id="structure_pages_search" name="structure_pages_search" placeholder="Search Pages" />
-             </h1>
-         ';
+        $contents = '
+        <h1 class="round heading">
+            <a href="#"><span class="blueprints_arrow"></span>Pages</a>
+            <input type="text" id="structure_pages_search" name="structure_pages_search" placeholder="Search Pages" />
+        </h1>
+        <div class="blueprints_page_listing"></div>
+        ';
 
-         if (array_key_exists('structure', $this->EE->addons->get_installed()) OR 
-             array_key_exists('pages', $this->EE->addons->get_installed()))
-         {
-             $script .= '
-                 $("#sidebarContent").prepend(\'<div class="structure_pages_sidebar contents">'. $header . $pages_html .'</div>\');
-                 $("#sidebarContent .structure_pages_sidebar h1 a").toggle(function(){
-                     $(".structure_pages_sidebar ul, .structure_pages_sidebar .item_wrapper").not(".listings").slideDown();
-                     $(".structure_pages_sidebar h1 span.blueprints_arrow").addClass("active");
-                     $("#structure_pages_search").val("");
-                 }, function(){
-                     $(".structure_pages_sidebar ul").slideUp();
-                     $(".structure_pages_sidebar h1 span.blueprints_arrow").removeClass("active");
-                 });
-                 $("a.expand").toggle(function(){
-                     $(this).text(" - ");
-                     $(this).closest(".item_wrapper").next(".listings").slideDown();
-                 }, function(){
-                     $(this).text(" + ");
-                     $(this).closest(".item_wrapper").next(".listings").slideUp();
-                 });
-                 $("#structure_pages_search").keyup(function(){
-                     val = $(this).val().toLowerCase();
-                     items = $(".structure_pages_sidebar .item_wrapper");
-                     if(val.length > 2){
-                         $(".structure_pages_sidebar ul").show();
-                         items.hide();
-                         items.each(function(){
-                             text = $(this).find("a").text().toLowerCase();
-                             if(text.search(val) != -1){
-                                 $(this).show();
-                                 $(".structure_pages_sidebar h1 span.blueprints_arrow").addClass("active");
-                             }
-                         });
-                     } else {
-                         if( $(".structure_pages_sidebar h1 span.blueprints_arrow").hasClass("active") ) {
-                             items.show();
-                         } else {
-                             items.hide();
-                         }
-                     }
-                 });';
+        if (array_key_exists('structure', $this->EE->addons->get_installed()) OR 
+            array_key_exists('pages', $this->EE->addons->get_installed()))
+        {
+            $load_pages_url = $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'load_pages');
+             
+            $script .= '
+             
+            $("#sidebarContent").prepend(\'<div class="structure_pages_sidebar contents">'. $contents .'</div>\');
+             
+            $("#sidebarContent .structure_pages_sidebar h1 a").toggle(function(){
+                $(".structure_pages_sidebar ul, .structure_pages_sidebar .item_wrapper").not(".listings").slideDown();
+                $(".structure_pages_sidebar h1 span.blueprints_arrow").addClass("active");
+                $("#structure_pages_search").val("");
+            }, function(){
+                $(".structure_pages_sidebar ul").slideUp();
+                $(".structure_pages_sidebar h1 span.blueprints_arrow").removeClass("active");
+            });
+            $("a.expand").toggle(function(){
+                $(this).text(" - ");
+                $(this).closest(".item_wrapper").next(".listings").slideDown();
+            }, function(){
+                $(this).text(" + ");
+                $(this).closest(".item_wrapper").next(".listings").slideUp();
+            });
+            $("#structure_pages_search").keyup(function(){
+                val = $(this).val().toLowerCase();
+                items = $(".structure_pages_sidebar .item_wrapper");
+                if(val.length > 2){
+                    $(".structure_pages_sidebar ul").show();
+                    items.hide();
+                    items.each(function(){
+                        text = $(this).find("a").text().toLowerCase();
+                        if(text.search(val) != -1){
+                            $(this).show();
+                            $(".structure_pages_sidebar h1 span.blueprints_arrow").addClass("active");
+                        }
+                    });
+                } else {
+                    if( $(".structure_pages_sidebar h1 span.blueprints_arrow").hasClass("active") ) {
+                        items.show();
+                    } else {
+                        items.hide();
+                    }
+                }
+            });
+             
+            $.ajax({
+                type: "GET",
+                url: "'. $load_pages_url .'",
+                success: function(html){
+                    $(".blueprints_page_listing").html(html);
+                }
+            });';
          }
 
          // Fix from John D. Wells        
          // first create default settings array
-         $settings = array('enable_edit_menu_tweaks' => '');
+         // $settings = array('enable_edit_menu_tweaks' => '');
+         // 
+         // // now attempt to override from DB
+         // $query = $this->EE->db->get_where('extensions', array('class' => 'Blueprints_ext'), 1, 0);
+         // 
+         // if ($query->num_rows() > 0)
+         // {
+         //     $row = unserialize($query->row('settings'));
+         //     $site_id = $this->EE->config->item('site_id');
+         //     if($row AND array_key_exists($site_id, $row))
+         //     {
+         //         $settings = $row[$site_id];
+         //     }
+         // }
 
-         // now attempt to override from DB
-         $query = $this->EE->db->get_where('extensions', array('class' => 'Blueprints_ext'), 1, 0);
-
-         if ($query->num_rows() > 0)
-         {
-             $row = unserialize($query->row('settings'));
-             $site_id = $this->EE->config->item('site_id');
-             if($row AND array_key_exists($site_id, $row))
-             {
-                 $settings = $row[$site_id];
-             }
-         }
-
-         if (isset($settings['enable_edit_menu_tweaks']) AND $settings['enable_edit_menu_tweaks'] == 'y')
+         if (isset($this->cache['settings']['enable_edit_menu_tweaks']) AND $this->cache['settings']['enable_edit_menu_tweaks'] == 'y')
          {
              $script .= '
                  var bp_ul = $("#navigationTabs li:eq(1) ul:eq(0) li.parent ul:eq(0)").html();

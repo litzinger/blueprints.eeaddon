@@ -101,6 +101,13 @@ class Blueprints_upd {
             );
 
             $this->EE->db->insert('actions', $data);
+            
+            $data = array(
+                'class' => 'Blueprints_mcp',
+                'method' => 'get_pages'
+            );
+
+            $this->EE->db->insert('actions', $data);
         }
         
         $this->_add_tables();
@@ -123,9 +130,9 @@ class Blueprints_upd {
         // $this->EE->db->where('member_group', '>= 2000');
         // $this->EE->db->delete('layout_publish');
         
-		$this->EE->load->dbforge();
-		$this->EE->dbforge->drop_table('blueprints_layouts');
-		$this->EE->dbforge->drop_table('blueprints_entries');
+        $this->EE->load->dbforge();
+        $this->EE->dbforge->drop_table('blueprints_layouts');
+        $this->EE->dbforge->drop_table('blueprints_entries');
         
         return TRUE;
     }

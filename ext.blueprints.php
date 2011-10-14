@@ -392,7 +392,7 @@ class Blueprints_ext {
         {
             foreach($layout_options as $k => $name)
             {
-                $layout_checkbox_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $k .'\" class=\"toggle_member_groups\" /> '. $name .'</label><br />';
+                $layout_checkbox_options .= '<label><input type=\"checkbox\" name=\"member_group[]\" value=\"'. $k .'\" class=\"toggle_member_groups blueprints_member_groups\" /> '. $name .'</label><br />';
             }
         
             $layout_checkbox_options .= '<div style=\"height: 1px; margin-bottom: 7px; border-bottom: 1px solid rgba(0,0,0,0.1);\">&nbsp;</div>';
@@ -417,21 +417,22 @@ class Blueprints_ext {
         if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
 
         Blueprints.config = {
-            autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
-            layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
-            layout_group: "'. (isset($this->cache['layout_group']) ? $this->cache['layout_group'] : '') .'",
-            enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
-            carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
-            thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
-            thumbnails: {'. implode(',', $thumbnails) .'},
-            layouts: {'. implode(',', $layouts) .'},
-            layout_checkbox_options: "'. $layout_checkbox_options .'",
             active_publish_layouts: '. $active_publish_layouts .',
+            autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
+            carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
             channel_templates: '. $channel_templates_options .',
             edit_templates_link: "'. $edit_templates_link .'",
+            enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
+            layouts: {'. implode(',', $layouts) .'},
+            layout_checkbox_options: "'. $layout_checkbox_options .'",
+            layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
+            layout_group: "'. (isset($this->cache['layout_group']) ? $this->cache['layout_group'] : '') .'",
+            member_group_id: "'. $this->EE->session->userdata['group_id']. '",
             publish_layout_takeover: '. ($this->EE->blueprints_helper->enable_publish_layout_takeover() ? 'true' : 'false') .',
-            thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'",
-            theme_url: "'. $this->EE->blueprints_helper->get_theme_folder_url() .'"
+            theme_url: "'. $this->EE->blueprints_helper->get_theme_folder_url() .'",
+            thumbnails: {'. implode(',', $thumbnails) .'},
+            thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
+            thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
         };';
         
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
