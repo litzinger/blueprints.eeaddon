@@ -90,27 +90,9 @@ class Blueprints_upd {
 
         $this->EE->db->insert('modules', $data);
         
-        // Insert our Action
-        $query = $this->EE->db->get_where('actions', array('class' => 'Blueprints_mcp'));
-
-        if($query->num_rows() == 0)
-        {
-            $data = array(
-                'class' => 'Blueprints_mcp',
-                'method' => 'get_autosave_entry'
-            );
-
-            $this->EE->db->insert('actions', $data);
-            
-            $data = array(
-                'class' => 'Blueprints_mcp',
-                'method' => 'get_pages'
-            );
-
-            $this->EE->db->insert('actions', $data);
-        }
-        
+        $this->_add_actions();
         $this->_add_tables();
+        $this->_migrate_settings();
         
         return TRUE;
     }
@@ -173,16 +155,17 @@ class Blueprints_upd {
                 'hook' => 'entry_submission_ready'
             ));
         }
+
+        if($current < '2.0')
+        {
+            $this->_add_actions();
+            $this->_add_tables();
+            $this->_migrate_settings();
+        }
         
         // Update version #
         $this->EE->db->where('class', __CLASS__);
         $this->EE->db->update('exp_extensions', array('version' => $this->version));
-
-        if($current < '2.0')
-        {
-            $this->_add_tables();
-            $this->_migrate_settings();
-        }
         
         return TRUE;
     }
@@ -263,6 +246,29 @@ class Blueprints_upd {
             $this->EE->dbforge->add_key('entry_id', TRUE);
             $this->EE->dbforge->add_key('group_id', TRUE);
             $this->EE->dbforge->create_table('blueprints_entries');
+        }
+    }
+    
+    private function _add_actions()
+    {
+        // Insert our Action
+        $query = $this->EE->db->get_where('actions', array('class' => 'Blueprints_mcp'));
+
+        if($query->num_rows() == 0)
+        {
+            $data = array(
+                'class' => 'Blueprints_mcp',
+                'method' => 'get_autosave_entry'
+            );
+
+            $this->EE->db->insert('actions', $data);
+            
+            $data = array(
+                'class' => 'Blueprints_mcp',
+                'method' => 'load_pages'
+            );
+
+            $this->EE->db->insert('actions', $data);
         }
     }
     

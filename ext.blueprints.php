@@ -88,6 +88,7 @@ class Blueprints_ext {
             
         // Load up our model
         $this->EE->load->add_package_path(PATH_THIRD.'blueprints/');
+        $this->EE->load->library('addons');
         $this->EE->load->model('blueprints_model');
         
         // Get our settings
