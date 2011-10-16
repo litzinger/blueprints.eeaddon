@@ -192,37 +192,6 @@ class Blueprints_helper
         return $site_url ? $site_url : str_replace('themes/', '', PATH_THEMES);
     }
     
-    /*
-        Allow config overrides
-    */
-    // public function set_paths()
-    // {
-    //     // If path and url is set in the user's config file, use them.
-    //     if($this->EE->config->item('blueprints.thumbnail_directory_url') AND $this->EE->config->item('blueprints.thumbnail_directory_path'))
-    //     {
-    //         $this->cache['settings']['thumbnail_directory_url'] = $this->EE->config->item('blueprints.thumbnail_directory_url');
-    //         $this->cache['settings']['thumbnail_directory_path'] = $this->EE->config->item('blueprints.thumbnail_directory_path');
-    //     }
-    //     else
-    //     {
-    //         $this->cache['thumbnail_directory_url'] = 'images/template_thumbnails/';
-    //         
-    //         // If the user set the site_path var, use it.
-    //         if($this->EE->config->item('site_path'))
-    //         {
-    //             $this->cache['settings']['thumbnail_directory_path'] = 'images' . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
-    //         }
-    //         // Or fallback and try to find the site root path.
-    //         else
-    //         {
-    //             // Really? I would think BASEPATH would be the absolute root of the site, not the base of the EE install?
-    //             // Is there a variable I don't know about to get the EE webroot path?
-    //             $images_path = str_replace('themes', 'images', PATH_THEMES);
-    //             $this->cache['settings']['thumbnail_directory_path'] = $images_path . DIRECTORY_SEPARATOR . 'template_thumbnails' . DIRECTORY_SEPARATOR;
-    //         }
-    //     }
-    // }
-    
     private function debug($str, $die = false)
     {
         echo '<pre>';

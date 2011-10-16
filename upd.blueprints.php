@@ -126,10 +126,6 @@ class Blueprints_upd {
         $this->EE->db->where('class', 'Blueprints_ext');
         $this->EE->db->delete('exp_extensions');
         
-        // Remove layout from the DB
-        // $this->EE->db->where('member_group', '>= 2000');
-        // $this->EE->db->delete('layout_publish');
-        
         $this->EE->load->dbforge();
         $this->EE->dbforge->drop_table('blueprints_layouts');
         $this->EE->dbforge->drop_table('blueprints_entries');
