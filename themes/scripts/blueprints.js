@@ -98,6 +98,10 @@ Blueprints.autosave = function(layout_preview)
         @todo: 
         1. create a new ajax call to temporarily grab all custom fields that are required,
         save them to a new db table with 1 row with a serialized array of the settings.
+            
+            member_id
+            session_id
+            settings
         
         2. update all custom fields and set their validation to not required.
         
