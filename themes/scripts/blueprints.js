@@ -93,6 +93,17 @@ Blueprints.carousel = function(template_id)
 Blueprints.autosave = function(layout_preview)
 {
     post_data = $("#publishForm").serialize();
+    
+    /*
+        @todo: 
+        1. create a new ajax call to temporarily grab all custom fields that are required,
+        save them to a new db table with 1 row with a serialized array of the settings.
+        
+        2. update all custom fields and set their validation to not required.
+        
+        3. on sessions_end and NOT an ajax call in the CP, see if a row exists in my table, if it does, then
+        we need to reset the required fields based on the serialized array settings.
+    */
 
     $.ajax({
         type: "POST",
