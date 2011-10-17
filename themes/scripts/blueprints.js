@@ -100,6 +100,8 @@ Blueprints.autosave = function(layout_preview)
         save them to a new db table with 1 row with a serialized array of the settings.
             
             member_id
+            entry_id
+            channel_id
             session_id
             timestamp
             settings
