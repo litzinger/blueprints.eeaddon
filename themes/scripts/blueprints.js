@@ -101,12 +101,15 @@ Blueprints.autosave = function(layout_preview)
             
             member_id
             session_id
+            timestamp
             settings
         
         2. update all custom fields and set their validation to not required.
         
         3. on sessions_end and NOT an ajax call in the CP, see if a row exists in my table, if it does, then
-        we need to reset the required fields based on the serialized array settings.
+        we need to reset the required fields based on the serialized array settings. base this off of member_id
+        and session_id, or if the timestamp is greater than 3 minutes in the event that someone's browser crashes
+        in the middle of the whole deal.
     */
 
     $.ajax({
