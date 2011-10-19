@@ -113,6 +113,17 @@ Blueprints.autosave = function(layout_preview)
         and session_id, or if the timestamp is greater than 3 minutes in the event that someone's browser crashes
         in the middle of the whole deal.
     */
+    
+    // @todo: see if there are any required fields even in this channels field group before doing this.
+    
+    $.ajax({
+        type: "POST",
+        url: Blueprints.config.action_url_update_field_settings,
+        data: "action=unset&hash="+ Blueprints.config.hash,
+        success: function (data, status, xhr) {
+            
+        }
+    });
 
     $.ajax({
         type: "POST",
@@ -126,7 +137,7 @@ Blueprints.autosave = function(layout_preview)
                     entry_id = $("#publishForm input[name=entry_id]").val();
                     channel_id = $("#publishForm input[name=channel_id]").val();
 
-                    Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
+                    // Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
                 }
             }.run, 500);
         }

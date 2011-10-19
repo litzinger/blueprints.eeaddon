@@ -52,6 +52,7 @@ class Blueprints_upd {
     function __construct()
     {
         $this->EE =& get_instance();
+        $this->site_id = $this->EE->config->item('site_id');
     }
 
     public function install()
@@ -135,14 +136,14 @@ class Blueprints_upd {
             if(!isset($settings[$site_id]) OR $settings[$site_id] == '')
             {
                 $new_settings[$site_id] = $settings;
-                $this->EE->db->where('class', strtolower(__CLASS__));
+                $this->EE->db->where('class', 'Blueprints_ext');
                 $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
             }
         }
         
         if($current < '1.3.5')
         {
-            $this->EE->db->where('class', strtolower(__CLASS__));
+            $this->EE->db->where('class', 'Blueprints_ext');
             $this->EE->db->where('method', 'submit_new_entry_start');
             $this->EE->db->update('extensions', array(
                 'method' => 'entry_submission_absolute_end',
@@ -152,7 +153,7 @@ class Blueprints_upd {
         
         if($current < '1.3.7.4')
         {
-            $this->EE->db->where('class', strtolower(__CLASS__));
+            $this->EE->db->where('class', 'Blueprints_ext');
             $this->EE->db->where('method', 'entry_submission_absolute_end');
             $this->EE->db->update('extensions', array(
                 'method' => 'entry_submission_ready',
@@ -168,7 +169,7 @@ class Blueprints_upd {
         }
         
         // Update version #
-        $this->EE->db->where('class', __CLASS__);
+        $this->EE->db->where('class', 'Blueprints_ext');
         $this->EE->db->update('exp_extensions', array('version' => $this->version));
         
         return TRUE;
@@ -182,35 +183,52 @@ class Blueprints_upd {
                             ->where('class', 'Blueprints_ext')
                             ->limit(1)
                             ->get();
+        
+        // Stop here if it's a new install
+        if($qry->num_rows() == 0)
+            return;
                             
         $settings = unserialize($qry->row('settings'));
-
-        foreach($settings as $site_id => $setting)
+        
+        // Create a random hash to use to validate ACT
+        $hash = $this->EE->functions->random('encrypt', 32);
+        $new_settings = array();
+        
+        if(!empty($settings))
         {
-            foreach($setting['layout_group_names'] as $k => $v)
+            foreach($settings as $site_id => $setting)
             {
-                $data = array(
-                    'site_id'       => $site_id,
-                    'group_id'      => $setting['layout_group_ids'][$k],
-                    'template'      => $setting['template'][$k],
-                    'thumbnail'     => $setting['thumbnails'][$k],
-                    'name'          => $setting['layout_group_names'][$k],
-                );
+                foreach($setting['layout_group_names'] as $k => $v)
+                {
+                    $data = array(
+                        'site_id'       => $site_id,
+                        'group_id'      => $setting['layout_group_ids'][$k],
+                        'template'      => $setting['template'][$k],
+                        'thumbnail'     => $setting['thumbnails'][$k],
+                        'name'          => $setting['layout_group_names'][$k],
+                    );
             
-                $this->EE->db->insert('blueprints_layouts', $data);
+                    $this->EE->db->insert('blueprints_layouts', $data);
+                }
+        
+                foreach($setting['template_layout'] as $entry_id => $v)
+                {
+                    $data = array(
+                        'site_id'       => $site_id,
+                        'entry_id'      => $entry_id,
+                        'template_id'   => $v['template_id'],
+                        'group_id'      => $v['layout_group_id']
+                    );
+            
+                    $this->EE->db->insert('blueprints_entries', $data);
+                }
+            
+                $new_settings[$site_id] = $setting;
+                $new_settings[$site_id]['hash'] = $hash;
             }
         
-            foreach($setting['template_layout'] as $entry_id => $v)
-            {
-                $data = array(
-                    'site_id'       => $site_id,
-                    'entry_id'      => $entry_id,
-                    'template_id'   => $v['template_id'],
-                    'group_id'      => $v['layout_group_id']
-                );
-            
-                $this->EE->db->insert('blueprints_entries', $data);
-            }
+            $this->EE->db->where('class', 'Blueprints_ext');
+            $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
         }
     }
     
@@ -251,6 +269,27 @@ class Blueprints_upd {
             $this->EE->dbforge->add_key('group_id', TRUE);
             $this->EE->dbforge->create_table('blueprints_entries');
         }
+        
+        if (! $this->EE->db->table_exists('blueprints_field_settings'))
+        {
+            $this->EE->dbforge->add_field(array(
+                'id'            => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE, 'auto_increment' => TRUE),
+                'site_id'       => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'entry_id'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'channel_id'    => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'member_id'     => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'session_id'    => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'timestamp'     => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'settings'      => array('type' => 'text'),
+            ));
+
+            $this->EE->dbforge->add_key('id', TRUE);
+            $this->EE->dbforge->add_key('site_id', TRUE);
+            $this->EE->dbforge->add_key('entry_id', TRUE);
+            $this->EE->dbforge->add_key('channel_id', TRUE);
+            $this->EE->dbforge->add_key('member_id', TRUE);
+            $this->EE->dbforge->create_table('blueprints_field_settings');
+        }
     }
     
     private function _add_actions()
@@ -270,6 +309,11 @@ class Blueprints_upd {
             $data = array(
                 'class' => 'Blueprints_mcp',
                 'method' => 'load_pages'
+            );
+            
+            $data = array(
+                'class' => 'Blueprints_mcp',
+                'method' => 'update_field_settings'
             );
 
             $this->EE->db->insert('actions', $data);

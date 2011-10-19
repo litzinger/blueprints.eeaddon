@@ -424,6 +424,7 @@ class Blueprints_ext {
             channel_templates: '. $channel_templates_options .',
             edit_templates_link: "'. $edit_templates_link .'",
             enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
+            hash: "'. $this->settings['hash'] .'",
             layouts: {'. implode(',', $layouts) .'},
             layout_checkbox_options: "'. $layout_checkbox_options .'",
             layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
@@ -433,7 +434,8 @@ class Blueprints_ext {
             theme_url: "'. $this->EE->blueprints_helper->get_theme_folder_url() .'",
             thumbnails: {'. implode(',', $thumbnails) .'},
             thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
-            thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
+            thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'",
+            action_url_update_field_settings: "'. $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'update_field_settings') .'"
         };';
         
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
@@ -587,9 +589,13 @@ class Blueprints_ext {
         $vars['enable_carousel'] = isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n';
         $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_url'];
         $vars['site_path'] = $this->EE->blueprints_helper->site_path();
-        $vars['hidden'] = array('file' => 'blueprints');
         $vars['structure_installed'] = array_key_exists('structure', $this->EE->addons->get_installed());
         $vars['pages_installed'] = array_key_exists('pages', $this->EE->addons->get_installed());
+        
+        $vars['hidden'] = array(
+            'file' => 'blueprints', 
+            'hash' => (isset($this->settings['hash']) ? $this->settings['hash'] : $this->EE->functions->random('encrypt', 32))
+        );
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
 
@@ -615,6 +621,7 @@ class Blueprints_ext {
         $save['enable_edit_menu_tweaks'] = $this->EE->input->post('enable_edit_menu_tweaks');
         $save['enable_carousel'] = $this->EE->input->post('enable_carousel');
         $save['thumbnail_path'] = $this->EE->input->post('thumbnail_path');
+        $save['hash'] = $this->EE->input->post('hash');
         
         $insert['template'] = $this->EE->input->post('template');
         $insert['thumbnails'] = $this->EE->input->post('thumbnails');
