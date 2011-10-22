@@ -132,18 +132,10 @@ Blueprints.autosave = function(layout_preview)
                     setTimeout({
                         run: function() 
                         {
-                            $.ajax({
-                                type: "POST",
-                                url: Blueprints.config.action_url_update_field_settings,
-                                data: "action=set&hash="+ Blueprints.config.hash +'&'+ Blueprints.config.ajax_params,
-                                success: function (data, status, xhr) {
-                                    
-                                    entry_id = $("#publishForm input[name=entry_id]").val();
-                                    channel_id = $("#publishForm input[name=channel_id]").val();
+                            entry_id = $("#publishForm input[name=entry_id]").val();
+                            channel_id = $("#publishForm input[name=channel_id]").val();
 
-                                    // Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
-                                }
-                            });
+                            // Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
                         }
                     }.run, 500);
                 }
