@@ -114,6 +114,9 @@ class Blueprints_ext {
             return $session;
         }
         
+        // Clean up any field_required settings.
+        // @todo - see if there is a method to call an action like fetch_action_id
+        
         // Get our basic data
         $channel_id = $this->EE->input->get_post('channel_id');
         $entry_id = $this->EE->input->get_post('entry_id');
@@ -138,10 +141,6 @@ class Blueprints_ext {
         $s = ($this->EE->config->item('admin_session_type') != 'c') ? $session->userdata('session_id') : 0;
         $base_url = SELF.'?S='.$s.'&amp;D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP;
         
-        //
-        // Figure out what our template_id is
-        //
-
         // Get previously set data for either Structure or Pages set to the requested entry_id
         if ($entry_id && isset($site_pages['uris'][$entry_id]))
         {
@@ -412,6 +411,9 @@ class Blueprints_ext {
                 'layout_name' => (isset($layout_carousel_names[$template['template_id']]) AND $layout_carousel_names[$template['template_id']] != '') ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
             ); 
         }
+        
+        // Used in the first ajax request when changing the publish layout.
+        $ajax_params = 'entry_id='.$entry_id.'&channel_id='.$channel_id;
 
         // Create global config to use in our JS file
         $blueprints_config = '
@@ -419,7 +421,9 @@ class Blueprints_ext {
 
         Blueprints.config = {
             active_publish_layouts: '. $active_publish_layouts .',
+            action_url_update_field_settings: "'. $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'update_field_settings') .'",
             autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
+            ajax_params: "'. $ajax_params .'",
             carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
             channel_templates: '. $channel_templates_options .',
             edit_templates_link: "'. $edit_templates_link .'",
@@ -434,8 +438,7 @@ class Blueprints_ext {
             theme_url: "'. $this->EE->blueprints_helper->get_theme_folder_url() .'",
             thumbnails: {'. implode(',', $thumbnails) .'},
             thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
-            thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'",
-            action_url_update_field_settings: "'. $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'update_field_settings') .'"
+            thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
         };';
         
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');

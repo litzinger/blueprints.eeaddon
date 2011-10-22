@@ -119,27 +119,35 @@ Blueprints.autosave = function(layout_preview)
     $.ajax({
         type: "POST",
         url: Blueprints.config.action_url_update_field_settings,
-        data: "action=unset&hash="+ Blueprints.config.hash,
-        success: function (data, status, xhr) {
-            
-        }
-    });
-
-    $.ajax({
-        type: "POST",
-        dataType: "json",
-        url: EE.BASE + "&C=content_publish&M=autosave",
-        data: post_data,
-        success: function (data, status, xhr) {
-            setTimeout({
-                run: function() 
+        data: "action=unset&hash="+ Blueprints.config.hash +'&'+ Blueprints.config.ajax_params,
+        success: function (data, status, xhr) 
+        {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: EE.BASE + "&C=content_publish&M=autosave",
+                data: post_data,
+                success: function (data, status, xhr) 
                 {
-                    entry_id = $("#publishForm input[name=entry_id]").val();
-                    channel_id = $("#publishForm input[name=channel_id]").val();
+                    setTimeout({
+                        run: function() 
+                        {
+                            $.ajax({
+                                type: "POST",
+                                url: Blueprints.config.action_url_update_field_settings,
+                                data: "action=set&hash="+ Blueprints.config.hash +'&'+ Blueprints.config.ajax_params,
+                                success: function (data, status, xhr) {
+                                    
+                                    entry_id = $("#publishForm input[name=entry_id]").val();
+                                    channel_id = $("#publishForm input[name=channel_id]").val();
 
-                    // Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
+                                    // Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
+                                }
+                            });
+                        }
+                    }.run, 500);
                 }
-            }.run, 500);
+            });
         }
     });
 }
