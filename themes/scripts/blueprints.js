@@ -116,10 +116,13 @@ Blueprints.autosave = function(layout_preview)
     
     // @todo: see if there are any required fields even in this channels field group before doing this.
     
+    entry_id = $("#publishForm input[name=entry_id]").val();
+    channel_id = $("#publishForm input[name=channel_id]").val();
+    
     $.ajax({
         type: "POST",
         url: Blueprints.config.action_url_update_field_settings,
-        data: "action=unset&hash="+ Blueprints.config.hash +'&'+ Blueprints.config.ajax_params,
+        data: "action=unset&hash="+ Blueprints.config.hash +'&'+ Blueprints.config.ajax_params +'&entry_id='+ entry_id,
         success: function (data, status, xhr) 
         {
             $.ajax({
@@ -132,10 +135,7 @@ Blueprints.autosave = function(layout_preview)
                     setTimeout({
                         run: function() 
                         {
-                            entry_id = $("#publishForm input[name=entry_id]").val();
-                            channel_id = $("#publishForm input[name=channel_id]").val();
-
-                            // Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
+                            Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
                         }
                     }.run, 500);
                 }

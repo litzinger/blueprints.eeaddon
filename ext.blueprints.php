@@ -114,8 +114,14 @@ class Blueprints_ext {
             return $session;
         }
         
-        // Clean up any field_required settings.
-        // @todo - see if there is a method to call an action like fetch_action_id
+        // Clean up any field_required settings. Autosave will potentially unset
+        // all required fields for the entry/field group so the autosave does not 
+        // bomb when a required field is blank. This will detect any temporarily
+        // saved settings in our table and restore them. User doesn't know what happened.
+        if($this->EE->input->get('use_autosave') == 'y')
+        {
+            $this->EE->blueprints_model->update_field_settings('set', $session);
+        }
         
         // Get our basic data
         $channel_id = $this->EE->input->get_post('channel_id');
