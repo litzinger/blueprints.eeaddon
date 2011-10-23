@@ -118,6 +118,9 @@ class Blueprints_upd {
     
     public function update($current = '')
     {
+        // $this->debug($current);
+        // $this->debug($this->version, true);
+        
         if ($current == $this->version)
         {
             return FALSE;
@@ -162,6 +165,24 @@ class Blueprints_upd {
             $this->_add_actions();
             $this->_add_tables();
             $this->_migrate_settings();
+            
+            $qry = $this->EE->db->select('settings')
+                                ->where('enabled', 'y')
+                                ->where('class', 'Blueprints_ext')
+                                ->limit(1)
+                                ->get('extensions');
+                                
+            $settings = unserialize($qry->row('settings'));
+            $new_settings = array();
+            
+            foreach($settings as $site_id => $setting_data)
+            {
+                $new_settings[$site_id] = $setting_data;
+                $new_settings[$site_id]['hash'] = $this->EE->functions->random('encrypt', 32);
+            }
+
+            $this->EE->db->where('class', 'Blueprints_ext');
+            $this->EE->db->update('exp_extensions', array('settings' => serialize($new_settings)));
         }
         
         // Update version #

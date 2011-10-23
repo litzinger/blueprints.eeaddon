@@ -607,7 +607,7 @@ class Blueprints_ext {
         
         $vars['hidden'] = array(
             'file' => 'blueprints', 
-            'hash' => (isset($this->settings['hash']) ? $this->settings['hash'] : $this->EE->functions->random('encrypt', 32))
+            'hash' => $this->settings['hash']
         );
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
@@ -719,7 +719,12 @@ class Blueprints_ext {
     }
     
     function activate_extension() {}
-    function update_extension($current = '') {}
+    function update_extension($current = '') {
+        // Is there a better way to do this??
+        require_once PATH_THIRD .'blueprints/upd.blueprints.php';
+        $upd = new Blueprints_upd;
+        $upd->update($current);
+    }
     function disable_extension() {}
     
     private function debug($str, $die = false)
