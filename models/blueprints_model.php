@@ -133,6 +133,9 @@ class Blueprints_model
 
             // Found a match? Return it and duplicate the Publish Layout row so it actually works.
             // Next time we won't get this far b/c it will find the row above first.
+            // @todo - revisit this, caused the publish layout to blow up when cloning from pages(1) to news (2)
+            // Need to see if it's a listing channel, and if so, unset some of the array keys in the publish
+            // array b/c the fields are not displayed in structure tab.
             if($group_id = $qry->row('group_id'))
             {
                 $data = array(
@@ -388,6 +391,123 @@ class Blueprints_model
         }
         
         return $this->cache['structure_settings'];
+    }
+    
+    public function update_field_settings($action, $session = false)
+    {
+        if(!$session)
+        {
+            $session = $this->EE->session;
+        }
+        
+        $channel_id = $this->EE->input->get_post('channel_id', TRUE);
+        $entry_id = $this->EE->input->get_post('entry_id', TRUE);
+        
+        // Get the field group assigned to the channel.
+        $qry = $this->EE->db->select('field_group')
+                            ->where('channel_id', $channel_id)
+                            ->get('channels');
+        
+        $field_group_id = $qry->row('field_group');
+        
+        // If it's unset, then we're saving the required fields data before unsetting them in the db
+        // so we can restore them after the autosave refresh page load.
+        if($action == 'unset')
+        {
+            $qry = $this->EE->db->select('cf.field_id, cf.field_required')
+                                ->from('channel_fields AS cf')
+                                ->join('channels AS c', 'cf.group_id = c.field_group')
+                                ->where('cf.site_id', $this->site_id)
+                                ->where('group_id', $field_group_id)
+                                ->get();
+
+            $data = array(
+                'site_id'       => $this->site_id,
+                'member_id'     => $session->userdata['member_id'],
+                'session_id'    => $session->userdata['session_id'],
+                'channel_id'    => $channel_id,
+                'entry_id'      => $entry_id,
+                'timestamp'     => $this->EE->localize->now,
+                'group_id'      => $field_group_id,
+                'settings'      => serialize($qry->result_array())
+            );
+
+            $where = array(
+                'site_id'       => $this->site_id,
+                'member_id'     => $session->userdata['member_id'],
+                'session_id'    => $session->userdata['session_id'],
+                'channel_id'    => $channel_id,
+                'entry_id'      => $entry_id
+            );
+
+            $this->EE->blueprints_model->insert_or_update('blueprints_field_settings', $data, $where);
+
+            $data = array(
+                'field_required' => 'n'
+            );
+
+            $where = array(
+                'site_id'   => $this->site_id,
+                'group_id'  => $field_group_id
+            );
+
+            $result = $this->EE->db->where($where)->update('channel_fields', $data);
+        }
+        elseif($action == 'set')
+        {
+            $errors = array();
+            
+            // Get our real entry ID. What we get in POST is the autosave entry_id
+            $qry = $this->EE->db->select('original_entry_id')
+                                ->where('entry_id', $entry_id)
+                                ->get('channel_entries_autosave');
+                                
+            if($qry->num_rows())
+            {
+                $entry_id = $qry->row('original_entry_id');
+            }
+            else
+            {
+                $errors[] = 1;
+            }
+            
+            $where = array(
+                'site_id'       => $this->site_id,
+                'member_id'     => $session->userdata['member_id'],
+                'session_id'    => $session->userdata['session_id'],
+                'channel_id'    => $channel_id,
+                'entry_id'      => $entry_id,
+            );
+            
+            $qry = $this->EE->db->select('settings')
+                                ->where($where)
+                                ->get('blueprints_field_settings');
+
+            if($qry->num_rows())
+            {
+                $settings = unserialize($qry->row('settings'));
+                
+                foreach($settings as $k => $setting)
+                {
+                    $result = $this->EE->db->where('field_id', $setting['field_id'])
+                                           ->update('channel_fields', array('field_required' => $setting['field_required']));
+                                           
+                    if(!$result)
+                    {
+                        $errors[] = $k;
+                    }
+                }
+            }
+            
+            $result = empty($errors) ? true : false;
+            
+            if($result)
+            {
+                $this->EE->db->where($where)->delete('blueprints_field_settings');
+            }
+        }
+        
+        return $result;
     }
     
     /**

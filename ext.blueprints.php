@@ -114,6 +114,15 @@ class Blueprints_ext {
             return $session;
         }
         
+        // Clean up any field_required settings. Autosave will potentially unset
+        // all required fields for the entry/field group so the autosave does not 
+        // bomb when a required field is blank. This will detect any temporarily
+        // saved settings in our table and restore them. User doesn't know what happened.
+        if($this->EE->input->get('use_autosave') == 'y')
+        {
+            $this->EE->blueprints_model->update_field_settings('set', $session);
+        }
+        
         // Get our basic data
         $channel_id = $this->EE->input->get_post('channel_id');
         $entry_id = $this->EE->input->get_post('entry_id');
@@ -138,10 +147,6 @@ class Blueprints_ext {
         $s = ($this->EE->config->item('admin_session_type') != 'c') ? $session->userdata('session_id') : 0;
         $base_url = SELF.'?S='.$s.'&amp;D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP;
         
-        /*
-            Figure out what our template_id is
-        */
-
         // Get previously set data for either Structure or Pages set to the requested entry_id
         if ($entry_id && isset($site_pages['uris'][$entry_id]))
         {
@@ -412,6 +417,9 @@ class Blueprints_ext {
                 'layout_name' => (isset($layout_carousel_names[$template['template_id']]) AND $layout_carousel_names[$template['template_id']] != '') ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
             ); 
         }
+        
+        // Used in the first ajax request when changing the publish layout.
+        $ajax_params = 'entry_id='.$entry_id.'&channel_id='.$channel_id;
 
         // Create global config to use in our JS file
         $blueprints_config = '
@@ -419,11 +427,14 @@ class Blueprints_ext {
 
         Blueprints.config = {
             active_publish_layouts: '. $active_publish_layouts .',
+            action_url_update_field_settings: "'. $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'update_field_settings') .'",
             autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
+            ajax_params: "'. $ajax_params .'",
             carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
             channel_templates: '. $channel_templates_options .',
             edit_templates_link: "'. $edit_templates_link .'",
             enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
+            hash: "'. $this->settings['hash'] .'",
             layouts: {'. implode(',', $layouts) .'},
             layout_checkbox_options: "'. $layout_checkbox_options .'",
             layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
@@ -591,9 +602,13 @@ class Blueprints_ext {
         $vars['enable_carousel'] = isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n';
         $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_url'];
         $vars['site_path'] = $this->EE->blueprints_helper->site_path();
-        $vars['hidden'] = array('file' => 'blueprints');
         $vars['structure_installed'] = array_key_exists('structure', $this->EE->addons->get_installed());
         $vars['pages_installed'] = array_key_exists('pages', $this->EE->addons->get_installed());
+        
+        $vars['hidden'] = array(
+            'file' => 'blueprints', 
+            'hash' => (isset($this->settings['hash']) ? $this->settings['hash'] : $this->EE->functions->random('encrypt', 32))
+        );
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
 
@@ -622,6 +637,7 @@ class Blueprints_ext {
         $save['enable_edit_menu_tweaks'] = $this->EE->input->post('enable_edit_menu_tweaks');
         $save['enable_carousel'] = $this->EE->input->post('enable_carousel');
         $save['thumbnail_path'] = $this->EE->input->post('thumbnail_path');
+        $save['hash'] = $this->EE->input->post('hash');
         
         $insert['template'] = $this->EE->input->post('template');
         $insert['thumbnails'] = $this->EE->input->post('thumbnails');

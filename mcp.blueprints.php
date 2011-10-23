@@ -50,14 +50,16 @@ class Blueprints_mcp {
     function Blueprints_mcp()
     {
         $this->EE =& get_instance();
+        $this->site_id = $this->EE->config->item('site_id');
+        $this->settings = $this->EE->blueprints_model->get_settings(true);
     }
     
-    function index() {}
+    public function index() {}
     
-    function get_autosave_entry()
+    public function get_autosave_entry()
     {
-        $entry_id = $this->EE->input->post('entry_id');
-        $channel_id = $this->EE->input->post('channel_id');
+        $entry_id = $this->EE->input->post('entry_id', TRUE);
+        $channel_id = $this->EE->input->post('channel_id', TRUE);
         $site_id = $this->EE->config->item('site_id');
         
         $autosave_entry_id = $this->EE->db->select('entry_id')
@@ -70,11 +72,32 @@ class Blueprints_mcp {
         $this->send_ajax_response($autosave_entry_id);
     }
     
-    function load_pages()
+    public function load_pages()
     {
         $pages = $this->EE->blueprints_helper->get_pages();
         
         $this->send_ajax_response($pages);
+    }
+    
+    
+    /*
+        Update our field settings. Temporarily setting all required fields to 'n',
+        or restoring required settings to their original state after the autosave
+        action takes affect. 'set' is called in the ext sessions_end() and should
+        clean up any fields that were set to 'n', but should be 'y'. Doing it in the
+        ext incase the JS fails for whatever reason.
+    */
+    public function update_field_settings()
+    {
+        // Make sure this is a valid request.
+        if($this->EE->input->post('hash') != $this->settings['hash'])
+            return;
+            
+        $action = $this->EE->input->get_post('action', TRUE) == 'unset' ? 'unset' : 'set';
+        
+        $result = $this->EE->blueprints_model->update_field_settings($action);
+        
+        $this->send_ajax_response($result);
     }
     
     private function send_ajax_response($msg)

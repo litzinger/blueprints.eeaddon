@@ -93,57 +93,53 @@ Blueprints.carousel = function(template_id)
 Blueprints.autosave = function(layout_preview)
 {
     post_data = $("#publishForm").serialize();
-
+    
+    /*
+        @todo: 
+        1. create a new ajax call to temporarily grab all custom fields that are required,
+        save them to a new db table with 1 row with a serialized array of the settings.
+            
+            member_id
+            entry_id
+            channel_id
+            session_id
+            timestamp
+            settings
+        
+        2. update all custom fields and set their validation to not required.
+        
+        3. on sessions_end and NOT an ajax call in the CP, see if a row exists in my table, if it does, then
+        we need to reset the required fields based on the serialized array settings. base this off of member_id
+        and session_id, or if the timestamp is greater than 3 minutes in the event that someone's browser crashes
+        in the middle of the whole deal.
+    */
+    
+    // @todo: see if there are any required fields even in this channels field group before doing this.
+    
+    entry_id = $("#publishForm input[name=entry_id]").val();
+    channel_id = $("#publishForm input[name=channel_id]").val();
+    
     $.ajax({
         type: "POST",
-        dataType: "json",
-        url: EE.BASE + "&C=content_publish&M=autosave",
-        data: post_data,
-        success: function (result, status, xhr) {
-            setTimeout({
-                run: function() 
+        url: Blueprints.config.action_url_update_field_settings,
+        data: "action=unset&hash="+ Blueprints.config.hash +'&'+ Blueprints.config.ajax_params +'&entry_id='+ entry_id,
+        success: function (data, status, xhr) 
+        {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: EE.BASE + "&C=content_publish&M=autosave",
+                data: post_data,
+                success: function (data, status, xhr) 
                 {
-                    console.log(result);
-                    
-                    entry_id = $("#publishForm input[name=entry_id]").val();
-                    channel_id = $("#publishForm input[name=channel_id]").val();
-                    
-                    // Blueprints.autosave_redirect(result.autosave_entry_id, layout_preview);
-                    
-                    // if (result.error) 
-                    // {
-                    //     console.log(result.error);
-                    // }
-                    // else if (result.success) 
-                    // {
-                    //     // If we get an object back, not an integer, we have form errors.
-                    //     if (typeof result.autosave_entry_id == "object") 
-                    //     {
-                    //         obj = result.autosave_entry_id;
-                    //         for(field in obj)
-                    //         {
-                    //             // if(field != 'title') $.ee_notice(obj[field] +' '+ field, {type: "error"});
-                    //             if(field != 'title') $.ee_notice('The following field is required before loading a new Publish Layout: '+ field, {type: "error"});
-                    //         }
-                    //         
-                    //         $('.jcarousel-item .overlay, .jcarousel-item .ajax_loader').remove();
-                    //     }
-                    //     else
-                    //     {
-                    //         entry_id = $("#publishForm input[name=entry_id]").val();
-                    //         channel_id = $("#publishForm input[name=channel_id]").val();
-                    //         
-                    //         Blueprints.autosave_redirect(result.autosave_entry_id, layout_preview);
-                    //     }
-                    // }
-                    // else 
-                    // {
-                    //     $.ee_notice('Layout change failed.', {type: "error"});
-                    // }
-                    // 
-                    // autosaving = false;
+                    setTimeout({
+                        run: function() 
+                        {
+                            Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
+                        }
+                    }.run, 500);
                 }
-            }.run, 500);
+            });
         }
     });
 }
