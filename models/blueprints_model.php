@@ -131,6 +131,8 @@ class Blueprints_model
             // Found a match? Return it and duplicate the Publish Layout row so it actually works.
             // Next time we won't get this far b/c it will find the row above first.
             // @todo - revisit this, caused the publish layout to blow up when cloning from pages(1) to news (2)
+            // Need to see if it's a listing channel, and if so, unset some of the array keys in the publish
+            // array b/c the fields are not displayed in structure tab.
             if($group_id = $qry->row('group_id'))
             {
                 $data = array(
