@@ -170,6 +170,9 @@ class Blueprints_upd {
         return TRUE;
     }
     
+    /*
+        Migrate settings from version 1.x to 2.x
+    */
     private function _migrate_settings()
     {
         $qry = $this->EE->db->select('settings')
@@ -210,7 +213,9 @@ class Blueprints_upd {
         }
     }
     
-    // Added in 2.0
+    /*
+        Add our tables for 2.x version.
+    */
     private function _add_tables()
     {
         // Create our external tables
@@ -249,6 +254,9 @@ class Blueprints_upd {
         }
     }
     
+    /*
+        Add actions for 2.x version.
+    */
     private function _add_actions()
     {
         // Insert our Action

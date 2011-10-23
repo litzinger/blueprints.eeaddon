@@ -138,9 +138,9 @@ class Blueprints_ext {
         $s = ($this->EE->config->item('admin_session_type') != 'c') ? $session->userdata('session_id') : 0;
         $base_url = SELF.'?S='.$s.'&amp;D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP;
         
-        //
-        // Figure out what our template_id is
-        //
+        /*
+            Figure out what our template_id is
+        */
 
         // Get previously set data for either Structure or Pages set to the requested entry_id
         if ($entry_id && isset($site_pages['uris'][$entry_id]))
@@ -287,7 +287,7 @@ class Blueprints_ext {
     
     /*
         This is kind of lame, but all the good hooks have been removed from 2.0. This is called at the 
-        beginning of a publish form load, so we'll use it to add JS to the footer.
+        beginning of a publish form load, so we'll use it to add our JS config settings to the footer.
     */
     function publish_form_channel_preferences($data)
     {
@@ -440,9 +440,13 @@ class Blueprints_ext {
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
         $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
 
+        // Return the unmodified data
         return $data;
     }
     
+    /*
+        Settings form. Turn on/off options and save Publish Layout names.
+    */
     function settings_form($vars)
     {
         $this->EE->lang->loadfile('blueprints');
@@ -597,6 +601,9 @@ class Blueprints_ext {
         return $this->EE->load->view('settings_form', $vars, TRUE);
     }
     
+    /*
+        Save the form settings
+    */
     function save_settings()
     {
         $channels = $this->EE->input->post('channels');

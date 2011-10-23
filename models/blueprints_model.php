@@ -60,12 +60,11 @@ class Blueprints_model
     }
     
     /*
-    @param - string
-    @param - array of data to be inserted, key => value pairs
-    @param - array of data used to find the row to update, key => value pairs
+        @param - string
+        @param - array of data to be inserted, key => value pairs
+        @param - array of data used to find the row to update, key => value pairs
     
-    _insert_or_update('some_table', array('foo' => 'bar'), array('id' => 1, 'something' => 'another-thing'))
-    
+        _insert_or_update('some_table', array('foo' => 'bar'), array('id' => 1, 'something' => 'another-thing'))
     */
     public function insert_or_update($table, $data, $where)
     {
@@ -85,6 +84,10 @@ class Blueprints_model
         }
     }
     
+    /*
+        Based on template_id and channel_id try to figure out which 
+        layout group to use for the entry.
+    */
     public function find_layout_group_from_settings($template_id, $channel_id)
     {
         // Compare our saved layouts to the existing publish layouts and see if our template matches

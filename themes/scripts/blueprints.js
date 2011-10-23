@@ -99,14 +99,49 @@ Blueprints.autosave = function(layout_preview)
         dataType: "json",
         url: EE.BASE + "&C=content_publish&M=autosave",
         data: post_data,
-        success: function (data, status, xhr) {
+        success: function (result, status, xhr) {
             setTimeout({
                 run: function() 
                 {
+                    console.log(result);
+                    
                     entry_id = $("#publishForm input[name=entry_id]").val();
                     channel_id = $("#publishForm input[name=channel_id]").val();
-
-                    Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
+                    
+                    // Blueprints.autosave_redirect(result.autosave_entry_id, layout_preview);
+                    
+                    // if (result.error) 
+                    // {
+                    //     console.log(result.error);
+                    // }
+                    // else if (result.success) 
+                    // {
+                    //     // If we get an object back, not an integer, we have form errors.
+                    //     if (typeof result.autosave_entry_id == "object") 
+                    //     {
+                    //         obj = result.autosave_entry_id;
+                    //         for(field in obj)
+                    //         {
+                    //             // if(field != 'title') $.ee_notice(obj[field] +' '+ field, {type: "error"});
+                    //             if(field != 'title') $.ee_notice('The following field is required before loading a new Publish Layout: '+ field, {type: "error"});
+                    //         }
+                    //         
+                    //         $('.jcarousel-item .overlay, .jcarousel-item .ajax_loader').remove();
+                    //     }
+                    //     else
+                    //     {
+                    //         entry_id = $("#publishForm input[name=entry_id]").val();
+                    //         channel_id = $("#publishForm input[name=channel_id]").val();
+                    //         
+                    //         Blueprints.autosave_redirect(result.autosave_entry_id, layout_preview);
+                    //     }
+                    // }
+                    // else 
+                    // {
+                    //     $.ee_notice('Layout change failed.', {type: "error"});
+                    // }
+                    // 
+                    // autosaving = false;
                 }
             }.run, 500);
         }
