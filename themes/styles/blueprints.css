@@ -97,6 +97,7 @@
     top: 80px;
     z-index: 91;
 }
+
 .jcarousel-skin-blueprints .jcarousel-item.current .carousel_thumbnail_wrapper,
 .jcarousel-skin-blueprints .jcarousel-item.current span.carousel_template_name {
     background-color: #FAFCAE;

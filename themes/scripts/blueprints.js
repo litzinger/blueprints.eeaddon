@@ -77,6 +77,11 @@ Blueprints.carousel = function(template_id)
                 item_width = $('.carousel_thumbnail').width();
                 submit_width = submit_button.width();
                 submit_button.css('left', ((item_width / 2) - (submit_width / 2)) - 8);
+                
+                submit_button.show(function () {
+                    alert('visible!');
+                      // $(this).hide("scale", {}, 1000);
+                });
 
                 submit_button.click(function(e){
                     e.preventDefault();
@@ -93,29 +98,6 @@ Blueprints.carousel = function(template_id)
 Blueprints.autosave = function(layout_preview)
 {
     post_data = $("#publishForm").serialize();
-    
-    /*
-        @todo: 
-        1. create a new ajax call to temporarily grab all custom fields that are required,
-        save them to a new db table with 1 row with a serialized array of the settings.
-            
-            member_id
-            entry_id
-            channel_id
-            session_id
-            timestamp
-            settings
-        
-        2. update all custom fields and set their validation to not required.
-        
-        3. on sessions_end and NOT an ajax call in the CP, see if a row exists in my table, if it does, then
-        we need to reset the required fields based on the serialized array settings. base this off of member_id
-        and session_id, or if the timestamp is greater than 3 minutes in the event that someone's browser crashes
-        in the middle of the whole deal.
-    */
-    
-    // @todo: see if there are any required fields even in this channels field group before doing this.
-    
     entry_id = $("#publishForm input[name=entry_id]").val();
     channel_id = $("#publishForm input[name=channel_id]").val();
     
@@ -252,8 +234,7 @@ jQuery(function(){
             }, function() {
                 $(".active_publish_layout").remove();
             });
-            // console.log(Blueprints.config);
-            // console.log(Blueprints.config.layout_group);
+
             if(Blueprints.config.layout_group == "" && Blueprints.config.member_group_id == 1)
             {
                 $('#showToolbarLink a span').text('No Publish Layout defined for the current template and channel combination. Create one now.');
