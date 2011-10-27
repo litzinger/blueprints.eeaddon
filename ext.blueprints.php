@@ -474,6 +474,22 @@ class Blueprints_ext {
         $templates  = $this->EE->blueprints_model->get_templates();
         $thumbnails = $this->EE->blueprints_model->get_thumbnails();
         $channels   = $this->EE->blueprints_model->get_channels();
+
+        // See if P&T Switch is installed, if so, add some style...
+        $this->EE->load->library('api');
+        $this->EE->api->instantiate('channel_fields');
+        $fts = $this->EE->api_channel_fields->fetch_installed_fieldtypes();
+
+        if(array_key_exists('pt_switch', $fts))
+        {
+            // Apply P&T Switch to specific fields
+            $this->EE->blueprints_helper->load_switch(array(
+                '#enable_edit_menu_tweaks',
+                '#enable_publish_layout_takeover',
+                '#enable_carousel',
+                '#enable_detailed_template'
+            ));
+        }
         
         // $vars sent from core are basically the settings, 
         // but to make it MSM compat, we need to grab our settings instead.
@@ -600,6 +616,7 @@ class Blueprints_ext {
         $vars['enable_publish_layout_takeover'] = isset($this->settings['enable_publish_layout_takeover']) ? $this->settings['enable_publish_layout_takeover'] : 'n';
         $vars['enable_edit_menu_tweaks'] = isset($this->settings['enable_edit_menu_tweaks']) ? $this->settings['enable_edit_menu_tweaks'] : 'n';
         $vars['enable_carousel'] = isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n';
+        $vars['enable_detailed_template'] = isset($this->settings['enable_detailed_template']) ? $this->settings['enable_detailed_template'] : 'n';
         $vars['thumbnail_path'] = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_url'];
         $vars['site_path'] = $this->EE->blueprints_helper->site_path();
         $vars['structure_installed'] = array_key_exists('structure', $this->EE->addons->get_installed());

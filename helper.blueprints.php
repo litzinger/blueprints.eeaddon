@@ -183,6 +183,34 @@ class Blueprints_helper
         }
     }
     
+    public function load_switch($target)
+    {
+        if(!$target)
+        {
+            return;
+        }
+
+        if(!isset($this->cache['pt_switch']))
+        {
+            $this->EE->cp->add_to_head('<link rel="stylesheet" type="text/css" href="'.$this->get_theme_folder_url().'pt_switch/styles/pt_switch.css" />');
+            $this->EE->cp->add_to_foot('<script type="text/javascript" src="'.$this->get_theme_folder_url().'pt_switch/scripts/pt_switch.js"></script>');
+            
+            $this->cache['pt_switch'] = true;
+        }
+        
+        if(is_array($target))
+        {
+            foreach($target as $ele)
+            {
+                $this->EE->cp->add_to_foot('<script type="text/javascript">new ptSwitch(jQuery("'. $ele .'"));</script>');
+            }
+        }
+        else
+        {
+            $this->EE->cp->add_to_foot('<script type="text/javascript">new ptSwitch(jQuery("'. $target .'"));</script>');
+        }
+    }
+    
     /**
       * Retrieve site path
       */

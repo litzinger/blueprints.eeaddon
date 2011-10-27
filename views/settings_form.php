@@ -31,7 +31,7 @@ option.disabled { color: #999; }
     );
     $this->table->add_row(
         array('data' => '<p>'. lang('enable_edit_menu_tweaks_detail') .'</p>', 'style' => 'width: 80%'),
-        array('data' => form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id=enable_edit_menu_tweaks'), 'style' => 'width: 20%')
+        array('data' => form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id="enable_edit_menu_tweaks"'), 'style' => 'width: 20%')
     );
 
     echo $this->table->generate();
@@ -45,7 +45,7 @@ option.disabled { color: #999; }
     );
     $this->table->add_row(
         array('data' => '<p>'. lang('enable_publish_layout_takeover_detail') .'</p>', 'style' => 'width: 80%'),
-        array('data' => form_dropdown('enable_publish_layout_takeover', array('n' => 'No', 'y' => 'Yes'), $enable_publish_layout_takeover, 'id=enable_publish_layout_takeover'), 'style' => 'width: 20%')
+        array('data' => form_dropdown('enable_publish_layout_takeover', array('n' => 'No', 'y' => 'Yes'), $enable_publish_layout_takeover, 'id="enable_publish_layout_takeover"'), 'style' => 'width: 20%')
     );
 
     echo $this->table->generate();
@@ -59,7 +59,7 @@ option.disabled { color: #999; }
     );
     $this->table->add_row(
         array('data' => '<p>'. lang('enable_carousel_detail') .'</p>', 'style' => 'width: 80%'),
-        array('data' => form_dropdown('enable_carousel', array('n' => 'No', 'y' => 'Yes'), $enable_carousel, 'id=enable_carousel'), 'style' => 'width: 20%')
+        array('data' => form_dropdown('enable_carousel', array('n' => 'No', 'y' => 'Yes'), $enable_carousel, 'id="enable_carousel"'), 'style' => 'width: 20%')
     );
 
     echo $this->table->generate();
@@ -102,6 +102,20 @@ option.disabled { color: #999; }
     echo $this->table->generate();
     echo '</div>';
     echo '<a href="#" class="blueprint_add_row" rel="publish_layouts">+ Add</a>';
+    $this->table->clear();
+    
+    
+    // Enable detailed template selecting
+    $this->table->set_template($cp_table_template);
+    $this->table->set_heading(
+        array('data' => lang('enable_detailed_template'), 'colspan' => '2')
+    );
+    $this->table->add_row(
+        array('data' => '<p>'. lang('enable_detailed_template_detail') .'</p>', 'style' => 'width: 80%'),
+        array('data' => form_dropdown('enable_detailed_template', array('n' => 'No', 'y' => 'Yes'), $enable_detailed_template, 'id="enable_detailed_template"'), 'style' => 'width: 20%')
+    );
+
+    echo $this->table->generate();
     $this->table->clear();
     
 
@@ -228,7 +242,6 @@ option.disabled { color: #999; }
             }
         });
         
-
         $('.blueprint_remove_row').live('click', function(e){
             
             rel = $(this).attr('rel');
@@ -338,6 +351,10 @@ option.disabled { color: #999; }
             blueprints_show_group( $(this), true );
             blueprints_show_selected( $(this), true );
         });
+        
+        // $('#enable_detailed_template').change(function(){
+        //     console.log('1');
+        // });
     
     });
     </script>
