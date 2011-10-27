@@ -121,6 +121,11 @@ class Blueprints_upd {
         // $this->debug($current);
         // $this->debug($this->version, true);
         
+        // Uh, this is called when a template is requested?
+        // Got an error below when requesting a template.
+        if(REQ != 'CP')
+            return;
+        
         if ($current == $this->version)
         {
             return FALSE;
@@ -218,31 +223,37 @@ class Blueprints_upd {
         {
             foreach($settings as $site_id => $setting)
             {
-                foreach($setting['layout_group_names'] as $k => $v)
+                if(isset($settings['layout_group_names']) AND !empty($setting['layout_group_names']))
                 {
-                    $data = array(
-                        'site_id'       => $site_id,
-                        'group_id'      => $setting['layout_group_ids'][$k],
-                        'template'      => $setting['template'][$k],
-                        'thumbnail'     => $setting['thumbnails'][$k],
-                        'name'          => $setting['layout_group_names'][$k],
-                    );
-            
-                    $this->EE->db->insert('blueprints_layouts', $data);
-                }
-        
-                foreach($setting['template_layout'] as $entry_id => $v)
-                {
-                    $data = array(
-                        'site_id'       => $site_id,
-                        'entry_id'      => $entry_id,
-                        'template_id'   => $v['template_id'],
-                        'group_id'      => $v['layout_group_id']
-                    );
-            
-                    $this->EE->db->insert('blueprints_entries', $data);
+                    foreach($setting['layout_group_names'] as $k => $v)
+                    {
+                        $data = array(
+                            'site_id'       => $site_id,
+                            'group_id'      => $setting['layout_group_ids'][$k],
+                            'template'      => $setting['template'][$k],
+                            'thumbnail'     => $setting['thumbnails'][$k],
+                            'name'          => $setting['layout_group_names'][$k],
+                        );
+
+                        $this->EE->db->insert('blueprints_layouts', $data);
+                    }
                 }
             
+                if(isset($settings['layout_group_names']) AND !empty($setting['layout_group_names']))
+                {
+                    foreach($setting['template_layout'] as $entry_id => $v)
+                    {
+                        $data = array(
+                            'site_id'       => $site_id,
+                            'entry_id'      => $entry_id,
+                            'template_id'   => $v['template_id'],
+                            'group_id'      => $v['layout_group_id']
+                        );
+            
+                        $this->EE->db->insert('blueprints_entries', $data);
+                    }
+                }
+                
                 $new_settings[$site_id] = $setting;
                 $new_settings[$site_id]['hash'] = $hash;
             }

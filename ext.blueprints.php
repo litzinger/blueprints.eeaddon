@@ -653,6 +653,7 @@ class Blueprints_ext {
         $save['enable_publish_layout_takeover'] = $this->EE->input->post('enable_publish_layout_takeover');
         $save['enable_edit_menu_tweaks'] = $this->EE->input->post('enable_edit_menu_tweaks');
         $save['enable_carousel'] = $this->EE->input->post('enable_carousel');
+        $save['enable_detailed_template'] = $this->EE->input->post('enable_detailed_template');
         $save['thumbnail_path'] = $this->EE->input->post('thumbnail_path');
         $save['hash'] = $this->EE->input->post('hash');
         

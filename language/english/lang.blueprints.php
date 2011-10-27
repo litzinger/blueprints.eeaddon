@@ -26,6 +26,13 @@ $lang = array(
 "blueprint_channel_heading" =>
 "Channel",
 
+"enable_detailed_template" =>
+"Detailed Template Visibility",
+
+"enable_detailed_template_detail" =>
+"By default only the templates you defined above will be visible in the Template dropdown or carousel on the publish page.
+This setting lets you get more specific with which templates are visible.",
+
 "thumbnail_path" =>
 "Thumbnails Path",
 

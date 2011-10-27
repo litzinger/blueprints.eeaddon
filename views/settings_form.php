@@ -1,6 +1,5 @@
 <style type="text/css">
-/*#blueprint_settings tbody tr:first-child .blueprint_remove_row { display: none; }*/
-.blueprint_add_row { float: right; font-weight: bold; display: inline-block; padding: 5px 12px }
+.blueprint_add_row { float: right; font-weight: bold; display: inline-block; padding: 0 12px 12px 12px; margin-top: -5px }
 .blueprint_remove_row { float: right; }
 #remove_dialog { display: none; }
 .radios { margin: 1em; padding-left: 100px }
@@ -120,7 +119,7 @@ option.disabled { color: #999; }
     
 
     // Template selection
-    echo '<div class="channel_template_selection">';
+    echo '<div class="channel_template_selection" '. (($enable_detailed_template != 'y') ? 'style="display: none;"' : "") .'>';
     $this->table->set_template($cp_table_template);
     $this->table->set_heading(
         array('style' => '30%'),
@@ -142,7 +141,7 @@ option.disabled { color: #999; }
 
     echo $this->table->generate();
     echo '</div>';
-    echo '<a href="#" class="blueprint_add_row" rel="channel_template_selection">+ Add</a>';
+    echo '<a href="#" class="blueprint_add_row" rel="channel_template_selection" '. (($enable_detailed_template != 'y') ? 'style="display: none;"' : "") .'>+ Add</a>';
     $this->table->clear();
     ?>
 
@@ -352,9 +351,20 @@ option.disabled { color: #999; }
             blueprints_show_selected( $(this), true );
         });
         
-        // $('#enable_detailed_template').change(function(){
-        //     console.log('1');
-        // });
+        // Turn off detailed template display
+        $('#enable_detailed_template').next('.pt-switch').click(function(){
+            val = $('#enable_detailed_template').val();
+            
+            if(val == 'y') {
+                $('.channel_template_selection').slideDown();
+                $('.channel_template_selection').next('.blueprint_add_row').show();
+            } else {
+                $('.channel_template_selection').slideUp();
+                $('.channel_template_selection').find('.show_group, .show_selected').attr("checked", false);
+                $('.channel_template_selection').find('select option').attr("selected", false);
+                $('.channel_template_selection').next('.blueprint_add_row').hide();
+            }
+        });
     
     });
     </script>
