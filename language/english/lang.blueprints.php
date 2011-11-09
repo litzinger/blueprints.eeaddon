@@ -27,7 +27,7 @@ $lang = array(
 "Channel",
 
 "enable_detailed_template" =>
-"Detailed Template Visibility",
+"Detailed Template Visibility?",
 
 "enable_detailed_template_detail" =>
 "By default only the templates you defined above will be visible in the Template dropdown or carousel on the publish page.

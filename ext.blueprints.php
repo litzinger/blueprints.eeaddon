@@ -293,6 +293,7 @@ class Blueprints_ext {
     /*
         This is kind of lame, but all the good hooks have been removed from 2.0. This is called at the 
         beginning of a publish form load, so we'll use it to add our JS config settings to the footer.
+        Could use session_end and check the router or check the $_GET vars, but meh, doing it this way.
     */
     function publish_form_channel_preferences($data)
     {
@@ -310,7 +311,7 @@ class Blueprints_ext {
         $entry_id = $this->EE->input->get_post('entry_id');
         $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_path'];
         
-        // Lets get our active layouts into a JavaScrip array to use with jQuery below
+        // Lets get our active layouts into a JavaScript array to use with jQuery below
         $active_publish_layout = $this->EE->blueprints_model->get_active_publish_layout($channel_id);
         $active_publish_layout_array = array();
         
@@ -339,13 +340,30 @@ class Blueprints_ext {
                 $layout_carousel_names[$layout['template']] = $layout_name;
             }
         }
-
-        if(isset($this->settings['channels']))
+        
+        // Only show templates assigned to a publish layout
+        if(
+            isset($this->settings['enable_detailed_template']) AND
+            $this->settings['enable_detailed_template'] != 'y' AND
+            isset($this->settings['enable_publish_layout_takeover']) AND
+            $this->settings['enable_publish_layout_takeover'] == 'y' AND
+            count($this->cache['layouts']) > 0
+        ){
+            foreach($this->cache['layouts'] as $group_id => $layout)
+            {
+                $channel_templates[] = $layout['template'];
+            }
+        }
+        // Show specific templates depending on settings
+        elseif(isset($this->settings['channels']))
         {
             foreach($this->settings['channels'] as $k => $channel)
             {
                 if($channel == $channel_id OR $channel == '*')
                 {
+                    // If neither of these are true then the user didn't complete the settings form entirely.
+                    // If that is the case then all templates will be visible.
+                    
                     if(isset($this->settings['channel_show_group'][$k]))
                     {
                         $groups = array();
@@ -362,7 +380,7 @@ class Blueprints_ext {
                             $channel_templates[] = $row['template_id'];
                         }
                     }
-                    else
+                    elseif(isset($this->settings['channel_templates']))
                     {
                         $channel_templates = isset($this->settings['channel_templates'][$k]) ? $this->settings['channel_templates'][$k] : '';
                     }
@@ -613,6 +631,7 @@ class Blueprints_ext {
             );
         }
 
+        $vars['app_version'] = $this->EE->config->item('app_version');
         $vars['enable_publish_layout_takeover'] = isset($this->settings['enable_publish_layout_takeover']) ? $this->settings['enable_publish_layout_takeover'] : 'n';
         $vars['enable_edit_menu_tweaks'] = isset($this->settings['enable_edit_menu_tweaks']) ? $this->settings['enable_edit_menu_tweaks'] : 'n';
         $vars['enable_carousel'] = isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n';
@@ -623,8 +642,9 @@ class Blueprints_ext {
         $vars['pages_installed'] = array_key_exists('pages', $this->EE->addons->get_installed());
         
         $vars['hidden'] = array(
-            'file' => 'blueprints', 
-            'hash' => $this->settings['hash']
+            'file' => 'blueprints',
+            // Check for hash and set it if it doesn't exist... just incase
+            'hash' => (isset($this->settings['hash']) ? $this->settings['hash'] : $this->EE->functions->random('encrypt', 32))
         );
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));

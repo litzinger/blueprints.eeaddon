@@ -23,19 +23,25 @@ option.disabled { color: #999; }
     <?php echo form_open('C=addons_extensions'.AMP.'M=save_extension_settings', 'id="blueprint_settings"', $hidden)?>
     
     <?php
-    // Enable Edit menu tweak in Accessory?
-    $this->table->set_template($cp_table_template);
-    $this->table->set_heading(
-        array('data' => lang('enable_edit_menu_tweaks'), 'style' => 'width: 80%;', 'colspan' => '2')
-    );
-    $this->table->add_row(
-        array('data' => '<p>'. lang('enable_edit_menu_tweaks_detail') .'</p>', 'style' => 'width: 80%'),
-        array('data' => form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id="enable_edit_menu_tweaks"'), 'style' => 'width: 20%')
-    );
+    if($app_version > 231)
+    {
+        echo form_hidden('enable_edit_menu_tweaks', 'n');
+    }
+    else
+    {
+        // Enable Edit menu tweak in Accessory?
+        $this->table->set_template($cp_table_template);
+        $this->table->set_heading(
+            array('data' => lang('enable_edit_menu_tweaks'), 'style' => 'width: 80%;', 'colspan' => '2')
+        );
+        $this->table->add_row(
+            array('data' => '<p>'. lang('enable_edit_menu_tweaks_detail') .'</p>', 'style' => 'width: 80%'),
+            array('data' => form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id="enable_edit_menu_tweaks"'), 'style' => 'width: 20%')
+        );
 
-    echo $this->table->generate();
-    $this->table->clear();
-    
+        echo $this->table->generate();
+        $this->table->clear();
+    }
     
     // Enable hi-jacking
     $this->table->set_template($cp_table_template);
@@ -281,6 +287,10 @@ option.disabled { color: #999; }
             blueprints_enable_publish_layout_takeover($(this));
         });
         
+        $('#enable_publish_layout_takeover').next('.pt-switch').click(function(){
+            blueprints_enable_publish_layout_takeover($(this).prev('select'));
+        });
+        
         // blueprints_disable_template_options($('.template_name'));
         blueprints_enable_publish_layout_takeover($('#enable_publish_layout_takeover'));
         blueprints_set_row_events('channel_template_selection');
@@ -310,7 +320,8 @@ option.disabled { color: #999; }
         {
             var val = ele.val();
             if(val == 'n'){
-                $('#blueprint_settings .layout_group_name').val('').attr('disabled', true).addClass('disabled');
+                // $('#blueprint_settings .layout_group_name').val('').attr('disabled', true).addClass('disabled');
+                $('#blueprint_settings .layout_group_name:text[value=""]').attr('disabled', true).addClass('disabled');
             } else {
                 $('#blueprint_settings .layout_group_name').attr('disabled', false).removeClass('disabled');
             }

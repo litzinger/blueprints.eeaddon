@@ -103,7 +103,7 @@ class Blueprints_acc {
             array_key_exists('pages', $this->EE->addons->get_installed()))
         {
             $load_pages_url = $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'load_pages');
-             
+
             $script .= '
              
             $("#sidebarContent").prepend(\'<div class="structure_pages_sidebar contents">'. $contents .'</div>\');
@@ -154,6 +154,8 @@ class Blueprints_acc {
             });';
          }
 
+         // No longer needed in 2.0 version
+         
          // Fix from John D. Wells        
          // first create default settings array
          // $settings = array('enable_edit_menu_tweaks' => '');
@@ -171,8 +173,11 @@ class Blueprints_acc {
          //     }
          // }
 
-         if (isset($this->cache['settings']['enable_edit_menu_tweaks']) AND $this->cache['settings']['enable_edit_menu_tweaks'] == 'y')
-         {
+         if (
+             isset($this->cache['settings']['enable_edit_menu_tweaks']) AND 
+             $this->cache['settings']['enable_edit_menu_tweaks'] == 'y' AND
+             $this->EE->config->item('app_version') <= 231
+         ){
              $script .= '
                  var bp_ul = $("#navigationTabs li:eq(1) ul:eq(0) li.parent ul:eq(0)").html();
 
