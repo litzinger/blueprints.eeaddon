@@ -33,12 +33,15 @@ Blueprints.carousel = function(template_id)
             size: carousel.length,
             start: start_template.index()
         });
-
+        
         // Sets the layout_change input value so the correct layout group is saved
         Blueprints.carousel_change(old_template_id);
 
         // On load set the active template
         start_template.addClass('current');
+        
+        // Add divs for the edge fades
+        $('.jcarousel-container').prepend('<div class="jcarousel-left-fade"></div><div class="jcarousel-right-fade"></div>');
 
         // On click set active template
         $('.jcarousel-item').click(function(){

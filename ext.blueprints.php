@@ -172,8 +172,9 @@ class Blueprints_ext {
         {
             if(!$template_id = $structure_settings[$channel_id]['template_id'])
             {
+                $channels = $this->EE->blueprints_model->get_channels();
                 $link = $base_url.'module=structure'.AMP.'method=channel_setings';
-                show_error('Please define a default template for Channel ID: '. $channel_id .' in the <a href="'. $link .'">Structure module configuration</a>.');
+                show_error('Please define a default template for the <b>'. $channels[$channel_id]['channel_title'] .'</b> channel in the <a href="'. $link .'">Structure module configuration</a>.');
             }
         }
         // Get default Pages settings
@@ -183,8 +184,9 @@ class Blueprints_ext {
             
             if($query->num_rows() == 0)
             {
+                $channels = $this->EE->blueprints_model->get_channels();
                 $link = $base_url.'module=pages'.AMP.'method=configuration';
-                show_error('Please define a default template for Channel ID: '. $channel_id .' in the <a href="'. $link .'">Pages module configuration</a>.');
+                show_error('Please define a default template for the <b>'. $channels[$channel_id]['channel_title'] .'</b> channel in the <a href="'. $link .'">Pages module configuration</a>.');
             }
             else
             {
@@ -547,8 +549,8 @@ class Blueprints_ext {
         {
             $channel_options[''] = '-- Select --';
             $channel_options['*'] = '* All Channels';
-            foreach($channels->result_array() as $row) {
-                $channel_options[$row['channel_id']] = $row['channel_title'];
+            foreach($channels as $channel_id => $channel) {
+                $channel_options[$channel_id] = $channel['channel_title'];
             }
         }
         

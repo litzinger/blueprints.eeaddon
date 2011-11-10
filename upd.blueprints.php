@@ -312,8 +312,9 @@ class Blueprints_upd {
                 'channel_id'    => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
                 'member_id'     => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
                 'session_id'    => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+                'group_id'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
                 'timestamp'     => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
-                'settings'      => array('type' => 'text'),
+                'settings'      => array('type' => 'text')
             ));
 
             $this->EE->dbforge->add_key('id', TRUE);

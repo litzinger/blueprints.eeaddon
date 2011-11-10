@@ -133,9 +133,11 @@ class Blueprints_model
 
             // Found a match? Return it and duplicate the Publish Layout row so it actually works.
             // Next time we won't get this far b/c it will find the row above first.
+            
             // @todo - revisit this, caused the publish layout to blow up when cloning from pages(1) to news (2)
             // Need to see if it's a listing channel, and if so, unset some of the array keys in the publish
             // array b/c the fields are not displayed in structure tab.
+            
             if($group_id = $qry->row('group_id'))
             {
                 $data = array(
@@ -151,7 +153,34 @@ class Blueprints_model
                     'channel_id'    => $channel_id
                 ));
                 
-                $this->EE->db->insert('layout_publish', $insert);
+                // // See if it's a Structure listing channel first.
+                // if(array_key_exists('structure', $this->EE->addons->get_installed()))
+                // {
+                //     $settings = $this->get_structure_settings();
+                //     $channel_data = $settings[$channel_id];
+                //     
+                //     // If it's unmanaged or a listing, we need to clean up the field_layout.
+                //     if($channel_data['type'] != 'page')
+                //     {
+                //         $field_layout = unserialize($insert['field_layout']);
+                //         
+                //         if($channel_data['type'] == 'unmanaged')
+                //         {
+                //             unset($field_layout['structure']);
+                //         }
+                //         elseif($channel_data['type'] == 'listing')
+                //         {
+                //             unset($field_layout['structure']['structure__parent_id']);
+                //             // unset($field_layout['structure']['structure__listing_channel']);
+                //         }
+                //         
+                //         $insert['field_layout'] = serialize($field_layout);
+                //     }
+                // }
+                // 
+                // // @todo See if Revisions are enabled for the channel, if not, make sure it's not a set tab
+                // 
+                // $this->EE->db->insert('layout_publish', $insert);
                 
                 return $group_id;
             }
@@ -309,9 +338,18 @@ class Blueprints_model
     {
         if(!isset($this->cache['channels']))
         {
-            $sql = "SELECT channel_id, channel_name, channel_title FROM exp_channels WHERE site_id = '".$this->site_id."'";
+            $qry = $this->EE->db->select('channel_id, channel_name, channel_title')
+                                ->where('site_id', $this->site_id)
+                                ->get('channels');
+            
+            $channels = array();
+                
+            foreach($qry->result_array() as $row)
+            {
+                $channels[$row['channel_id']] = $row;
+            }
 
-            $this->cache['channels'] = $this->EE->db->query($sql);
+            $this->cache['channels'] = $channels;
         }
         
         return $this->cache['channels'];
@@ -325,11 +363,11 @@ class Blueprints_model
             if(array_key_exists('blueprints', $this->EE->addons->get_installed()))
             {
                 // check the db for extension settings
-                $query = $this->EE->db->get_where('blueprints_layouts', array('site_id' => $this->EE->config->item('site_id')));
+                $qry = $this->EE->db->get_where('blueprints_layouts', array('site_id' => $this->EE->config->item('site_id')));
 
                 $layouts = array();
 
-                foreach($query->result_array() as $row)
+                foreach($qry->result_array() as $row)
                 {
                     $layouts[$row['group_id']] = $row;
                 }
