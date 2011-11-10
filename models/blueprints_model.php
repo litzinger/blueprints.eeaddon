@@ -171,13 +171,17 @@ class Blueprints_model
                     {
                         $field_layout = unserialize($insert['field_layout']);
                         
+                        // Remove Structure tab entirely
                         if($channel_data['type'] == 'unmanaged')
                         {
                             unset($field_layout['structure']);
                         }
+                        // Just remove a few of fields
                         elseif($channel_data['type'] == 'listing')
                         {
+                            unset($field_layout['structure']['structure__listing_channel']);
                             unset($field_layout['structure']['structure__parent_id']);
+                            unset($field_layout['structure']['structure__hidden']);
                         }
                         
                         $insert['field_layout'] = serialize($field_layout);
