@@ -104,6 +104,9 @@ class Blueprints_model
             return $qry->row('group_id');
         }
         
+        // Uncomment to disable layout cloning.
+        // return false;
+        
         // No existing Publish Layout was found? Lets try harder...
         
         // See if this channel shares a field group with another channel that has a publish layout
@@ -134,53 +137,81 @@ class Blueprints_model
             // Found a match? Return it and duplicate the Publish Layout row so it actually works.
             // Next time we won't get this far b/c it will find the row above first.
             
-            // @todo - revisit this, caused the publish layout to blow up when cloning from pages(1) to news (2)
-            // Need to see if it's a listing channel, and if so, unset some of the array keys in the publish
-            // array b/c the fields are not displayed in structure tab.
-            
             if($group_id = $qry->row('group_id'))
             {
+                $field_display = array(
+                    'visible'       => TRUE,
+                    'collapse'      => FALSE, 
+                    'html_buttons'  => TRUE,
+                    'is_hidden'     => FALSE,
+                    'width'         => '100%'
+                );
+                
                 $data = array(
                     'member_group'  => $group_id, 
                     'channel_id'    => $row->channel_id
                 );
                 
-                $qry = $this->EE->db->get_where('layout_publish', $data)->result();
+                $qry = $this->EE->db->get_where('layout_publish', $data);
 
                 $insert = array_merge($data, array(
-                    'field_layout'  => $qry[0]->field_layout,
-                    'site_id'       => $qry[0]->site_id,
+                    'field_layout'  => $qry->row('field_layout'),
+                    'site_id'       => $qry->row('site_id'),
                     'channel_id'    => $channel_id
                 ));
                 
-                // // See if it's a Structure listing channel first.
-                // if(array_key_exists('structure', $this->EE->addons->get_installed()))
-                // {
-                //     $settings = $this->get_structure_settings();
-                //     $channel_data = $settings[$channel_id];
-                //     
-                //     // If it's unmanaged or a listing, we need to clean up the field_layout.
-                //     if($channel_data['type'] != 'page')
-                //     {
-                //         $field_layout = unserialize($insert['field_layout']);
-                //         
-                //         if($channel_data['type'] == 'unmanaged')
-                //         {
-                //             unset($field_layout['structure']);
-                //         }
-                //         elseif($channel_data['type'] == 'listing')
-                //         {
-                //             unset($field_layout['structure']['structure__parent_id']);
-                //             // unset($field_layout['structure']['structure__listing_channel']);
-                //         }
-                //         
-                //         $insert['field_layout'] = serialize($field_layout);
-                //     }
-                // }
-                // 
-                // // @todo See if Revisions are enabled for the channel, if not, make sure it's not a set tab
-                // 
-                // $this->EE->db->insert('layout_publish', $insert);
+                // See if it's a Structure listing channel first.
+                if(array_key_exists('structure', $this->EE->addons->get_installed()))
+                {
+                    $settings = $this->get_structure_settings();
+                    $channel_data = $settings[$channel_id];
+                    
+                    // If it's unmanaged or a listing, we need to clean up the field_layout.
+                    if($channel_data['type'] != 'page')
+                    {
+                        $field_layout = unserialize($insert['field_layout']);
+                        
+                        if($channel_data['type'] == 'unmanaged')
+                        {
+                            unset($field_layout['structure']);
+                        }
+                        elseif($channel_data['type'] == 'listing')
+                        {
+                            unset($field_layout['structure']['structure__parent_id']);
+                        }
+                        
+                        $insert['field_layout'] = serialize($field_layout);
+                    }
+                }
+                
+                // Going to do a few channel specific things here so the publish layouts
+                // don't blow up and throw a bunch of PHP errors.
+                
+                // Get channel settings
+                $qry = $this->EE->db->get_where('channels', array('channel_id' => $channel_id));
+                
+                $field_layout = unserialize($insert['field_layout']);
+                
+                // See if Revisions are enabled for the channel, if not, make sure it's not a set tab
+                if($qry->row('enable_versioning') == 'n')
+                {
+                    unset($field_layout['revisions']);
+                }
+                
+                // Remove the comment exp date field if it's in the layout and commenting is off
+                if($qry->row('comment_system_enabled') == 'n')
+                {
+                    unset($field_layout['date']['comment_expiration_date']);
+                }
+                // If commenting is on, give the field the default display
+                else
+                {
+                    $field_layout['date']['comment_expiration_date'] = $field_display;
+                }
+                
+                $insert['field_layout'] = serialize($field_layout);
+                
+                $this->EE->db->insert('layout_publish', $insert);
                 
                 return $group_id;
             }
