@@ -118,9 +118,6 @@ class Blueprints_upd {
     
     public function update($current = '')
     {
-        // $this->debug($current);
-        // $this->debug($this->version, true);
-        
         // Uh, this is called when a template is requested?
         // Got an error below when requesting a template.
         if(REQ != 'CP')
@@ -218,39 +215,47 @@ class Blueprints_upd {
         // Create a random hash to use to validate ACT
         $hash = $this->EE->functions->random('encrypt', 32);
         $new_settings = array();
-        
+
         if(!empty($settings))
         {
             foreach($settings as $site_id => $setting)
             {
-                if(isset($settings['layout_group_names']) AND !empty($setting['layout_group_names']))
+                if(isset($setting['layout_group_names']) AND !empty($setting['layout_group_names']))
                 {
                     foreach($setting['layout_group_names'] as $k => $v)
                     {
-                        $data = array(
-                            'site_id'       => $site_id,
-                            'group_id'      => $setting['layout_group_ids'][$k],
-                            'template'      => $setting['template'][$k],
-                            'thumbnail'     => $setting['thumbnails'][$k],
-                            'name'          => $setting['layout_group_names'][$k],
-                        );
+                        // Account for a possible bug in 1.x where empty key/value pairs were possible
+                        if(!empty($v))
+                        {
+                            $data = array(
+                                'site_id'       => $site_id,
+                                'group_id'      => $setting['layout_group_ids'][$k],
+                                'template'      => $setting['template'][$k],
+                                'thumbnail'     => $setting['thumbnails'][$k],
+                                'name'          => $setting['layout_group_names'][$k],
+                            );
 
-                        $this->EE->db->insert('blueprints_layouts', $data);
+                            $this->EE->db->insert('blueprints_layouts', $data);
+                        }
                     }
                 }
             
-                if(isset($settings['layout_group_names']) AND !empty($setting['layout_group_names']))
+                if(isset($setting['template_layout']) AND !empty($setting['template_layout']))
                 {
                     foreach($setting['template_layout'] as $entry_id => $v)
                     {
-                        $data = array(
-                            'site_id'       => $site_id,
-                            'entry_id'      => $entry_id,
-                            'template_id'   => $v['template_id'],
-                            'group_id'      => $v['layout_group_id']
-                        );
+                        // Account for a possible bug in 1.x where empty key/value pairs were possible
+                        if(!empty($v))
+                        {
+                            $data = array(
+                                'site_id'       => $site_id,
+                                'entry_id'      => $entry_id,
+                                'template_id'   => $v['template_id'],
+                                'group_id'      => $v['layout_group_id']
+                            );
             
-                        $this->EE->db->insert('blueprints_entries', $data);
+                            $this->EE->db->insert('blueprints_entries', $data);
+                        }
                     }
                 }
                 
