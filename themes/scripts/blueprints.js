@@ -82,7 +82,7 @@ Blueprints.carousel = function(template_id)
                 submit_button.css('left', ((item_width / 2) - (submit_width / 2)) - 8);
                 
                 submit_button.show(function () {
-                    alert('visible!');
+                    // alert('visible!');
                       // $(this).hide("scale", {}, 1000);
                 });
 
@@ -103,7 +103,7 @@ Blueprints.autosave = function(layout_preview)
     post_data = $("#publishForm").serialize();
     entry_id = $("#publishForm input[name=entry_id]").val();
     channel_id = $("#publishForm input[name=channel_id]").val();
-    
+
     $.ajax({
         type: "POST",
         url: Blueprints.config.action_url_update_field_settings,
@@ -165,6 +165,7 @@ Blueprints.select_change = function(ele)
 {
     var template = $(ele).find("option:selected").val();
     thumbnail = Blueprints.config.thumbnail_path + Blueprints.config.thumbnails[template];
+    
     if(Blueprints.config.thumbnails[template] != "" && Blueprints.config.thumbnails[template] != undefined) {
         $("#template_thumbnail").show().html('<img src="'+ thumbnail +'" width="155" />');
     } else {
@@ -174,15 +175,14 @@ Blueprints.select_change = function(ele)
     if(Blueprints.config.publish_layout_takeover)
     {
         layout_preview = Blueprints.config.layouts[template];
-        
+
         if(layout_preview != undefined && layout_preview != "") {
             $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
-            $("#revision_button").clone(true).appendTo( jQuery("#layout_change") );
         } else {
             $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="layout_preview" value="NULL" />');
         }
         
-        $("#template_thumbnail").append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
+        $("#template_thumbnail").show().append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
         $("#template_thumbnail .submit").click(function(e){
             e.preventDefault();
             $(this).after('<img class="ajax_loader" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
