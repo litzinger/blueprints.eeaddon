@@ -86,7 +86,7 @@ option.disabled { color: #999; }
     
     
     // Layouts
-    echo '<div class="publish_layouts">';
+    echo '<div class="publish_layouts settings_sortable">';
     $this->table->set_template($cp_table_template);
     $this->table->set_heading(
         array('data' => lang('blueprint_layout_heading'), 'style' => 'width:25%;'),
@@ -97,6 +97,7 @@ option.disabled { color: #999; }
     foreach($fields as $field)
     {
         $this->table->add_row(
+            '<div class="handle"><img src="'. $theme_folder_url .'boldminded_themes/images/icon_handle.gif" /></div>' .
             form_hidden($field['layout_group_id'], $field['layout_group_id_value']) .
             form_input($field['layout_group_name'], $field['layout_group_name_value'], 'class="layout_group_name"'),
             form_dropdown($field['tmpl_name'], $field['tmpl_options'], $field['tmpl_options_selected'], 'id="'.$field['tmpl_name'].'" class="template_name"'),
@@ -154,6 +155,27 @@ option.disabled { color: #999; }
     <script type="text/javascript">
     jQuery(function($){
         
+        var fixHelper = function(e, ui) {
+            ui.children().each(function() {
+                $(this).width($(this).width());
+                $(this).height($(this).height());
+            });
+            return ui;
+        };
+
+        $("div.settings_sortable table").sortable({
+            axis: "y",
+            placeholder: "ui-state-highlight",
+            distance: 5,
+            forcePlaceholderSize: true,
+            items: "tr",
+            helper: fixHelper,
+            handle: ".handle",
+            start: function (event, ui) {
+                ui.placeholder.html("<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>");
+            },
+        });
+        
         var blueprints_total_templates = <?php echo count($channel['channel_templates_options']) - 1; // minus 1 b/c of the 'None' option ?>;
         var blueprints_total_channels = <?php echo count($channel['channel_options']) - 1; // minus 1 b/c of the 'None' option ?>;
         var blueprints_selected_templates = [];
@@ -182,7 +204,7 @@ option.disabled { color: #999; }
             // Old way, way over thinking this, caused some errors.
             // row = row.replace(regex, '['+ index +']');
             // Remove the index from the cloned row so it gets saved with a new index
-            row = row.replace(regex, '[]');
+            row = row.replace(regex, '[new_'+ index +']');
             table.append('<tr id="'+ rel + index +'" class="'+ cssclass +'">'+ row +'</tr>');
         
             /* Remove all selections from the duplicated select */
