@@ -67,7 +67,7 @@ class Blueprints_ext {
     /**
      * Constructor
      */
-    function Blueprints_ext($settings = '') 
+    public function Blueprints_ext($settings = '') 
     {
         $this->EE =& get_instance();
         $this->site_id = $this->EE->config->item('site_id');
@@ -96,13 +96,14 @@ class Blueprints_ext {
         $this->cache['layouts'] = $this->EE->blueprints_model->get_layouts();
         $this->cache['entries'] = $this->EE->blueprints_model->get_entries();
         
+        // So I don't have to change a bunch of references below
         $this->settings = $this->cache['settings'];
     }
     
     /*
         Determine what we should set $_GET['layout_preview'] to for hi-jacking.
     */
-    function sessions_end($session)
+    public function sessions_end($session)
     {
         // Stop here if we shouldn't be hi-jacking the publish layouts
         if(
@@ -193,7 +194,7 @@ class Blueprints_ext {
                 $template_id = $query->row('configuration_value');
             }
         }
-        
+
         // And hi-jack it if we have a custom layout_group
         if($layout_group = $this->_find_layout_group($template_id, $channel_id, $entry_id, $session))
         {
@@ -253,10 +254,24 @@ class Blueprints_ext {
     /*
         Only this hook is called when Save Revision and Submit are clicked.
     */
-    function entry_submission_ready($meta, $data, $autosave)
+    public function entry_submission_ready($meta, $data, $autosave)
     {
+        $this->_entry_submission($data['entry_id'], $data);
+    }
+    
+    public function entry_submission_absolute_end($entry_id, $meta, $data)
+    {
+        $this->_entry_submission($entry_id, $data);
+    }
+    
+    private function _entry_submission($entry_id, $data)
+    {
+        if($this->EE->input->is_ajax_request() OR $entry_id == 0)
+        {
+            return;
+        }
+        
         $post_template_id = false;
-        $entry_id = $data['entry_id'];
         
         // Save our settings to the current site ID for MSM.
         $site_id = $this->EE->config->item('site_id');
@@ -280,7 +295,7 @@ class Blueprints_ext {
                 'site_id'       => $this->site_id,
                 'entry_id'      => $entry_id
             );
-            
+
             $this->EE->blueprints_model->insert_or_update('blueprints_entries', $data, $where);
         }
         
@@ -297,7 +312,7 @@ class Blueprints_ext {
         beginning of a publish form load, so we'll use it to add our JS config settings to the footer.
         Could use session_end and check the router or check the $_GET vars, but meh, doing it this way.
     */
-    function publish_form_channel_preferences($data)
+    public function publish_form_channel_preferences($data)
     {
         $templates = array();
         
@@ -478,7 +493,7 @@ class Blueprints_ext {
     /*
         Settings form. Turn on/off options and save Publish Layout names.
     */
-    function settings_form($vars)
+    public function settings_form($vars)
     {
         $this->EE->lang->loadfile('blueprints');
         $this->EE->load->library('javascript');
@@ -658,7 +673,7 @@ class Blueprints_ext {
     /*
         Save the form settings
     */
-    function save_settings()
+    public function save_settings()
     {
         $channels = $this->EE->input->post('channels');
         $channel_show_selected = $this->EE->input->post('channel_show_selected');
@@ -758,14 +773,14 @@ class Blueprints_ext {
         $this->EE->session->set_flashdata('message_success', $this->EE->lang->line('preferences_updated'));
     }
     
-    function activate_extension() {}
-    function update_extension($current = '') {
+    public function activate_extension() {}
+    public function update_extension($current = '') {
         // Is there a better way to do this??
         require_once PATH_THIRD .'blueprints/upd.blueprints.php';
         $upd = new Blueprints_upd;
         $upd->update($current);
     }
-    function disable_extension() {}
+    public function disable_extension() {}
     
     private function debug($str, $die = false)
     {
