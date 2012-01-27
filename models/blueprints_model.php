@@ -398,7 +398,9 @@ class Blueprints_model
             if(array_key_exists('blueprints', $this->EE->addons->get_installed()))
             {
                 // check the db for extension settings
-                $qry = $this->EE->db->get_where('blueprints_layouts', array('site_id' => $this->EE->config->item('site_id')));
+                $qry = $this->EE->db->where(array('site_id' => $this->EE->config->item('site_id')))
+                                    ->order_by('order', 'asc')
+                                    ->get('blueprints_layouts');
 
                 $layouts = array();
 

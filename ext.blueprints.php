@@ -657,6 +657,7 @@ class Blueprints_ext {
         $vars['site_path'] = $this->EE->blueprints_helper->site_path();
         $vars['structure_installed'] = array_key_exists('structure', $this->EE->addons->get_installed());
         $vars['pages_installed'] = array_key_exists('pages', $this->EE->addons->get_installed());
+        $vars['theme_folder_url'] = $this->EE->blueprints_helper->get_theme_folder_url();
         
         $vars['hidden'] = array(
             'file' => 'blueprints',
@@ -665,6 +666,8 @@ class Blueprints_ext {
         );
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
+        
+        $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
 
         // Load it up and return it to addons_extensions.php for rendering
         return $this->EE->load->view('settings_form', $vars, TRUE);
@@ -746,12 +749,18 @@ class Blueprints_ext {
         
         foreach($insert['template'] as $k => $v)
         {
+            if(strstr('new_', $k))
+            {
+                
+            }
+            
             $data = array(
                 'site_id'       => $this->site_id,
                 'group_id'      => $insert['layout_group_ids'][$k],
                 'template'      => $insert['template'][$k],
                 'thumbnail'     => $insert['thumbnails'][$k],
                 'name'          => $insert['layout_group_names'][$k],
+                'order'         => $k
             );
     
             $where = array(
