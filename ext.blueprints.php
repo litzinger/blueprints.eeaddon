@@ -252,16 +252,23 @@ class Blueprints_ext {
     }
     
     /*
-        Only this hook is called when Save Revision and Submit are clicked.
+        Only this hook is called when Autosave, Save Revision and Submit are clicked.
     */
     public function entry_submission_ready($meta, $data, $autosave)
     {
+        // $this->cache['entry_submission_ready_called'] = true;
         $this->_entry_submission($data['entry_id'], $data);
     }
     
+    /*
+        Only called when Submit is clicked.
+    */
     public function entry_submission_absolute_end($entry_id, $meta, $data)
     {
-        $this->_entry_submission($entry_id, $data);
+        // if ( ! isset($this->cache['entry_submission_ready_called']))
+        // {
+            $this->_entry_submission($entry_id, $data);
+        // }
     }
     
     private function _entry_submission($entry_id, $data)
@@ -578,6 +585,7 @@ class Blueprints_ext {
             {
                 // Recreate saved fields
                 $fields[] = array(
+                    'row_id' => $layout['id'],
                     'tmpl_name' => 'template['. $k .']',
                     'tmpl_options' => $template_options,
                     'tmpl_options_selected' => isset($layout['template']) ? $layout['template'] : '',
@@ -598,6 +606,7 @@ class Blueprints_ext {
         else
         {
             $fields[] = array(
+                'row_id' => 0,
                 'tmpl_name' => 'template['. $k .']',
                 'tmpl_options' => $template_options,
                 'tmpl_options_selected' => isset($layout['template']) ? $layout['template'] : '',
@@ -658,6 +667,10 @@ class Blueprints_ext {
         $vars['structure_installed'] = array_key_exists('structure', $this->EE->addons->get_installed());
         $vars['pages_installed'] = array_key_exists('pages', $this->EE->addons->get_installed());
         $vars['theme_folder_url'] = $this->EE->blueprints_helper->get_theme_folder_url();
+        
+        $max_group_id = $this->EE->db->select_max('group_id')->get('blueprints_layouts')->row('group_id');
+        
+        $vars['max_group_id'] = $max_group_id ? $max_group_id : $this->layout_id;
         
         $vars['hidden'] = array(
             'file' => 'blueprints',
@@ -747,28 +760,30 @@ class Blueprints_ext {
             }
         }
         
+        $template_order = array_values($insert['template']);
+
         foreach($insert['template'] as $k => $v)
         {
-            if(strstr('new_', $k))
+            if($insert['layout_group_names'][$k])
             {
-                
-            }
+                $order = array_search($insert['template'][$k], $template_order);
             
-            $data = array(
-                'site_id'       => $this->site_id,
-                'group_id'      => $insert['layout_group_ids'][$k],
-                'template'      => $insert['template'][$k],
-                'thumbnail'     => $insert['thumbnails'][$k],
-                'name'          => $insert['layout_group_names'][$k],
-                'order'         => $k
-            );
+                $data = array(
+                    'site_id'       => $this->site_id,
+                    'group_id'      => $insert['layout_group_ids'][$k],
+                    'template'      => $insert['template'][$k],
+                    'thumbnail'     => $insert['thumbnails'][$k],
+                    'name'          => $insert['layout_group_names'][$k],
+                    'order'         => $order
+                );
     
-            $where = array(
-                'site_id'       => $this->site_id,
-                'group_id'      => $insert['layout_group_ids'][$k]
-            );
-    
-            $this->EE->blueprints_model->insert_or_update('blueprints_layouts', $data, $where);
+                $where = array(
+                    'site_id'       => $this->site_id,
+                    'group_id'      => $insert['layout_group_ids'][$k]
+                );
+
+                $this->EE->blueprints_model->insert_or_update('blueprints_layouts', $data, $where);
+            }
         }
 
         // Save our settings to the current site ID for MSM.

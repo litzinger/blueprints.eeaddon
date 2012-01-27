@@ -22,136 +22,167 @@ option.disabled { color: #999; }
 
     <?php echo form_open('C=addons_extensions'.AMP.'M=save_extension_settings', 'id="blueprint_settings"', $hidden)?>
     
-    <?php
-    if($app_version > 231)
-    {
-        echo form_hidden('enable_edit_menu_tweaks', 'n');
-    }
-    else
-    {
-        // Enable Edit menu tweak in Accessory?
-        $this->table->set_template($cp_table_template);
-        $this->table->set_heading(
-            array('data' => lang('enable_edit_menu_tweaks'), 'style' => 'width: 80%;', 'colspan' => '2')
-        );
-        $this->table->add_row(
-            array('data' => '<p>'. lang('enable_edit_menu_tweaks_detail') .'</p>', 'style' => 'width: 80%'),
-            array('data' => form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id="enable_edit_menu_tweaks"'), 'style' => 'width: 20%')
-        );
+    <?php if($app_version > 231): ?>
+        
+        <?php echo form_hidden('enable_edit_menu_tweaks', 'n'); ?>
+        
+    <?php else: ?>
+        
+        <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <th colspan="2">
+                    <?php echo lang('enable_edit_menu_tweaks'); ?>
+                </th>
+            </tr>
+            <tr>
+                <td width="80%">
+                    <?php echo lang('enable_edit_menu_tweaks_detail'); ?>
+                </td>
+                <td width="20%">
+                    <?php echo form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id="enable_edit_menu_tweaks"'); ?>
+                </td>
+            </tr>
+        </table>
+    
+    <?php endif; ?>
+    
+    <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <th colspan="2">
+                <?php echo lang('enable_publish_layout_takeover'); ?>
+            </th>
+        </tr>
+        <tr>
+            <td width="80%">
+                <?php echo lang('enable_publish_layout_takeover_detail'); ?>
+            </td>
+            <td width="20%">
+                <?php echo form_dropdown('enable_publish_layout_takeover', array('n' => 'No', 'y' => 'Yes'), $enable_publish_layout_takeover, 'id="enable_publish_layout_takeover"'); ?>
+            </td>
+        </tr>
+    </table>
+    
+    <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <th colspan="2">
+                <?php echo lang('enable_carousel'); ?>
+            </th>
+        </tr>
+        <tr>
+            <td width="80%">
+                <?php echo lang('enable_carousel_detail'); ?>
+            </td>
+            <td width="20%">
+                <?php echo form_dropdown('enable_carousel', array('n' => 'No', 'y' => 'Yes'), $enable_carousel, 'id="enable_carousel"'); ?>
+            </td>
+        </tr>
+    </table>
+    
+    <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <th colspan="2">
+                <?php echo lang('thumbnail_path'); ?>
+            </th>
+        </tr>
+        <tr>
+            <td width="50%">
+                <?php echo lang('thumbnail_path_detail'); ?>
+            </td>
+            <td width="50%">
+                <?php echo form_input('thumbnail_path', $thumbnail_path, 'class="thumbnail_path"'); ?>
+            </td>
+        </tr>
+    </table>
+    
+    <input type="hidden" value="<?php echo $max_group_id ?>" id="max_group_id" />
+    
+    <div class="publish_layouts settings_sortable">
+        <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <th>
+                    <?php echo lang('blueprint_layout_heading'); ?>
+                </th>
+                <th>
+                    <?php echo lang('blueprint_template_heading'); ?>
+                </th>
+                <th>
+                    <?php echo lang('blueprint_thumbnail_heading'); ?>
+                </th>
+            </tr>
+            <?php foreach($fields as $field): ?>
+                <tr id="order_<?php echo $field['row_id'] ?>">
+                    <td width="25%">
+                        <div class="handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
+                        <?php echo form_hidden($field['layout_group_id'], $field['layout_group_id_value']); ?>
+                        <?php echo form_input($field['layout_group_name'], $field['layout_group_name_value'], 'class="layout_group_name"'); ?>
+                    </td>
+                    <td width="30%">
+                        <?php echo form_dropdown($field['tmpl_name'], $field['tmpl_options'], $field['tmpl_options_selected'], 'id="'.$field['tmpl_name'].'" class="template_name"'); ?>
+                    </td>
+                    <td width="45%">
+                        <?php echo form_dropdown($field['thb_name'], $field['thb_options'], $field['thb_options_selected'], 'id="'.$field['thb_name'].'"'); ?>
+                        <a href="#" class="blueprint_remove_row" rel="publish_layouts" data="<?php echo $field['layout_group_id_value'] ?>">Delete</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+    
+    <a href="#" class="blueprint_add_row" rel="publish_layouts">+ Add</a>
 
-        echo $this->table->generate();
-        $this->table->clear();
-    }
+    <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <th colspan="2">
+                <?php echo lang('enable_detailed_template'); ?>
+            </th>
+        </tr>
+        <tr>
+            <td width="80%">
+                <?php echo lang('enable_detailed_template_detail'); ?>
+            </td>
+            <td width="20%">
+                <?php echo form_dropdown('enable_detailed_template', array('n' => 'No', 'y' => 'Yes'), $enable_detailed_template, 'id="enable_detailed_template"'); ?>
+            </td>
+        </tr>
+    </table>
+        
+    <div class="channel_template_selection"<?php echo (($enable_detailed_template != 'y') ? 'style="display: none;"' : "") ?>>
+        <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>
+                        <?php echo lang('blueprint_channel_heading'); ?>
+                    </th>
+                    <th>
+                        <?php echo lang('blueprint_template_heading'); ?>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($channels as $channel): ?>
+                    <tr>
+                        <td width="25%">
+                            <p style="margin-bottom: 12px" class="template_display_detail"><?php echo lang('template_display_detail') ?></p>
+                        </td>
+                        <td width="30%">
+                            <?php echo form_dropdown($channel['channel_name'], $channel['channel_options'], $channel['channel_options_selected'], 'id="'.$channel['channel_name'].'"'); ?>
+                        </td>
+                        <td width="45%">
+                            <div class="checkboxes">
+                                <?php echo $channel['channel_checkbox_options'] ?>
+                                <?php echo form_multiselect($channel['channel_templates_name'], $channel['channel_templates_options'], $channel['channel_templates_options_selected'], 'id="'.$channel['channel_templates_name'].'" class="show_select" size="10" style="display: none; width: 99%; margin-top: 5px;"') ?>
+                                <a href="#" class="blueprint_remove_row" rel="channel_template_selection">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
     
-    // Enable hi-jacking
-    $this->table->set_template($cp_table_template);
-    $this->table->set_heading(
-        array('data' => lang('enable_publish_layout_takeover'), 'colspan' => '2')
-    );
-    $this->table->add_row(
-        array('data' => '<p>'. lang('enable_publish_layout_takeover_detail') .'</p>', 'style' => 'width: 80%'),
-        array('data' => form_dropdown('enable_publish_layout_takeover', array('n' => 'No', 'y' => 'Yes'), $enable_publish_layout_takeover, 'id="enable_publish_layout_takeover"'), 'style' => 'width: 20%')
-    );
-
-    echo $this->table->generate();
-    $this->table->clear();
+    <a href="#" class="blueprint_add_row" rel="channel_template_selection"<?php echo (($enable_detailed_template != 'y') ? 'style="display: none;"' : "") ?>>+ Add</a>
     
-    
-    // Enable carousel
-    $this->table->set_template($cp_table_template);
-    $this->table->set_heading(
-        array('data' => lang('enable_carousel'), 'colspan' => '2')
-    );
-    $this->table->add_row(
-        array('data' => '<p>'. lang('enable_carousel_detail') .'</p>', 'style' => 'width: 80%'),
-        array('data' => form_dropdown('enable_carousel', array('n' => 'No', 'y' => 'Yes'), $enable_carousel, 'id="enable_carousel"'), 'style' => 'width: 20%')
-    );
-
-    echo $this->table->generate();
-    $this->table->clear();
-    
-    
-    // Thumbnail Path
-    $this->table->set_template($cp_table_template);
-    $this->table->set_heading(
-        array('data' => lang('thumbnail_path'), 'colspan' => '2')
-    );
-    $this->table->add_row(
-        array('data' => '<p>'. lang('thumbnail_path_detail') .'</p>', 'style' => 'width: 50%'),
-        array('data' => form_input('thumbnail_path', $thumbnail_path, 'class="thumbnail_path"') . '<p><small>Current path: '. $site_path.$thumbnail_path .'</small></p>', 'style' => 'width: 50%')
-    );
-
-    echo $this->table->generate();
-    $this->table->clear();
-    
-    
-    // Layouts
-    echo '<div class="publish_layouts settings_sortable">';
-    $this->table->set_template($cp_table_template);
-    $this->table->set_heading(
-        array('data' => lang('blueprint_layout_heading'), 'style' => 'width:25%;'),
-        array('data' => lang('blueprint_template_heading'), 'style' => 'width:30%;'),
-        array('data' => lang('blueprint_thumbnail_heading'),'style' => 'width:45%;')
-    );
-    
-    foreach($fields as $field)
-    {
-        $this->table->add_row(
-            '<div class="handle"><img src="'. $theme_folder_url .'boldminded_themes/images/icon_handle.gif" /></div>' .
-            form_hidden($field['layout_group_id'], $field['layout_group_id_value']) .
-            form_input($field['layout_group_name'], $field['layout_group_name_value'], 'class="layout_group_name"'),
-            form_dropdown($field['tmpl_name'], $field['tmpl_options'], $field['tmpl_options_selected'], 'id="'.$field['tmpl_name'].'" class="template_name"'),
-            form_dropdown($field['thb_name'], $field['thb_options'], $field['thb_options_selected'], 'id="'.$field['thb_name'].'"') . '<a href="#" class="blueprint_remove_row" rel="publish_layouts" data="'. $field['layout_group_id_value'] .'">Delete</a>'
-        );
-    }
-
-    echo $this->table->generate();
-    echo '</div>';
-    echo '<a href="#" class="blueprint_add_row" rel="publish_layouts">+ Add</a>';
-    $this->table->clear();
-    
-    
-    // Enable detailed template selecting
-    $this->table->set_template($cp_table_template);
-    $this->table->set_heading(
-        array('data' => lang('enable_detailed_template'), 'colspan' => '2')
-    );
-    $this->table->add_row(
-        array('data' => '<p>'. lang('enable_detailed_template_detail') .'</p>', 'style' => 'width: 80%'),
-        array('data' => form_dropdown('enable_detailed_template', array('n' => 'No', 'y' => 'Yes'), $enable_detailed_template, 'id="enable_detailed_template"'), 'style' => 'width: 20%')
-    );
-
-    echo $this->table->generate();
-    $this->table->clear();
-    
-
-    // Template selection
-    echo '<div class="channel_template_selection" '. (($enable_detailed_template != 'y') ? 'style="display: none;"' : "") .'>';
-    $this->table->set_template($cp_table_template);
-    $this->table->set_heading(
-        array('style' => '30%'),
-        array('data' => lang('blueprint_channel_heading'), 'style' => 'width:30%;'),
-        array('data' => lang('blueprint_template_heading'),'style' => 'width:40%;')
-    );
-
-    foreach($channels as $channel)
-    {
-        $this->table->add_row(
-            '<p style="margin-bottom: 12px" class="template_display_detail">'. lang('template_display_detail') .'</p>',
-            form_dropdown($channel['channel_name'], $channel['channel_options'], $channel['channel_options_selected'], 'id="'.$channel['channel_name'].'"'),
-            '<div class="checkboxes">'. 
-                $channel['channel_checkbox_options'] .
-                form_multiselect($channel['channel_templates_name'], $channel['channel_templates_options'], $channel['channel_templates_options_selected'], 'id="'.$channel['channel_templates_name'].'" class="show_select" size="10" style="display: none; width: 99%; margin-top: 5px;"') . '<a href="#" class="blueprint_remove_row" rel="channel_template_selection">Delete</a>'. 
-            '</div>'    
-        );
-    }
-
-    echo $this->table->generate();
-    echo '</div>';
-    echo '<a href="#" class="blueprint_add_row" rel="channel_template_selection" '. (($enable_detailed_template != 'y') ? 'style="display: none;"' : "") .'>+ Add</a>';
-    $this->table->clear();
-    ?>
-
     <script type="text/javascript">
     jQuery(function($){
         
@@ -173,7 +204,7 @@ option.disabled { color: #999; }
             handle: ".handle",
             start: function (event, ui) {
                 ui.placeholder.html("<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>");
-            },
+            }
         });
         
         var blueprints_total_templates = <?php echo count($channel['channel_templates_options']) - 1; // minus 1 b/c of the 'None' option ?>;
@@ -188,38 +219,35 @@ option.disabled { color: #999; }
         });
     
         $('.blueprint_add_row').live('click', function(e){
-            regex = /(\[\d+\])/g; 
-            rel = $(this).attr('rel');
-            table = $('.'+ rel +' .mainTable tbody');
-            tr = table.find('tr:last-child').clone(true);
-            row = tr.html();
-            index = table.find('tr').length;
+            // regex = /(\[\d+\])/g; 
+            var regex = /(\[\d+\]|\[new_\d+\])/g;
+            var rel = $(this).attr('rel');
+            var table = $('.'+ rel +' .mainTable tbody');
+            var tr = table.find('tr:last-child').clone(true);
+            var row = tr.html();
+            var index = table.find('tr').length;
         
             if(tr.hasClass('even')){
-                cssclass = 'odd';
+                var cssclass = 'odd';
             } else {
-                cssclass = 'even';
+                var cssclass = 'even';
             }
             
-            // Old way, way over thinking this, caused some errors.
-            // row = row.replace(regex, '['+ index +']');
             // Remove the index from the cloned row so it gets saved with a new index
             row = row.replace(regex, '[new_'+ index +']');
+            // row = row.replace(regex, '[]');
             table.append('<tr id="'+ rel + index +'" class="'+ cssclass +'">'+ row +'</tr>');
         
             /* Remove all selections from the duplicated select */
             $('#'+ rel + index).find('select').val('');
 
             /* Remove values from text fields */
-            $('#'+ rel + index).find('input').val('');
+            $('#'+ rel + index).find('input').attr('value', '');
 
-            /* Set ID value */
-            if(parseInt(index - 1) == 0) {
-                var prev_id = parseInt($('.'+ rel).find('table tbody tr:eq(0) input[type="hidden"]').val());
-            } else {
-                var prev_id = parseInt($('.'+ rel).find('table tbody tr:eq('+ parseInt(index - 1) +')').find('input[type="hidden"]').val());
-            }
-            $('#'+ rel + index).find('input[type="hidden"]').val(parseInt(prev_id + 1));
+            /* Set the new group ID */
+            var max_group_id = parseInt($('#max_group_id').val()) + 1;
+            $('#max_group_id').val(max_group_id);
+            $('#'+ rel + index).find('input[type="hidden"]').val(max_group_id);
             
             /* Reset all checkboxes */
             $('#'+ rel + index).find('.show_group, .show_selected').attr('disabled', false).attr('checked', false);
@@ -273,10 +301,15 @@ option.disabled { color: #999; }
             
             rel = $(this).attr('rel');
             field = $(this).closest('tr').find('.layout_group_name');
-            
+
             if(field.val() == "")
             {
                 $(this).closest('tr').remove();
+                
+                /* Add the Add link back ;) */
+                if($('.publish_layouts tbody tr').length <= blueprints_total_templates){
+                    $('.publish_layouts + .blueprint_add_row').show();
+                }
             }
             else if(rel == 'publish_layouts')
             {
@@ -286,6 +319,11 @@ option.disabled { color: #999; }
                 $.data(document.body, 'delete_link', $(this));
             
                 blueprints_dialog.dialog('open');
+
+                /* Add the Add link back ;) */
+                if($('.publish_layouts tbody tr').length <= blueprints_total_templates){
+                    $('.publish_layouts + .blueprint_add_row').show();
+                }
             }
             else if(rel == 'channel_template_selection')
             {

@@ -185,6 +185,25 @@ class Blueprints_upd {
 
             $this->EE->db->where('class', 'Blueprints_ext');
             $this->EE->db->update('exp_extensions', array('settings' => serialize($new_settings)));
+            
+            // Add new hooks
+            $ext_template = array(
+                'class'    => 'Blueprints_ext',
+                'settings' => '',
+                'priority' => 8,
+                'version'  => $this->version,
+                'enabled'  => 'y'
+            );
+
+            $extensions = array(
+                array('hook'=>'entry_submission_absolute_end', 'method'=>'entry_submission_absolute_end')
+            );
+
+            foreach($extensions as $extension)
+            {
+                $ext = array_merge($ext_template, $extension);
+                $this->EE->db->insert('exp_extensions', $ext);
+            }
         }
         
         // Update version #
@@ -284,12 +303,16 @@ class Blueprints_upd {
                 'group_id'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
                 'template'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
                 'thumbnail'     => array('type' => 'text'),
-                'name'          => array('type' => 'text')
+                'name'          => array('type' => 'text'),
+                'order'         => array('type' => 'int', 'constraint' => 2, 'default' => 0) 
             ));
 
             $this->EE->dbforge->add_key('id', TRUE);
             $this->EE->dbforge->add_key('group_id', TRUE);
             $this->EE->dbforge->create_table('blueprints_layouts');
+            
+            // Start the ID as 2000
+            // $this->EE->db->query("ALTER TABLE `exp_blueprints_layouts` AUTO_INCREMENT = 2000");
         }
         
         if (! $this->EE->db->table_exists('blueprints_entries'))
