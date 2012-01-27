@@ -680,7 +680,19 @@ class Blueprints_ext {
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
         
+        
+        // Create global config to use in our JS file
+        $blueprints_config = '
+        if (typeof window.Blueprints == \'undefined\') window.Blueprints = {};
+
+        Blueprints.config = {
+            blueprints_total_templates: '. $templates->num_rows() .',
+            blueprints_total_channels: '. count($channels) .'
+        };';
+        
+        $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
+        $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints_settings.js"></script><!-- END Blueprints assets -->');
 
         // Load it up and return it to addons_extensions.php for rendering
         return $this->EE->load->view('settings_form', $vars, TRUE);

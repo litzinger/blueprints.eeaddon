@@ -1,3 +1,5 @@
+/* Settings Page */
+
 .handle {
 	float: left;
 	width: 16px;
@@ -9,6 +11,19 @@
 input[type="text"].layout_group_name {
 	width: 80%;
 }
+
+.blueprint_add_row { float: right; font-weight: bold; display: inline-block; padding: 0 12px 12px 12px; margin-top: -5px }
+.blueprint_remove_row { float: right; }
+#remove_dialog { display: none; }
+.radios { margin: 1em; padding-left: 100px }
+.radios label { margin: 0.5em 0; display: block;}
+.layout_group_name.disabled { background-color: #e2e2e2; }
+.channel_template_selection tbody tr .template_display_detail { display: none; }
+.channel_template_selection tbody tr:first-child .template_display_detail { display: block; }
+option.disabled { color: #999; }
+
+
+/* Publish Page */
 
 #template_thumbnail {
     margin: 20px 20px 0 0;
