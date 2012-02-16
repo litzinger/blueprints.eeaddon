@@ -72,19 +72,22 @@ class Blueprints_acc {
     
     function set_sections()
     {
-        $this->cache['settings'] = $this->EE->blueprints_model->get_settings(true);
-        
-        // Remove the tab. This is lame.
-        $script = '
-            $("#blueprints.accessory").remove();
-            $("#accessoryTabs").find("a.blueprints").parent("li").remove();
-        ';
-        
-        // Output JS, and remove extra white space and line breaks
-        $this->EE->javascript->output('$(function(){'. preg_replace("/\s+/", " ", $script) .'});');
-        $this->EE->javascript->compile();
-        
-        $this->_sidebar();
+        if (array_key_exists('blueprints', $this->EE->addons->get_installed())
+        {
+            $this->cache['settings'] = $this->EE->blueprints_model->get_settings(true);
+
+            // Remove the tab. This is lame.
+            $script = '
+                $("#blueprints.accessory").remove();
+                $("#accessoryTabs").find("a.blueprints").parent("li").remove();
+            ';
+
+            // Output JS, and remove extra white space and line breaks
+            $this->EE->javascript->output('$(function(){'. preg_replace("/\s+/", " ", $script) .'});');
+            $this->EE->javascript->compile();
+
+            $this->_sidebar();
+        }
     }
     
     private function _sidebar()
