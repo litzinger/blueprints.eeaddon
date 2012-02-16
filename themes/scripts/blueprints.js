@@ -17,7 +17,7 @@ Blueprints.carousel = function(template_id)
         } else {
             start_template = $("#blueprints_carousel").find("li[data-id='" + template_id +"']");
         }
-        
+
         // Make sure our Pages and Structure tab field is visible, otherwise the carousel will not display correctly.
         $('#hold_field_pages__pages_template_id, #hold_field_structure__template_id').each(function(){
             var field = $(this);
@@ -200,7 +200,7 @@ Blueprints.carousel_change = function(template)
     if(Blueprints.config.publish_layout_takeover)
     {
         layout_preview = Blueprints.config.layouts[template];
-        
+
         if(layout_preview != undefined && layout_preview != "") {
             $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
             $("#blueprints_template_id").val(template);
@@ -217,6 +217,8 @@ Blueprints.carousel_change = function(template)
     Save the Entries data, then reload the page with the new layout and saved data
 */
 jQuery(function(){
+
+    // console.log(Blueprints.config);
     
     var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
 
@@ -295,16 +297,18 @@ jQuery(function(){
         template_select.remove();
     
         // Added short timeouts to ensure it initiates correctly.
-        
+
         // On page load...
         setTimeout({
             run: function() {
+                // Make sure our hidden fields are added to the page, otherwise
+                // only clicking the Pages/Structure tab will add them.
+                Blueprints.carousel_change(select_value);
                 Blueprints.carousel(select_value);
             }
         }.run, 350);
         
         // When a tab is clicked...
-        // $('a.menu_structure').click(function(){
         $('#structure, #pages').appear(function(){
             setTimeout({
                 run: function() {
