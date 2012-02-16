@@ -72,20 +72,29 @@ class Blueprints_acc {
     
     function set_sections()
     {
-        if (array_key_exists('blueprints', $this->EE->addons->get_installed())
+        if (array_key_exists('blueprints', $this->EE->addons->get_installed()))
         {
-            $this->cache['settings'] = $this->EE->blueprints_model->get_settings(true);
+            $this->EE->load->model('blueprints_model');
 
+            // Because I don't like how CI helpers work...
+            if(!class_exists('Blueprints_helper'))
+            {
+                require PATH_THIRD . 'blueprints/helper.blueprints.php';
+            }
+            $this->EE->blueprints_helper = new Blueprints_helper;
+
+            $this->cache['settings'] = $this->EE->blueprints_model->get_settings(true);
+            
             // Remove the tab. This is lame.
             $script = '
                 $("#blueprints.accessory").remove();
                 $("#accessoryTabs").find("a.blueprints").parent("li").remove();
             ';
-
+            
             // Output JS, and remove extra white space and line breaks
             $this->EE->javascript->output('$(function(){'. preg_replace("/\s+/", " ", $script) .'});');
             $this->EE->javascript->compile();
-
+            
             $this->_sidebar();
         }
     }
