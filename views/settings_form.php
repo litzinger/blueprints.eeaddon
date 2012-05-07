@@ -65,7 +65,7 @@
             </td>
         </tr>
     </table>
-    
+    <?php /*
     <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
         <tr>
             <th colspan="2">
@@ -81,7 +81,7 @@
             </td>
         </tr>
     </table>
-    
+    */ ?>
     <input type="hidden" value="<?php echo $max_group_id ?>" id="max_group_id" />
     
     <div class="publish_layouts settings_sortable">
@@ -97,7 +97,7 @@
                     <?php echo lang('blueprint_thumbnail_heading'); ?>
                 </th>
             </tr>
-            <?php foreach($fields as $field): ?>
+            <?php foreach($fields as $k => $field): ?>
                 <tr id="order_<?php echo $field['row_id'] ?>">
                     <td width="25%">
                         <div class="handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
@@ -108,7 +108,13 @@
                         <?php echo form_dropdown($field['tmpl_name'], $field['tmpl_options'], $field['tmpl_options_selected'], 'id="'.$field['tmpl_name'].'" class="template_name"'); ?>
                     </td>
                     <td width="45%">
-                        <?php echo form_dropdown($field['thb_name'], $field['thb_options'], $field['thb_options_selected'], 'id="'.$field['thb_name'].'"'); ?>
+                        <?php 
+                        $thumbnail = isset($field['thb_options_selected']) ? '<img src="'. $field['thb_options_selected'] .'" />' : '';
+
+                        echo '<a href="#" id="thumbnail_trigger_'. $k .'">Select Image</a>';
+                        echo '<span id="thumbnail_preview_'. $k .'">'. $thumbnail .'</span>';
+                        echo '<input type="hidden" name="'. $field['thb_name'] .'" value="'. $field['thb_options_selected'] .'" id="thumbnail_value_'. $k .'" />';
+                        //echo form_dropdown($field['thb_name'], $field['thb_options'], $field['thb_options_selected'], 'id="'.$field['thb_name'].'"'); ?>
                         <a href="#" class="blueprint_remove_row" rel="publish_layouts" data="<?php echo $field['layout_group_id_value'] ?>">Delete</a>
                     </td>
                 </tr>

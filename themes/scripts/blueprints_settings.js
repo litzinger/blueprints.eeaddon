@@ -249,7 +249,36 @@ $('#enable_detailed_template').next('.pt-switch').click(function(){
 
 
 
+function blueprints_set_thumbnail(file, field)
+{
+    // console.log(file);
 
+    upload_paths = Blueprints.config.upload_prefs;
+
+    // EE 2.2 changed the file object property names
+    if(Blueprints.config.ee_version > 220)
+    {
+        file.directory = file.upload_location_id;
+        file.name = file.file_name;
+    }
+
+    for(i in upload_paths)
+    {
+        path = upload_paths[i];
+
+        if(file.directory == path.directory)
+        {
+            break;
+        }
+    }
+    
+    if(file.is_image)
+    {
+        $("#thumbnail_preview_"+ field).html('<img src="'+ file.thumb +'" />');
+        $("#thumbnail_trigger_"+ field).text("Change Image");
+        $("#thumbnail_value_"+ field).val('{filedir_'+ file.directory +'}' + file.name);
+    }
+}
 
 // var insert_file = function(file, return_to, field_name, return_path_only)
 // {

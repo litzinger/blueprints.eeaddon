@@ -160,6 +160,54 @@ class Blueprints_helper
         
         return $this->EE->functions->remove_double_slashes($this->EE->config->slash_item('site_url') . $index);
     }
+
+    public function get_upload_prefs($group_id = NULL, $id = NULL)
+    {
+        if(!isset($this->cache['upload_prefs']))
+        {
+            if (version_compare(APP_VER, '2.4', '>='))
+            {
+                $this->EE->load->model('file_upload_preferences_model');
+                $this->cache['upload_prefs'] = $this->EE->file_upload_preferences_model->get_file_upload_preferences($group_id, $id);
+                return $this->cache['upload_prefs'];
+            }
+            
+            if (version_compare(APP_VER, '2.1.5', '>='))
+            {
+                $this->EE->load->model('file_upload_preferences_model');
+                $result = $this->EE->file_upload_preferences_model->get_upload_preferences($group_id, $id);
+            }
+            else
+            {
+                $this->EE->load->model('tools_model');
+                $result = $this->EE->tools_model->get_upload_preferences($group_id, $id);
+            }
+
+            $this->cache['upload_prefs'] = $result->result_array();
+        }
+
+        return $this->cache['upload_prefs'];
+    }
+
+    public function get_upload_prefs_tokens()
+    {
+        if(!isset($this->cache['upload_prefs_tokens']))
+        {
+            if (!isset($this->cache['upload_prefs']))
+            {
+                $this->get_upload_prefs();
+            }
+
+            $this->cache['upload_prefs_tokens'] = array();
+
+            foreach ($this->cache['upload_prefs'] as $id => $prefs)
+            {
+                $this->cache['upload_prefs_tokens']['{filedir_'. $prefs['id'] .'}'] = $prefs['url'];
+            }
+        }
+
+        return $this->cache['upload_prefs_tokens'];
+    }
     
     public function is_publish_form()
     {
