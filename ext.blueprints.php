@@ -505,6 +505,9 @@ class Blueprints_ext {
         $this->EE->lang->loadfile('blueprints');
         $this->EE->load->library('javascript');
 
+        $this->EE->load->library('filemanager');
+        $this->EE->load->library('file_field');
+
         // Set vars
         $fields = array();
         $channels = array();
@@ -679,7 +682,17 @@ class Blueprints_ext {
         );
         
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
-        
+
+        // foreach( $fields as $field)
+        // {
+            // $config = array(
+            //     'trigger' => '.test_btn',
+            //     'field_name' => '".test_img"',
+            //     'settings' => '{content_type: "img", directory: "all"}',
+            //     'callback' => 'function(file){ console.log(file) }'
+            // );
+            // $this->EE->file_field->browser($config);
+        // }
         
         // Create global config to use in our JS file
         $blueprints_config = '

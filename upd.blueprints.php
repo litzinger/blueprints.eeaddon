@@ -231,8 +231,6 @@ class Blueprints_upd {
                             
         $settings = unserialize($qry->row('settings'));
         
-        // Create a random hash to use to validate ACT
-        $hash = $this->EE->functions->random('encrypt', 32);
         $new_settings = array();
 
         if(!empty($settings))
@@ -279,9 +277,19 @@ class Blueprints_upd {
                 }
                 
                 $new_settings[$site_id] = $setting;
-                $new_settings[$site_id]['hash'] = $hash;
+
+                // Create a random hash to use to validate ACT
+                $new_settings[$site_id]['hash'] = $this->EE->functions->random('encrypt', 32);
             }
         
+            $this->EE->db->where('class', 'Blueprints_ext');
+            $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
+        }
+        else
+        {
+            // Create a random hash to use to validate ACT
+            $new_settings[1]['hash'] = $this->EE->functions->random('encrypt', 32);
+
             $this->EE->db->where('class', 'Blueprints_ext');
             $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
         }
