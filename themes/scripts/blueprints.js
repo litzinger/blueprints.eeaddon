@@ -164,7 +164,7 @@ Blueprints.is_array = function(input){ return typeof(input)=="object"&&(input in
 Blueprints.select_change = function(ele)
 {
     var template = $(ele).find("option:selected").val();
-    thumbnail = Blueprints.config.thumbnail_path + Blueprints.config.thumbnails[template];
+    thumbnail = Blueprints.config.thumbnails[template];
     
     if(Blueprints.config.thumbnails[template] != "" && Blueprints.config.thumbnails[template] != undefined) {
         $("#template_thumbnail").show().html('<img src="'+ thumbnail +'" width="155" />');
@@ -278,7 +278,7 @@ jQuery(function(){
             layout_preview = carousel[i].layout_preview;
             layout_name = carousel[i].layout_name;
         
-            thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ Blueprints.config.thumbnail_path + template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
+            thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
         
             out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span class="carousel_template_name">'+ layout_name +'</span><div class="carousel_thumbnail_wrapper">'+ thumbnail +'</div></li>';
         }

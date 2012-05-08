@@ -349,9 +349,9 @@ class Blueprints_ext {
         {
             foreach($this->cache['layouts'] as $layout)
             {
-                $thumbnail = ($layout['thumbnail']) ? $layout['thumbnail'] : '';
+                $thumbnail = ($layout['thumbnail']) ? $this->EE->blueprints_helper->swap_upload_pref_token($layout['thumbnail']) : '';
                 $thumbnails[] = '"'. $layout['template'] .'":"'. $thumbnail .'"';
-                $thumbnail_options[$layout['template']] = $thumbnail; 
+                $thumbnail_options[$layout['template']] = $thumbnail;
                 
                 $layout_name = ($layout['name']) ? $layout['name'] : '';
                 $layout_id = $layout['group_id'];
@@ -364,7 +364,7 @@ class Blueprints_ext {
                 $layout_carousel_names[$layout['template']] = $layout_name;
             }
         }
-        
+
         // Only show templates assigned to a publish layout
         if(
             isset($this->settings['enable_detailed_template']) AND
@@ -488,7 +488,7 @@ class Blueprints_ext {
             thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
             thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
         };';
-        
+
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
         $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
@@ -516,7 +516,6 @@ class Blueprints_ext {
         $channel_fields = array();
 
         $upload_prefs = $this->EE->blueprints_helper->get_upload_prefs();
-        $upload_tokens = $this->EE->blueprints_helper->get_upload_prefs_tokens();
         
         // Get our data
         $templates  = $this->EE->blueprints_model->get_templates();
@@ -577,11 +576,6 @@ class Blueprints_ext {
         {
             foreach($this->cache['layouts'] as $layout)
             {
-                foreach($upload_tokens as $token => $url)
-                {
-                    $layout['thumbnail'] = str_replace($token, $url.'_thumbs/', $layout['thumbnail']);
-                }
-
                 // Recreate saved fields
                 $fields[] = array(
                     'row_id' => $layout['id'],
@@ -590,7 +584,7 @@ class Blueprints_ext {
                     'tmpl_options_selected' => isset($layout['template']) ? $layout['template'] : '',
                     
                     'thb_name' => 'thumbnails['. $k .']',
-                    'thb_options_selected' => isset($layout['thumbnail']) ? $layout['thumbnail'] : '',
+                    'thb_options_selected' => isset($layout['thumbnail']) ? $this->EE->blueprints_helper->swap_upload_pref_token($layout['thumbnail'], true) : '',
                     
                     'layout_group_id' => 'layout_group_ids['. $k .']',
                     'layout_group_id_value' => isset($layout['group_id']) ? $layout['group_id'] : (int) $this->layout_id + $k,
@@ -692,7 +686,7 @@ class Blueprints_ext {
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
         $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints_settings.js"></script><!-- END Blueprints assets -->');
 
-        // Add our File Manager
+        // Add our File Manager and the first row event binding
         foreach( $fields as $k => $field)
         {
             $config = array(

@@ -264,8 +264,8 @@ $('#enable_detailed_template').next('.pt-switch').click(function(){
 
 function blueprints_set_thumbnail(file, field)
 {
-    console.log(file);
-    console.log(field);
+    // console.log(file);
+    // console.log(field);
 
     upload_paths = Blueprints.config.upload_prefs;
 

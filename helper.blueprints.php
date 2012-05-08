@@ -208,6 +208,29 @@ class Blueprints_helper
 
         return $this->cache['upload_prefs_tokens'];
     }
+
+    public function swap_upload_pref_token($str, $thumbnail = false)
+    {
+        $this->get_upload_prefs_tokens();
+
+        if ($thumbnail)
+        {
+            foreach ($this->cache['upload_prefs_tokens'] as $token => $url)
+            {
+                $urls[] = $url.'_thumbs/';
+            }
+
+            $urls = array_values($urls);
+        }
+        else
+        {
+            $urls = array_values($this->cache['upload_prefs_tokens']);
+        }
+
+        $tokens = array_keys($this->cache['upload_prefs_tokens']);
+
+        return str_replace($tokens, $urls, $str);
+    }
     
     public function is_publish_form()
     {

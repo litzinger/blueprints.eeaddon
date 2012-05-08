@@ -135,6 +135,7 @@ option.disabled { color: #999; }
     z-index: 91;
 }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail {
+    background-repeat: no-repeat;
     position: relative;
 }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail .submit {
