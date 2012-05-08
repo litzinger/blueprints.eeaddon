@@ -568,7 +568,7 @@ class Blueprints_ext {
                 $channel_options[$channel_id] = $channel['channel_title'];
             }
         }
-        
+
         $k = 0;
 
         // Create our fields from our saved settings in the DB
@@ -584,7 +584,7 @@ class Blueprints_ext {
                     'tmpl_options_selected' => isset($layout['template']) ? $layout['template'] : '',
                     
                     'thb_name' => 'thumbnails['. $k .']',
-                    'thb_options_selected' => isset($layout['thumbnail']) ? $this->EE->blueprints_helper->swap_upload_pref_token($layout['thumbnail'], true) : '',
+                    'thb_options_selected' => isset($layout['thumbnail']) ? $layout['thumbnail'] : '',
                     
                     'layout_group_id' => 'layout_group_ids['. $k .']',
                     'layout_group_id_value' => isset($layout['group_id']) ? $layout['group_id'] : (int) $this->layout_id + $k,
@@ -668,8 +668,10 @@ class Blueprints_ext {
             // Check for hash and set it if it doesn't exist... just incase
             'hash' => (isset($this->settings['hash']) ? $this->settings['hash'] : $this->EE->functions->random('encrypt', 32))
         );
-        
+
         $vars = array_merge($vars, array('fields' => $fields, 'channels' => $channel_fields));
+
+        $is_assets_installed = array_key_exists('assets', $this->EE->addons->get_installed()) ? "yes" : "no";
 
         // Create global config to use in our JS file
         $blueprints_config = '
@@ -679,7 +681,8 @@ class Blueprints_ext {
             blueprints_total_templates: '. $templates->num_rows() .',
             blueprints_total_channels: '. count($channels) .',
             ee_version: "'. $this->EE->config->item('app_version') .'",
-            upload_prefs: '. json_encode($upload_prefs) .'
+            upload_prefs: '. json_encode($upload_prefs) .',
+            is_assets_installed: "'. $is_assets_installed .'"
         };';
 
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
@@ -687,16 +690,50 @@ class Blueprints_ext {
         $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints_settings.js"></script><!-- END Blueprints assets -->');
 
         // Add our File Manager and the first row event binding
-        foreach( $fields as $k => $field)
+        if ($is_assets_installed == "yes")
         {
-            $config = array(
-                'trigger' => '#thumbnail_trigger_'. $k,
-                'field_name' => '"#thumbnail_'. $k .'"',
-                'settings' => '{content_type: "img", directory: "all"}',
-                'callback' => 'function(file) { blueprints_set_thumbnail(file, "'. $k .'"); }'
-            );
+            // Load Assets' assets
+            if ( ! isset($this->EE->session->cache['assets']['included_sheet_resources']))
+            {
+                if (! class_exists('Assets_helper'))
+                {
+                    require PATH_THIRD.'assets/helper.php';
+                }
 
-            $this->EE->file_field->browser($config);
+                $assets_helper = new Assets_helper;
+                $assets_helper->include_sheet_resources();
+            }
+
+            foreach( $fields as $k => $field)
+            {
+                $script = '$("#thumbnail_trigger_'. $k .'").click(function(e){
+                    var sheet = new Assets.Sheet({
+                        filedirs: "all",
+                        kinds: "any",
+                        onSelect: function(file) { blueprints_set_thumbnail(file[0], "'. $k .'"); }
+                    });
+                    
+                    e.preventDefault();
+                    sheet.show();
+                });';
+
+                $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $script .'</script><!-- END Blueprints assets -->');
+            }
+        }
+        else
+        {
+            foreach( $fields as $k => $field)
+            {
+                $config = array(
+                    'trigger' => '#thumbnail_trigger_'. $k,
+                    'field_name' => '"#thumbnail_'. $k .'"',
+                    'settings' => '{content_type: "img", directory: "all"}',
+                    'callback' => 'function(file) { blueprints_set_thumbnail(file, "'. $k .'"); }'
+                );
+
+                // Note this is required for the FM to even work, its assets can only be loaded through this method.
+                $this->EE->file_field->browser($config);
+            }
         }
 
         // Load it up and return it to addons_extensions.php for rendering

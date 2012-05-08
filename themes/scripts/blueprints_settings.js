@@ -74,12 +74,30 @@ $('.blueprint_add_row').live('click', function(e){
     $('#thumbnail_trigger_new_'+ index).text('Select Image');
 
     /* bind the file manager to the new rows we're adding */
-    $.ee_filebrowser.add_trigger('#thumbnail_trigger_new_'+ index, '#thumbnail_preview_new_'+ index, {
-        content_type: 'img',
-        directory:    'all'
-    }, function(file, field){
-        blueprints_set_thumbnail(file, 'new_'+ index);
-    });
+    if(Blueprints.config.is_assets_installed == "yes")
+    {
+        $('#thumbnail_trigger_new_'+ index).click(function(e){
+            var sheet = new Assets.Sheet({
+                filedirs: "all",
+                kinds: "any",
+                onSelect: function(file) { 
+                    blueprints_set_thumbnail(file[0], 'new_'+ index);
+                }
+            });
+
+            e.preventDefault();
+            sheet.show();
+        });
+    }
+    else
+    {
+        $.ee_filebrowser.add_trigger('#thumbnail_trigger_new_'+ index, '#thumbnail_preview_new_'+ index, {
+            content_type: 'img',
+            directory:    'all'
+        }, function(file, field){
+            blueprints_set_thumbnail(file, 'new_'+ index);
+        });
+    }
     
     blueprints_set_row_events(rel);
     
@@ -247,8 +265,17 @@ $('.channel_template_selection tr').each(function(){
     blueprints_show_selected( $(this), true );
 });
 
+$('#enable_detailed_template').change(function(){
+    blueprints_toggle_enabled_detailed_template();
+});
+
 // Turn off detailed template display
 $('#enable_detailed_template').next('.pt-switch').click(function(){
+    blueprints_toggle_enabled_detailed_template();
+});
+
+function blueprints_toggle_enabled_detailed_template()
+{
     val = $('#enable_detailed_template').val();
     
     if(val == 'y') {
@@ -260,184 +287,37 @@ $('#enable_detailed_template').next('.pt-switch').click(function(){
         $('.channel_template_selection').find('select option').attr("selected", false);
         $('.channel_template_selection').next('.blueprint_add_row').hide();
     }
-});
+}
 
 function blueprints_set_thumbnail(file, field)
 {
-    // console.log(file);
-    // console.log(field);
-
     upload_paths = Blueprints.config.upload_prefs;
 
-    // EE 2.2 changed the file object property names
-    if(Blueprints.config.ee_version > 220)
+    // We have an Assets file...
+    if (file.path)
     {
-        file.directory = file.upload_location_id;
-        file.name = file.file_name;
+        var directory = file.path.match(/\{filedir_(\d+)\}/)[1];
+        var url = upload_paths[directory]['url'];
+        var thumbnail = file.path.replace(/\{filedir_(\d+)\}/, url +'_thumbs/');
+
+        $("#thumbnail_preview_"+ field).html('<img src="'+ thumbnail +'" />');
+        $("#thumbnail_trigger_"+ field).text("Change Image");
+        $("#thumbnail_value_"+ field).val(file.path);
     }
-
-    for(i in upload_paths)
+    else
     {
-        path = upload_paths[i];
-
-        if(file.directory == path.directory)
+        // EE 2.2 changed the file object property names
+        if(Blueprints.config.ee_version > 220)
         {
-            break;
+            file.directory = file.upload_location_id;
+            file.name = file.file_name;
+        }
+
+        if(file.is_image)
+        {
+            $("#thumbnail_preview_"+ field).html('<img src="'+ file.thumb +'" />');
+            $("#thumbnail_trigger_"+ field).text("Change Image");
+            $("#thumbnail_value_"+ field).val('{filedir_'+ file.directory +'}' + file.name);
         }
     }
-    
-    if(file.is_image)
-    {
-        $("#thumbnail_preview_"+ field).html('<img src="'+ file.thumb +'" />');
-        $("#thumbnail_trigger_"+ field).text("Change Image");
-        $("#thumbnail_value_"+ field).val('{filedir_'+ file.directory +'}' + file.name);
-    }
 }
-
-// var insert_file = function(file, return_to, field_name, return_path_only)
-// {
-//     // Yeah, thats right, eval!
-//     // I could/should redo this as JSON, but this works...
-//     upload_paths = eval(wyvern_config.upload_paths);
-// 
-//     // EE 2.2 changed the file object property names
-//     if(wyvern_config.ee_version > 220)
-//     {
-//         file.directory = file.upload_location_id;
-//         file.name = file.file_name;
-//     }
-// 
-//     for(i = 0; i < upload_paths.length; i++)
-//     {
-//         path = upload_paths[i];
-// 
-//         if(file.directory == path.directory)
-//         {
-//             break;
-//         }
-//     }
-//     
-//     // 2.2+ removed the dimensions? Add them if present.
-//     dimensions = file.dimensions ? file.dimensions : '';
-//     
-//     // Place the image in the editing window
-//     if(file.is_image && ! return_path_only)
-//     {
-//         var image = '<img src="'+ path.url + file.name +'" '+ dimensions +' />';
-//         // return_to being the editor object
-//         return_to.insertHtml(image);
-//     }
-//     // File isn't an image, and return_path isn't true, then embed it as a link
-//     else if( ! file.is_image && ! return_path_only)
-//     {
-//         var link = '<a href="{filedir_'+ path.directory +'}'+ file.name +'" title="">'+ file.name +'</a>';
-//         // return_to being the editor object
-//         return_to.insertHtml(link);
-//     }
-//     // Otherwise we want to only return the path value to a form field
-//     else if(return_path_only && typeof return_path_only != 'function')
-//     {
-//         // return_to being a jQuery element
-//         $(return_to).val(path.url + file.name);
-// 
-//         // If the return_path_only var happens to be a valid jQuery object, insert the image.
-//         // Right now this is expecting it to be an <img> tag
-//         if(return_path_only.jquery)
-//         {
-//             return_path_only.show().attr('src', path.url + file.name);
-//         }
-//     }
-//     // We have a callback
-//     else if(typeof return_path_only == 'function')
-//     {
-//         return_path_only(file);
-//     }
-// }
-// 
-// /*
-//     Assets returns a slightly different object needed for insert_file above
-// */
-// var get_file_object = function(file)
-// {
-//     // See if it's an image
-//     var file_types = ['png', 'jpg', 'gif', 'svg'];
-// 
-//     extension = file.url.substr(-3);
-//     is_image = ($.inArray(extension, file_types) != -1) ? true : false;
-//     
-//     directory = file.path.match(/\{filedir_(\d+)\}/);
-//     file_name = file.path.replace(/\{filedir_(\d+)\}/, '');
-//     
-//     updated = {
-//         path: file.path, 
-//         url: file.url,
-//         is_image: is_image,
-//         file_name: file_name,
-//         upload_location_id: directory[1],
-//         dimensions: file.dimensions ? file.dimensions : ''
-//     };
-//     
-//     return updated;
-// }
-// 
-// /*
-//     field_name and ee_field_id are usually going to be the same, except when field_name
-//     is a jQuery element, not the field_name string. ee_field_id is used for the upload_prefs.
-// */
-// 
-// var bind_file_manager = function(button, return_to, field_name, ee_field_id, return_path_only)
-// {
-//     var field_settings = wyvern_config[ee_field_id].upload_prefs;
-//     
-//     if(wyvern_config.file_manager == 'assets')
-//     {
-//         $(button).click(function(){
-//             var sheet = new Assets.Sheet({
-//                 filedirs: field_settings.directory,
-//                 kinds: field_settings.content_type,
-//                 onSelect: function(files) 
-//                 {
-//                     for(i = 0; i < files.length; i++)
-//                     {
-//                         file = get_file_object(files[i]);
-//                         insert_file(file, return_to, field_name, return_path_only);
-//                     }
-//                 }
-//             });
-// 
-//             sheet.show();
-//         });
-//     }
-//     else
-//     {
-//         // TODO: Remove this fallback message if the FB ever gets global abilities, not just the Publish page.
-//         if(!wyvern_config.valid_filemanager && !wyvern_config.error_displayed)
-//         {
-//             $.ee_notice('Sorry, but the File Manager is not available on this page. Wyvern can not load the File Manager.', 'notice');
-//             wyvern_config.error_displayed = true;
-//         } 
-//         else if(wyvern_config.valid_filemanager)
-//         {
-//             $(button).each(function()
-//             {
-//                 if(wyvern_config.ee_version < 220)
-//                 {
-//                     $.ee_filebrowser.add_trigger($(this), field_name, function(file){
-//                         insert_file(file, return_to, field_name, return_path_only);
-//                     });
-//                 }
-//                 else
-//                 {
-//                     var settings = {
-//                         directory: field_settings.directory,
-//                         content_type: field_settings.content_type
-//                     };
-// 
-//                     $.ee_filebrowser.add_trigger($(this), field_name, settings, function(file){
-//                         insert_file(file, return_to, field_name, return_path_only);
-//                     });
-//                 }
-//             });
-//         }
-//     }
-// }

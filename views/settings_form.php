@@ -93,13 +93,13 @@
                     </td>
                     <td width="33%">
                         <?php 
-                        $thumbnail = isset($field['thb_options_selected']) ? '<img src="'. $field['thb_options_selected'] .'" />' : '';
+                        $thumbnail = isset($field['thb_options_selected']) ? '<img src="'. $this->blueprints_helper->swap_upload_pref_token($field['thb_options_selected'], true) .'" />' : '';
                         $text = $thumbnail != '' ? 'Change Image' : 'Select Image';
 
-                        echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div>';
+                        echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div><br />';
                         echo '<a class="thumbnail_trigger" href="#" id="thumbnail_trigger_'. $k .'">'. $text .'</a>';
                         echo '<input type="hidden" name="'. $field['thb_name'] .'" value="'. $field['thb_options_selected'] .'" id="thumbnail_value_'. $k .'" />';
-                        //echo form_dropdown($field['thb_name'], $field['thb_options'], $field['thb_options_selected'], 'id="'.$field['thb_name'].'"'); ?>
+                        ?>
                         <a href="#" class="blueprint_remove_row" rel="publish_layouts" data="<?php echo $field['layout_group_id_value'] ?>">Delete</a>
                     </td>
                 </tr>
@@ -129,25 +129,21 @@
         <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
             <thead>
                 <tr>
-                    <th>&nbsp;</th>
                     <th>
                         <?php echo lang('blueprint_channel_heading'); ?>
                     </th>
                     <th>
-                        <?php echo lang('blueprint_template_heading'); ?>
+                        <?php echo lang('blueprint_template_detailed_heading'); ?>
                     </th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach($channels as $channel): ?>
                     <tr>
-                        <td width="25%">
-                            <p style="margin-bottom: 12px" class="template_display_detail"><?php echo lang('template_display_detail') ?></p>
-                        </td>
-                        <td width="30%">
+                        <td width="33%">
                             <?php echo form_dropdown($channel['channel_name'], $channel['channel_options'], $channel['channel_options_selected'], 'id="'.$channel['channel_name'].'"'); ?>
                         </td>
-                        <td width="45%">
+                        <td width="66%">
                             <div class="checkboxes">
                                 <?php echo $channel['channel_checkbox_options'] ?>
                                 <?php echo form_multiselect($channel['channel_templates_name'], $channel['channel_templates_options'], $channel['channel_templates_options_selected'], 'id="'.$channel['channel_templates_name'].'" class="show_select" size="10" style="display: none; width: 99%; margin-top: 5px;"') ?>

@@ -17,6 +17,9 @@ $lang = array(
 "blueprint_template_heading" =>
 "Template<p class=\"heading_description\">Choose a template to assign to this Publish Layout.</p>",
 
+"blueprint_template_detailed_heading" =>
+"Template<p class=\"heading_description\">Choose a template group, or specific templates to make visible in this Channel. Non-selected groups or templates will not appear in the Publish Page.</p>",
+
 "blueprint_thumbnail_heading" =>
 "Thumbnail<p class=\"heading_description\">Choose an image to represent your Publish Layout. Note that images should be sized to 155px wide by 180px tall for best results.</p>",
 
