@@ -8,6 +8,8 @@ var fixHelper = function(e, ui) {
     return ui;
 };
 
+$(function(){
+
 $("div.settings_sortable table").sortable({
     axis: "y",
     placeholder: "ui-state-highlight",
@@ -29,7 +31,7 @@ $('#blueprint_settings tbody').each(function(){
 });
 
 $('.blueprint_add_row').live('click', function(e){
-    // regex = /(\[\d+\])/g; 
+
     var regex = /(\[\d+\]|\[new_\d+\])/g;
     var regex_thumbnails = /(_\d+|_new_\d+)/g;
 
@@ -50,7 +52,7 @@ $('.blueprint_add_row').live('click', function(e){
     row = row.replace(regex, '[new_'+ index +']');
     // row = row.replace(regex, '[]');
 
-    table.append('<tr id="'+ rel + index +'" class="'+ cssclass +'">'+ row +'</tr>');
+    table.append('<tr id="'+ rel + index +'" class="row '+ cssclass +'">'+ row +'</tr>');
 
     /* Remove all selections from the duplicated select */
     $('#'+ rel + index).find('select').val('');
@@ -206,14 +208,13 @@ function blueprints_set_row_events(rel)
     if( $('.'+ rel +' tbody tr').length > 1 ) {
         $('.'+ rel +' tbody tr').find('.blueprint_remove_row').show();
     }
-    
-    /* Remove Add link if we have no more channels to add settings for */
+
     if(rel == 'channel_template_selection'){
         if($('.channel_template_selection tbody tr').length >= Blueprints.config.blueprints_total_channels){
             $('.channel_template_selection + .blueprint_add_row').hide();
         } 
     } else if(rel == 'publish_layouts') {
-        if($('.publish_layouts tbody tr').length >= Blueprints.config.blueprints_total_templates){
+        if($('.publish_layouts tbody tr.row').length >= Blueprints.config.blueprints_total_templates){
             $('.publish_layouts + .blueprint_add_row').hide();
         }
     }
@@ -321,3 +322,5 @@ function blueprints_set_thumbnail(file, field)
         }
     }
 }
+
+});

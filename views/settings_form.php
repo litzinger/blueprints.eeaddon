@@ -82,7 +82,7 @@
                 </th>
             </tr>
             <?php foreach($fields as $k => $field): ?>
-                <tr id="order_<?php echo $field['row_id'] ?>">
+                <tr id="order_<?php echo $field['row_id'] ?>" class="row">
                     <td width="33%">
                         <div class="handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
                         <?php echo form_hidden($field['layout_group_id'], $field['layout_group_id_value']); ?>
@@ -139,7 +139,7 @@
             </thead>
             <tbody>
                 <?php foreach($channels as $channel): ?>
-                    <tr>
+                    <tr class="row">
                         <td width="33%">
                             <?php echo form_dropdown($channel['channel_name'], $channel['channel_options'], $channel['channel_options_selected'], 'id="'.$channel['channel_name'].'"'); ?>
                         </td>
