@@ -30,6 +30,7 @@ option.disabled { color: #999; }
     line-height: 1.2;
 }
 .mainTable th {
+    cursor: default;
     vertical-align: top;
 }
 
