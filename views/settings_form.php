@@ -65,23 +65,7 @@
             </td>
         </tr>
     </table>
-    <?php /*
-    <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
-        <tr>
-            <th colspan="2">
-                <?php echo lang('thumbnail_path'); ?>
-            </th>
-        </tr>
-        <tr>
-            <td width="50%">
-                <?php echo lang('thumbnail_path_detail'); ?>
-            </td>
-            <td width="50%">
-                <?php echo form_input('thumbnail_path', $thumbnail_path, 'class="thumbnail_path"'); ?>
-            </td>
-        </tr>
-    </table>
-    */ ?>
+
     <input type="hidden" value="<?php echo $max_group_id ?>" id="max_group_id" />
     
     <div class="publish_layouts settings_sortable">
@@ -99,20 +83,21 @@
             </tr>
             <?php foreach($fields as $k => $field): ?>
                 <tr id="order_<?php echo $field['row_id'] ?>">
-                    <td width="25%">
+                    <td width="33%">
                         <div class="handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
                         <?php echo form_hidden($field['layout_group_id'], $field['layout_group_id_value']); ?>
                         <?php echo form_input($field['layout_group_name'], $field['layout_group_name_value'], 'class="layout_group_name"'); ?>
                     </td>
-                    <td width="30%">
+                    <td width="33%">
                         <?php echo form_dropdown($field['tmpl_name'], $field['tmpl_options'], $field['tmpl_options_selected'], 'id="'.$field['tmpl_name'].'" class="template_name"'); ?>
                     </td>
-                    <td width="45%">
+                    <td width="33%">
                         <?php 
                         $thumbnail = isset($field['thb_options_selected']) ? '<img src="'. $field['thb_options_selected'] .'" />' : '';
+                        $text = $thumbnail != '' ? 'Change Image' : 'Select Image';
 
-                        echo '<a href="#" id="thumbnail_trigger_'. $k .'">Select Image</a>';
-                        echo '<span id="thumbnail_preview_'. $k .'">'. $thumbnail .'</span>';
+                        echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div>';
+                        echo '<a class="thumbnail_trigger" href="#" id="thumbnail_trigger_'. $k .'">'. $text .'</a>';
                         echo '<input type="hidden" name="'. $field['thb_name'] .'" value="'. $field['thb_options_selected'] .'" id="thumbnail_value_'. $k .'" />';
                         //echo form_dropdown($field['thb_name'], $field['thb_options'], $field['thb_options_selected'], 'id="'.$field['thb_name'].'"'); ?>
                         <a href="#" class="blueprint_remove_row" rel="publish_layouts" data="<?php echo $field['layout_group_id_value'] ?>">Delete</a>

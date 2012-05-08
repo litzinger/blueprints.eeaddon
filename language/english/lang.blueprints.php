@@ -15,13 +15,13 @@ $lang = array(
 "Enter the path to the directory where your template thumbnails/previews exist.",
 
 "blueprint_template_heading" =>
-"Template",
+"Template<p class=\"heading_description\">Choose a template to assign to this Publish Layout.</p>",
 
 "blueprint_thumbnail_heading" =>
-"Thumbnail",
+"Thumbnail<p class=\"heading_description\">Choose an image to represent your Publish Layout. Note that images should be sized to 155px wide by 180px tall for best results.</p>",
 
 "blueprint_layout_heading" =>
-"Publish Layout Name",
+"Publish Layout Name<p class=\"heading_description\">Choose friendly name to represent your Publish Layout to your content editors. They will see this name instead of the template name.</p>",
 
 "blueprint_channel_heading" =>
 "Channel",

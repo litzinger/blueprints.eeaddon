@@ -31,6 +31,8 @@ $('#blueprint_settings tbody').each(function(){
 $('.blueprint_add_row').live('click', function(e){
     // regex = /(\[\d+\])/g; 
     var regex = /(\[\d+\]|\[new_\d+\])/g;
+    var regex_thumbnails = /(_\d+|_new_\d+)/g;
+
     var rel = $(this).attr('rel');
     var table = $('.'+ rel +' .mainTable tbody');
     var tr = table.find('tr:last-child').clone(true);
@@ -44,8 +46,10 @@ $('.blueprint_add_row').live('click', function(e){
     }
     
     // Remove the index from the cloned row so it gets saved with a new index
+    row = row.replace(regex_thumbnails, '_new_'+ index);
     row = row.replace(regex, '[new_'+ index +']');
     // row = row.replace(regex, '[]');
+
     table.append('<tr id="'+ rel + index +'" class="'+ cssclass +'">'+ row +'</tr>');
 
     /* Remove all selections from the duplicated select */
@@ -64,6 +68,18 @@ $('.blueprint_add_row').live('click', function(e){
     
     /* Hide the select */
     $('#'+ rel + index).find('.show_select').hide();
+
+    /* Remove thumbnail images */
+    $('#thumbnail_preview_new_'+ index).html('');
+    $('#thumbnail_trigger_new_'+ index).text('Select Image');
+
+    /* bind the file manager to the new rows we're adding */
+    $.ee_filebrowser.add_trigger('#thumbnail_trigger_new_'+ index, '#thumbnail_preview_new_'+ index, {
+        content_type: 'img',
+        directory:    'all'
+    }, function(file, field){
+        blueprints_set_thumbnail(file, 'new_'+ index);
+    });
     
     blueprints_set_row_events(rel);
     
@@ -183,7 +199,6 @@ function blueprints_set_row_events(rel)
             $('.publish_layouts + .blueprint_add_row').hide();
         }
     }
-    
 }
 
 function blueprints_enable_publish_layout_takeover(ele)
@@ -247,11 +262,10 @@ $('#enable_detailed_template').next('.pt-switch').click(function(){
     }
 });
 
-
-
 function blueprints_set_thumbnail(file, field)
 {
-    // console.log(file);
+    console.log(file);
+    console.log(field);
 
     upload_paths = Blueprints.config.upload_prefs;
 
