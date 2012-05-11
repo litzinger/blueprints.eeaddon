@@ -234,7 +234,7 @@ class Blueprints_acc {
                  margin-top: -2px;
                  background-color: none;
                  background-position: -32px -16px;
-                 background-image: url('. $this->EE->config->item('theme_folder_url') .'cp_themes/default/images/ui-icons_ffffff_256x240.png);
+                 background-image: url('. $this->EE->config->item('theme_folder_url') .'third_party/jquery_ui/default/images/ui-icons_ffffff_256x240.png);
              }
              .structure_pages_sidebar .blueprints_arrow.active {
                  background-position: -64px -16px;
