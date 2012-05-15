@@ -107,7 +107,7 @@ option.disabled { color: #999; }
     left: 0;
     top: 0;
     width: 155px;
-    height: 180px;
+    max-height: 180px;
     background-color: #fff;
     opacity: 0.55;
     z-index: 90;
@@ -142,7 +142,7 @@ option.disabled { color: #999; }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail .submit {
     position: absolute;
     left: 50%;
-    top: 80px;
+    top: 46%;
     z-index: 91;
 }
 
@@ -181,7 +181,7 @@ option.disabled { color: #999; }
     background-position: 50% 50%;
     background-repeat: no-repeat;
     width: 155px;
-    height: 180px;
+    max-height: 180px;
     padding: 10px;
     background-color: #fff;
     
@@ -195,7 +195,7 @@ option.disabled { color: #999; }
 }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail {
     width: 155px;
-    height: 180px;
+    max-height: 180px;
 }
 .jcarousel-skin-blueprints .jcarousel-item-horizontal {
 	margin-left: 0;

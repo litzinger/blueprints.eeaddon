@@ -73,8 +73,9 @@ Blueprints.carousel = function(template_id)
             // Add zee button, but only if the choosen template is assigned to a Publish Layout
             if(old_template_id != id && id in Blueprints.config.layouts)
             {
-                item.find('.carousel_thumbnail').append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
-                item.find('.carousel_thumbnail').append('<div class="overlay"></div>');
+                item.find('.carousel_thumbnail').prepend('<div class="overlay"></div>');
+                item.find('.carousel_thumbnail').prepend('<input type="submit" class="submit" name="submit" value="Load Layout" />');
+                item.find('.carousel_thumbnail .overlay').height( item.find('img').height() );
                 submit_button = item.find('.submit');
 
                 item_width = $('.carousel_thumbnail').width();
@@ -278,7 +279,8 @@ jQuery(function(){
             layout_preview = carousel[i].layout_preview;
             layout_name = carousel[i].layout_name;
         
-            thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
+            // thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
+            thumbnail = template_thumb ? '<div class="carousel_thumbnail"><img src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"></div>';
         
             out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span class="carousel_template_name">'+ layout_name +'</span><div class="carousel_thumbnail_wrapper">'+ thumbnail +'</div></li>';
         }
