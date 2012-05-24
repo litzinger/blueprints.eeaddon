@@ -290,6 +290,8 @@ function blueprints_toggle_enabled_detailed_template()
     }
 }
 
+});
+
 function blueprints_set_thumbnail(file, field)
 {
     upload_paths = Blueprints.config.upload_prefs;
@@ -322,5 +324,3 @@ function blueprints_set_thumbnail(file, field)
         }
     }
 }
-
-});

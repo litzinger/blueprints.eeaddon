@@ -92,15 +92,18 @@
                         <?php echo form_dropdown($field['tmpl_name'], $field['tmpl_options'], $field['tmpl_options_selected'], 'id="'.$field['tmpl_name'].'" class="template_name"'); ?>
                     </td>
                     <td width="33%">
+                        <div class="thumbnail_container">
                         <?php 
-                        $thumbnail = isset($field['thb_options_selected']) ? '<img src="'. $this->blueprints_helper->swap_upload_pref_token($field['thb_options_selected'], true) .'" />' : '';
+                        $thumbnail = (isset($field['thb_options_selected']) AND $field['thb_options_selected'] != '') ? '<img src="'. $this->blueprints_helper->swap_upload_pref_token($field['thb_options_selected'], true) .'" />' : '';
+
                         $text = $thumbnail != '' ? 'Change Image' : 'Select Image';
 
-                        echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div><br />';
+                        echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div>';
                         echo '<a class="thumbnail_trigger" href="#" id="thumbnail_trigger_'. $k .'">'. $text .'</a>';
                         echo '<input type="hidden" name="'. $field['thb_name'] .'" value="'. $field['thb_options_selected'] .'" id="thumbnail_value_'. $k .'" />';
                         ?>
                         <a href="#" class="blueprint_remove_row" rel="publish_layouts" data="<?php echo $field['layout_group_id_value'] ?>">Delete</a>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>

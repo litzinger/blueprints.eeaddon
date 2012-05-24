@@ -213,6 +213,8 @@ class Blueprints_helper
     {
         $this->get_upload_prefs_tokens();
 
+        $urls = array();
+
         if ($thumbnail)
         {
             foreach ($this->cache['upload_prefs_tokens'] as $token => $url)

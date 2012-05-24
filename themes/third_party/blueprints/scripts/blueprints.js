@@ -278,9 +278,9 @@ jQuery(function(){
             template_id = carousel[i].template_id;
             layout_preview = carousel[i].layout_preview;
             layout_name = carousel[i].layout_name;
-        
+            
             // thumbnail = template_thumb ? '<div class="carousel_thumbnail" style="background-image: url('+ template_thumb +')"; />' : '<div class="carousel_thumbnail"></div>';
-            thumbnail = template_thumb ? '<div class="carousel_thumbnail"><img src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"></div>';
+            thumbnail = template_thumb.indexOf('http://') != -1 ? '<div class="carousel_thumbnail"><img src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"><img src="'+ Blueprints.config.theme_url +'blueprints/images/no_template.png' +'" /></div>';
         
             out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"><span class="carousel_template_name">'+ layout_name +'</span><div class="carousel_thumbnail_wrapper">'+ thumbnail +'</div></li>';
         }
