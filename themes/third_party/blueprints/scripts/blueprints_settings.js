@@ -36,10 +36,10 @@ $('.blueprint_add_row').live('click', function(e){
     var regex_thumbnails = /(_\d+|_new_\d+)/g;
 
     var rel = $(this).attr('rel');
-    var table = $('.'+ rel +' .mainTable tbody');
-    var tr = table.find('tr:last-child').clone(true);
+    var table = $('.'+ rel +' .mainTable tbody:eq(0)');
+    var tr = table.find('tr.row:last-child').clone(true);
     var row = tr.html();
-    var index = table.find('tr').length;
+    var index = table.find('tr.row').length;
 
     if(tr.hasClass('even')){
         var cssclass = 'odd';

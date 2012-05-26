@@ -42,7 +42,10 @@ option.disabled { color: #999; }
     display: inline-block;
 }
 
-.thumbnail_container {
+table.mainTable .thumbnail_table tr td,
+table.mainTable .thumbnail_table tr td:last-child {
+    border: 0 !important; /* whoever added this to EE's global styles needs to be shot */
+    padding: 0;
 }
 
 /* Publish Page */

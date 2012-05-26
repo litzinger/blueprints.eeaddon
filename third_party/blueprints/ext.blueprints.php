@@ -728,7 +728,7 @@ class Blueprints_ext {
                     'trigger' => '#thumbnail_trigger_'. $k,
                     'field_name' => '"#thumbnail_'. $k .'"',
                     'settings' => '{content_type: "img", directory: "all"}',
-                    'callback' => 'function(file) { blueprints_set_thumbnail(file, "'. $k .'"); }'
+                    'callback' => 'function(file, e) { blueprints_set_thumbnail(file, "'. $k .'"); }'
                 );
 
                 // Note this is required for the FM to even work, its assets can only be loaded through this method.
