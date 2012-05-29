@@ -81,8 +81,8 @@
                     <?php echo lang('blueprint_thumbnail_heading'); ?>
                 </th>
             </tr>
-            <?php foreach($fields as $k => $field): ?>
-                <tr id="order_<?php echo $field['row_id'] ?>" class="row">
+            <?php $i = 0; foreach($fields as $k => $field): $class = ($i % 2 == 0) ? 'even' : 'odd'; ?>
+                <tr id="order_<?php echo $field['row_id'] ?>" class="row <?php echo $class ?>">
                     <td width="33%">
                         <div class="handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
                         <?php echo form_hidden($field['layout_group_id'], $field['layout_group_id_value']); ?>
@@ -92,18 +92,27 @@
                         <?php echo form_dropdown($field['tmpl_name'], $field['tmpl_options'], $field['tmpl_options_selected'], 'id="'.$field['tmpl_name'].'" class="template_name"'); ?>
                     </td>
                     <td width="33%">
-                        <?php 
-                        $thumbnail = isset($field['thb_options_selected']) ? '<img src="'. $this->blueprints_helper->swap_upload_pref_token($field['thb_options_selected'], true) .'" />' : '';
-                        $text = $thumbnail != '' ? 'Change Image' : 'Select Image';
+                        <table width="100%" class="thumbnail_table">
+                            <tr>
+                                <td width="70%">
+                                    <?php 
+                                    $thumbnail = (isset($field['thb_options_selected']) AND $field['thb_options_selected'] != '' AND ! is_numeric($field['thb_options_selected'])) ? '<img src="'. $this->blueprints_helper->swap_upload_pref_token($field['thb_options_selected'], true) .'" />' : '';
 
-                        echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div><br />';
-                        echo '<a class="thumbnail_trigger" href="#" id="thumbnail_trigger_'. $k .'">'. $text .'</a>';
-                        echo '<input type="hidden" name="'. $field['thb_name'] .'" value="'. $field['thb_options_selected'] .'" id="thumbnail_value_'. $k .'" />';
-                        ?>
-                        <a href="#" class="blueprint_remove_row" rel="publish_layouts" data="<?php echo $field['layout_group_id_value'] ?>">Delete</a>
+                                    $text = $thumbnail != '' ? 'Change Image' : 'Select Image';
+
+                                    echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div>';
+                                    echo '<a class="thumbnail_trigger" href="#" id="thumbnail_trigger_'. $k .'">'. $text .'</a>';
+                                    echo '<input type="hidden" name="'. $field['thb_name'] .'" value="'. $field['thb_options_selected'] .'" id="thumbnail_value_'. $k .'" />';
+                                    ?>
+                                </td>
+                                <td width="30%" valign="middle">
+                                    <a href="#" class="blueprint_remove_row" rel="publish_layouts" data="<?php echo $field['layout_group_id_value'] ?>">Delete</a>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
-            <?php endforeach; ?>
+            <?php $i++; endforeach; ?>
         </table>
     </div>
     

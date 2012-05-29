@@ -36,12 +36,17 @@ option.disabled { color: #999; }
 
 .thumbnail_preview {
     margin-bottom: 5px;
-    display: inline-block;
+    display: block;
 }
 .thumbnail_trigger {
     display: inline-block;
 }
 
+table.mainTable .thumbnail_table tr td,
+table.mainTable .thumbnail_table tr td:last-child {
+    border: 0 !important; /* whoever added this to EE's global styles needs to be shot */
+    padding: 0;
+}
 
 /* Publish Page */
 
@@ -177,7 +182,7 @@ option.disabled { color: #999; }
     color: #28C916;
 }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail_wrapper {
-    background-image: url(../images/no_template.png);
+    /*background-image: url(../images/no_template.png);*/
     background-position: 50% 50%;
     background-repeat: no-repeat;
     width: 155px;
@@ -191,7 +196,7 @@ option.disabled { color: #999; }
 }
 .jcarousel-skin-blueprints .jcarousel-item.current .carousel_thumbnail_wrapper,
 .jcarousel-skin-blueprints .jcarousel-item.active .carousel_thumbnail_wrapper {
-    background-image: url(../images/no_template_light.png);
+    /*background-image: url(../images/no_template_light.png);*/
 }
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail {
     width: 155px;
