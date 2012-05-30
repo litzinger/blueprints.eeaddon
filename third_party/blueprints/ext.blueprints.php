@@ -747,6 +747,8 @@ class Blueprints_ext {
     */
     public function save_settings()
     {
+        var_dump($_POST); die;
+        
         $channels = $this->EE->input->post('channels');
         $channel_show_selected = $this->EE->input->post('channel_show_selected');
         $channel_templates = $this->EE->input->post('channel_templates');

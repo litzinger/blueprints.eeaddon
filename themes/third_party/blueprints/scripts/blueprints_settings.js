@@ -129,10 +129,10 @@ blueprints_dialog = $('#remove_dialog').dialog({
             
             // Remove row and close dialog
             blueprints_dialog.dialog('close');
-            link.closest('tr').remove();
+            link.closest('tr.row').remove();
         
             /* Add the Add link back ;) */
-            if($('.publish_layouts tbody tr').length <= Blueprints.config.blueprints_total_templates){
+            if($('.publish_layouts tbody tr.row').length <= Blueprints.config.blueprints_total_templates){
                 $('.publish_layouts + .blueprint_add_row').show();
             }
             
@@ -146,14 +146,14 @@ blueprints_dialog = $('#remove_dialog').dialog({
 $('.blueprint_remove_row').live('click', function(e){
     
     rel = $(this).attr('rel');
-    field = $(this).closest('tr').find('.layout_group_name');
+    field = $(this).closest('tr.row').find('.layout_group_name');
 
     if(field.val() == "")
     {
-        $(this).closest('tr').remove();
+        $(this).closest('tr.row').remove();
         
         /* Add the Add link back ;) */
-        if($('.publish_layouts tbody tr').length <= Blueprints.config.blueprints_total_templates){
+        if($('.publish_layouts tbody tr.row').length <= Blueprints.config.blueprints_total_templates){
             $('.publish_layouts + .blueprint_add_row').show();
         }
     }
@@ -167,23 +167,23 @@ $('.blueprint_remove_row').live('click', function(e){
         blueprints_dialog.dialog('open');
 
         /* Add the Add link back ;) */
-        if($('.publish_layouts tbody tr').length <= Blueprints.config.blueprints_total_templates){
+        if($('.publish_layouts tbody tr.row').length <= Blueprints.config.blueprints_total_templates){
             $('.publish_layouts + .blueprint_add_row').show();
         }
     }
     else if(rel == 'channel_template_selection')
     {
-        $(this).closest('tr').remove();
+        $(this).closest('tr.row').remove();
         
         /* Add the Add link back ;) */
-        if($('.channel_template_selection tbody tr').length <= Blueprints.config.blueprints_total_channels){
+        if($('.channel_template_selection tbody tr.row').length <= Blueprints.config.blueprints_total_channels){
             $('.channel_template_selection + .blueprint_add_row').show();
         }
     }
     
     // Hide delete link if 1 row is present
-    if( $('.'+ rel +' tbody tr').length == 1 ) {
-        $('.'+ rel +' tbody tr').find('.blueprint_remove_row').hide();
+    if( $('.'+ rel +' tbody tr.row').length == 1 ) {
+        $('.'+ rel +' tbody tr.row').find('.blueprint_remove_row').hide();
     }
     
     e.preventDefault();
