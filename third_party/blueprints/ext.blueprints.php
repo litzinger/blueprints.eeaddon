@@ -505,7 +505,7 @@ class Blueprints_ext {
     public function settings_form($vars)
     {
         $this->EE->lang->loadfile('blueprints');
-        // $this->EE->load->library('javascript');
+        $this->EE->load->library('javascript');
 
         $this->EE->load->library('filemanager');
         $this->EE->load->library('file_field');
