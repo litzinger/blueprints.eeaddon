@@ -13,6 +13,10 @@ input[type="text"].layout_group_name {
 	width: 80%;
 }
 
+.mainTable tr.row:nth-child(odd) {
+    background-color: #F4F6F6;
+}
+
 .blueprint_add_row { float: right; font-weight: bold; display: inline-block; padding: 0 12px 12px 12px; margin-top: -5px }
 .blueprint_remove_row { float: right; }
 #remove_dialog { display: none; }

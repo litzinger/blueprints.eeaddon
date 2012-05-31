@@ -17,72 +17,87 @@
     <?php else: ?>
         
         <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-                <th colspan="2">
-                    <?php echo lang('enable_edit_menu_tweaks'); ?>
-                </th>
-            </tr>
-            <tr>
-                <td width="80%">
-                    <?php echo lang('enable_edit_menu_tweaks_detail'); ?>
-                </td>
-                <td width="20%">
-                    <?php echo form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id="enable_edit_menu_tweaks"'); ?>
-                </td>
-            </tr>
+            <thead>
+                <tr class="odd">
+                    <th colspan="2">
+                        <?php echo lang('enable_edit_menu_tweaks'); ?>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="even">
+                    <td width="80%">
+                        <?php echo lang('enable_edit_menu_tweaks_detail'); ?>
+                    </td>
+                    <td width="20%">
+                        <?php echo form_dropdown('enable_edit_menu_tweaks', array('n' => 'No', 'y' => 'Yes'), $enable_edit_menu_tweaks, 'id="enable_edit_menu_tweaks"'); ?>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     
     <?php endif; ?>
     
     <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
-        <tr>
-            <th colspan="2">
-                <?php echo lang('enable_publish_layout_takeover'); ?>
-            </th>
-        </tr>
-        <tr>
-            <td width="80%">
-                <?php echo lang('enable_publish_layout_takeover_detail'); ?>
-            </td>
-            <td width="20%">
-                <?php echo form_dropdown('enable_publish_layout_takeover', array('n' => 'No', 'y' => 'Yes'), $enable_publish_layout_takeover, 'id="enable_publish_layout_takeover"'); ?>
-            </td>
-        </tr>
+        <thead>
+            <tr class="odd">
+                <th colspan="2">
+                    <?php echo lang('enable_publish_layout_takeover'); ?>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="even">
+                <td width="80%">
+                    <?php echo lang('enable_publish_layout_takeover_detail'); ?>
+                </td>
+                <td width="20%">
+                    <?php echo form_dropdown('enable_publish_layout_takeover', array('n' => 'No', 'y' => 'Yes'), $enable_publish_layout_takeover, 'id="enable_publish_layout_takeover"'); ?>
+                </td>
+            </tr>
+        </tbody>
     </table>
     
     <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
-        <tr>
-            <th colspan="2">
-                <?php echo lang('enable_carousel'); ?>
-            </th>
-        </tr>
-        <tr>
-            <td width="80%">
-                <?php echo lang('enable_carousel_detail'); ?>
-            </td>
-            <td width="20%">
-                <?php echo form_dropdown('enable_carousel', array('n' => 'No', 'y' => 'Yes'), $enable_carousel, 'id="enable_carousel"'); ?>
-            </td>
-        </tr>
+        <thead>
+            <tr class="odd">
+                <th colspan="2">
+                    <?php echo lang('enable_carousel'); ?>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="even">
+                <td width="80%">
+                    <?php echo lang('enable_carousel_detail'); ?>
+                </td>
+                <td width="20%">
+                    <?php echo form_dropdown('enable_carousel', array('n' => 'No', 'y' => 'Yes'), $enable_carousel, 'id="enable_carousel"'); ?>
+                </td>
+            </tr>
+        </tbody>
     </table>
 
     <input type="hidden" value="<?php echo $max_group_id ?>" id="max_group_id" />
     
     <div class="publish_layouts settings_sortable">
         <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-                <th>
-                    <?php echo lang('blueprint_layout_heading'); ?>
-                </th>
-                <th>
-                    <?php echo lang('blueprint_template_heading'); ?>
-                </th>
-                <th>
-                    <?php echo lang('blueprint_thumbnail_heading'); ?>
-                </th>
-            </tr>
-            <?php $i = 0; foreach($fields as $k => $field): $class = ($i % 2 == 0) ? 'even' : 'odd'; ?>
-                <tr id="order_<?php echo $field['row_id'] ?>" class="row <?php echo $class ?>">
+            <thead>
+                <tr>
+                    <th>
+                        <?php echo lang('blueprint_layout_heading'); ?>
+                    </th>
+                    <th>
+                        <?php echo lang('blueprint_template_heading'); ?>
+                    </th>
+                    <th>
+                        <?php echo lang('blueprint_thumbnail_heading'); ?>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach($fields as $k => $field): ?>
+                <tr id="order_<?php echo $field['row_id'] ?>" class="row">
                     <td width="33%">
                         <div class="handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
                         <?php echo form_hidden($field['layout_group_id'], $field['layout_group_id_value']); ?>
@@ -112,26 +127,31 @@
                         </table>
                     </td>
                 </tr>
-            <?php $i++; endforeach; ?>
+            <?php endforeach; ?>
+            </tbody>
         </table>
     </div>
     
     <a href="#" class="blueprint_add_row" rel="publish_layouts">+ Add</a>
 
     <table class="mainTable" border="0" cellspacing="0" cellpadding="0">
-        <tr>
-            <th colspan="2">
-                <?php echo lang('enable_detailed_template'); ?>
-            </th>
-        </tr>
-        <tr>
-            <td width="80%">
-                <?php echo lang('enable_detailed_template_detail'); ?>
-            </td>
-            <td width="20%">
-                <?php echo form_dropdown('enable_detailed_template', array('n' => 'No', 'y' => 'Yes'), $enable_detailed_template, 'id="enable_detailed_template"'); ?>
-            </td>
-        </tr>
+        <thead>
+            <tr>
+                <th colspan="2">
+                    <?php echo lang('enable_detailed_template'); ?>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td width="80%">
+                    <?php echo lang('enable_detailed_template_detail'); ?>
+                </td>
+                <td width="20%">
+                    <?php echo form_dropdown('enable_detailed_template', array('n' => 'No', 'y' => 'Yes'), $enable_detailed_template, 'id="enable_detailed_template"'); ?>
+                </td>
+            </tr>
+        </tbody>
     </table>
         
     <div class="channel_template_selection"<?php echo (($enable_detailed_template != 'y') ? 'style="display: none;"' : "") ?>>

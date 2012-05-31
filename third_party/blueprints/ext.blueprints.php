@@ -505,7 +505,7 @@ class Blueprints_ext {
     public function settings_form($vars)
     {
         $this->EE->lang->loadfile('blueprints');
-        $this->EE->load->library('javascript');
+        // $this->EE->load->library('javascript');
 
         $this->EE->load->library('filemanager');
         $this->EE->load->library('file_field');
@@ -747,8 +747,6 @@ class Blueprints_ext {
     */
     public function save_settings()
     {
-        var_dump($_POST); die;
-        
         $channels = $this->EE->input->post('channels');
         $channel_show_selected = $this->EE->input->post('channel_show_selected');
         $channel_templates = $this->EE->input->post('channel_templates');
@@ -775,6 +773,10 @@ class Blueprints_ext {
         
         if($channels)
         {
+            $channels = array_values($channels);
+            $channel_show_selected = array_values($channel_show_selected);
+            $channel_templates = array_values($channel_templates);
+
             // Figure out what templates to show for each channel
             foreach($channels as $k => $channel_id)
             {
@@ -794,7 +796,7 @@ class Blueprints_ext {
                 }
             }
         }
-        
+
         // If the user decided to remove the publish layout data from EE entirely
         if($delete)
         {

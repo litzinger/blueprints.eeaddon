@@ -33,7 +33,7 @@ $('#blueprint_settings tbody').each(function(){
 $('.blueprint_add_row').live('click', function(e){
 
     var regex = /(\[\d+\]|\[new_\d+\])/g;
-    var regex_thumbnails = /(_\d+|_new_\d+)/g;
+    var regex_thumbnails = /((thumbnail_preview_)\d+|(thumbnail_trigger_)\d+|(thumbnail_value_)\d+)/g;
 
     var rel = $(this).attr('rel');
     var table = $('.'+ rel +' .mainTable tbody:eq(0)');
@@ -46,11 +46,16 @@ $('.blueprint_add_row').live('click', function(e){
     } else {
         var cssclass = 'even';
     }
-    
+
     // Remove the index from the cloned row so it gets saved with a new index
-    row = row.replace(regex_thumbnails, '_new_'+ index);
+    row = row.replace(regex_thumbnails, function(match, g1, g2, g3, g4){
+        var str = '';
+        if(g2) return g2 + index;
+        if(g3) return g3 + index;
+        if(g4) return g4 + index;
+    });
+
     row = row.replace(regex, '[new_'+ index +']');
-    // row = row.replace(regex, '[]');
 
     table.append('<tr id="'+ rel + index +'" class="row '+ cssclass +'">'+ row +'</tr>');
 
@@ -58,7 +63,7 @@ $('.blueprint_add_row').live('click', function(e){
     $('#'+ rel + index).find('select').val('');
 
     /* Remove values from text fields */
-    $('#'+ rel + index).find('input').attr('value', '');
+    $('#'+ rel + index).find('input[type="text"]').attr('value', '');
 
     /* Set the new group ID */
     var max_group_id = parseInt($('#max_group_id').val()) + 1;
