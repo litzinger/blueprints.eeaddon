@@ -69,6 +69,9 @@ table.mainTable .thumbnail_table tr td:last-child {
 #template_thumbnail .ajax_loader {
     margin-left: 45px;
 }
+.ajax_loader.simple  {
+    margin-left: 20px;
+}
 .active_publish_layout {
     color: rgba(0,0,0,0.5);
     margin: 5px;
@@ -97,6 +100,9 @@ table.mainTable .thumbnail_table tr td:last-child {
     width: 780px;
     padding: 10px 40px;
 }
+.jcarousel-skin-blueprints.simple {
+    padding: 10px;
+}
 
 .jcarousel-skin-blueprints .jcarousel-clip-horizontal {
     width:  780px;
@@ -110,6 +116,12 @@ table.mainTable .thumbnail_table tr td:last-child {
     text-align: left;
     cursor: pointer;
     position: relative;
+}
+.jcarousel-skin-blueprints.simple .jcarousel-item {
+    width: auto;
+    height: auto;
+    float: left;
+    padding-right: 0;
 }
 .jcarousel-skin-blueprints .jcarousel-item .overlay {
     position: absolute;
@@ -148,13 +160,24 @@ table.mainTable .thumbnail_table tr td:last-child {
     background-repeat: no-repeat;
     position: relative;
 }
+.jcarousel-skin-blueprints.simple {
+    overflow: hidden;
+}
+.jcarousel-skin-blueprints.simple .carousel_thumbnail {
+    display: none;
+}
+.submit.simple {
+    display: block;
+    clear: both;
+    margin: 5px 20px;
+    opacity: 0.5;
+}
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail .submit {
     position: absolute;
     left: 50%;
     top: 46%;
     z-index: 91;
 }
-
 .jcarousel-skin-blueprints .jcarousel-item.current .carousel_thumbnail_wrapper,
 .jcarousel-skin-blueprints .jcarousel-item.current span.carousel_template_name {
     background-color: #FAFCAE;
@@ -163,6 +186,9 @@ table.mainTable .thumbnail_table tr td:last-child {
 .jcarousel-skin-blueprints .jcarousel-item.active span.carousel_template_name {
     background-color: #3A4850; /* ABB7C3 3A4850 */
     color: #fff;
+}
+.jcarousel-skin-blueprints.simple .jcarousel-item .carousel_thumbnail_wrapper {
+    display: none;
 }
 .jcarousel-skin-blueprints .jcarousel-item span.carousel_template_name {
     display: inline-block;
@@ -180,6 +206,14 @@ table.mainTable .thumbnail_table tr td:last-child {
     -moz-border-radius-topright: 5px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+}
+.jcarousel-skin-blueprints.simple .jcarousel-item span.carousel_template_name {
+    -webkit-border-bottom-left-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -moz-border-radius-bottomleft: 5px;
+    -moz-border-radius-bottomright: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 .jcarousel-skin-blueprints .jcarousel-item span.is_publish_layout {
     padding: 3px 6px 3px 0;

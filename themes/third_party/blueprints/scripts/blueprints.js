@@ -27,75 +27,119 @@ Blueprints.carousel = function(template_id)
             field.find('.js_hide').removeClass('js_hide');
             img.attr('src', src.replace('field_collapse.png', 'field_expand.png'));
         });
-
-        // Start it up
-        jQuery("#blueprints_carousel").show().jcarousel({
-            size: carousel.length,
-            start: start_template.index()
-        });
-
-        // Sets the layout_change input value so the correct layout group is saved
-        Blueprints.carousel_change(old_template_id);
-
-        // On load set the active template
-        start_template.addClass('current');
         
-        // Add divs for the edge fades
-        $('.jcarousel-container').prepend('<div class="jcarousel-left-fade"></div><div class="jcarousel-right-fade"></div>');
+        // Simple version, no carousel b/c there are no thumbnail previews :(
+        if( ! Blueprints.config.has_thumbnails)
+        {
+            $('#blueprints_carousel').find('li').addClass('jcarousel-item');
+            $('#blueprints_carousel').addClass('simple').show();
 
-        // On click set active template
-        $('.jcarousel-item').click(function(){
-            item = $(this);
+            var submit_button = $('<input type="submit" class="submit simple" name="submit" value="Load Layout" />');
+            submit_button.insertAfter('#blueprints_carousel');
 
-            // Set all siblings as not clicked
-            item.siblings().each(function(){
-                $(this).data('clicked', false);
+            // On click set active template
+            $('.jcarousel-item').click(function(){
+                item = $(this);
+
+                // Set all siblings as not clicked
+                item.siblings().each(function(){
+                    $(this).data('clicked', false);
+                });
+                // Make sure the item can only be clicked once, otherwise it will
+                // execute this code each time it's clicked. bad.
+                if(item.data('clicked')) return;
+                item.data('clicked', true);
+
+                id = $(this).attr('data-id');
+                $('input[name='+ select_name +']').val(id);
+
+                // Set layout_change on item click
+                layout_preview = Blueprints.carousel_change(id);
+
+                // Make it visually active
+                item.siblings().removeClass('active');
+                item.addClass('active');
+
+                // Add zee button, but only if the choosen template is assigned to a Publish Layout
+                if(old_template_id != id && id in Blueprints.config.layouts)
+                {
+                    submit_button.css({'opacity': '1'});
+                    
+                    submit_button.click(function(e){
+                        e.preventDefault();
+                        submit_button.after('<img class="ajax_loader simple" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
+                        submit_button.remove();
+                        Blueprints.autosave(layout_preview); 
+                    });
+                }
             });
-            // Make sure the item can only be clicked once, otherwise it will
-            // execute this code each time it's clicked. bad.
-            if(item.data('clicked')) return;
-            item.data('clicked', true);
+        }
+        else
+        {
+            // Start it up
+            jQuery("#blueprints_carousel").show().jcarousel({
+                size: carousel.length,
+                start: start_template.index()
+            });
 
-            id = $(this).attr('data-id');
-            $('input[name='+ select_name +']').val(id);
+            // Add divs for the edge fades
+            $('.jcarousel-container').prepend('<div class="jcarousel-left-fade"></div><div class="jcarousel-right-fade"></div>');
 
-            // Set layout_change on item click
-            layout_preview = Blueprints.carousel_change(id);
+            // Sets the layout_change input value so the correct layout group is saved
+            Blueprints.carousel_change(old_template_id);
 
-            // Make it visually active
-            item.siblings().removeClass('active');
-            item.addClass('active');
+            // On load set the active template
+            start_template.addClass('current');
+            
+            // On click set active template
+            $('.jcarousel-item').click(function(){
+                item = $(this);
 
-            item.siblings().find('.submit').remove();
-            item.siblings().find('.overlay').remove();
-            item.siblings().find('.ajax_loader').remove();
-
-            // Add zee button, but only if the choosen template is assigned to a Publish Layout
-            if(old_template_id != id && id in Blueprints.config.layouts)
-            {
-                item.find('.carousel_thumbnail').prepend('<div class="overlay"></div>');
-                item.find('.carousel_thumbnail').prepend('<input type="submit" class="submit" name="submit" value="Load Layout" />');
-                item.find('.carousel_thumbnail .overlay').height( item.find('img').height() );
-                submit_button = item.find('.submit');
-
-                item_width = $('.carousel_thumbnail').width();
-                submit_width = submit_button.width();
-                submit_button.css('left', ((item_width / 2) - (submit_width / 2)) - 8);
-                
-                submit_button.show(function () {
-                    // alert('visible!');
-                      // $(this).hide("scale", {}, 1000);
+                // Set all siblings as not clicked
+                item.siblings().each(function(){
+                    $(this).data('clicked', false);
                 });
+                // Make sure the item can only be clicked once, otherwise it will
+                // execute this code each time it's clicked. bad.
+                if(item.data('clicked')) return;
+                item.data('clicked', true);
 
-                submit_button.click(function(e){
-                    e.preventDefault();
-                    item.find('.overlay').addClass('loading');
-                    submit_button.after('<img class="ajax_loader" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
-                    submit_button.remove();
-                    Blueprints.autosave(layout_preview); 
-                });
-            }
-        });
+                id = $(this).attr('data-id');
+                $('input[name='+ select_name +']').val(id);
+
+                // Set layout_change on item click
+                layout_preview = Blueprints.carousel_change(id);
+
+                // Make it visually active
+                item.siblings().removeClass('active');
+                item.addClass('active');
+
+                item.siblings().find('.submit').remove();
+                item.siblings().find('.overlay').remove();
+                item.siblings().find('.ajax_loader').remove();
+
+                // Add zee button, but only if the choosen template is assigned to a Publish Layout
+                if(old_template_id != id && id in Blueprints.config.layouts)
+                {
+                    item.find('.carousel_thumbnail').prepend('<div class="overlay"></div>');
+                    item.find('.carousel_thumbnail').prepend('<input type="submit" class="submit" name="submit" value="Load Layout" />');
+                    item.find('.carousel_thumbnail .overlay').height( item.find('img').height() );
+                    submit_button = item.find('.submit');
+
+                    item_width = $('.carousel_thumbnail').width();
+                    submit_width = submit_button.width();
+                    submit_button.css('left', ((item_width / 2) - (submit_width / 2)) - 8);
+                    
+                    submit_button.click(function(e){
+                        e.preventDefault();
+                        item.find('.overlay').addClass('loading');
+                        submit_button.after('<img class="ajax_loader" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
+                        submit_button.remove();
+                        Blueprints.autosave(layout_preview); 
+                    });
+                }
+            });
+        }
     }
 }
     
@@ -213,7 +257,6 @@ Blueprints.carousel_change = function(template)
     }
 };
 
-
 /*!
  * jCarousel - Riding carousels with jQuery
  *   http://sorgalla.com/jcarousel/
@@ -240,7 +283,7 @@ Blueprints.carousel_change = function(template)
  * Copyright (c) 2009 Michael Hixson
  * Licensed under the MIT license (http://www.opensource.org/licenses/mit-license.php)
 */
-(function($){$.fn.appear=function(f,o){var s=$.extend({one:true},o);return this.each(function(){var t=$(this);t.appeared=false;if(!f){t.trigger('appear',s.data);return;}var w=$(window);var c=function(){if(!t.is(':visible')){t.appeared=false;return;}var a=w.scrollLeft();var b=w.scrollTop();var o=t.offset();var x=o.left;var y=o.top;if(y+t.height()>=b&&y<=b+w.height()&&x+t.width()>=a&&x<=a+w.width()){if(!t.appeared)t.trigger('appear',s.data);}else{t.appeared=false;}};var m=function(){t.appeared=true;if(s.one){w.unbind('scroll',c);var i=$.inArray(c,$.fn.appear.checks);if(i>=0)$.fn.appear.checks.splice(i,1);}f.apply(this,arguments);};if(s.one)t.one('appear',s.data,m);else t.bind('appear',s.data,m);w.scroll(c);$.fn.appear.checks.push(c);(c)();});};$.extend($.fn.appear,{checks:[],timeout:null,checkAll:function(){var l=$.fn.appear.checks.length;if(l>0)while(l--)($.fn.appear.checks[l])();},run:function(){if($.fn.appear.timeout)clearTimeout($.fn.appear.timeout);$.fn.appear.timeout=setTimeout($.fn.appear.checkAll,20);}});$.each(['append','prepend','after','before','attr','removeAttr','addClass','removeClass','toggleClass','remove','css','show','hide'],function(i,n){var u=$.fn[n];if(u){$.fn[n]=function(){var r=u.apply(this,arguments);$.fn.appear.run();return r;}}});})(jQuery);
+// (function($){$.fn.appear=function(f,o){var s=$.extend({one:true},o);return this.each(function(){var t=$(this);t.appeared=false;if(!f){t.trigger('appear',s.data);return;}var w=$(window);var c=function(){if(!t.is(':visible')){t.appeared=false;return;}var a=w.scrollLeft();var b=w.scrollTop();var o=t.offset();var x=o.left;var y=o.top;if(y+t.height()>=b&&y<=b+w.height()&&x+t.width()>=a&&x<=a+w.width()){if(!t.appeared)t.trigger('appear',s.data);}else{t.appeared=false;}};var m=function(){t.appeared=true;if(s.one){w.unbind('scroll',c);var i=$.inArray(c,$.fn.appear.checks);if(i>=0)$.fn.appear.checks.splice(i,1);}f.apply(this,arguments);};if(s.one)t.one('appear',s.data,m);else t.bind('appear',s.data,m);w.scroll(c);$.fn.appear.checks.push(c);(c)();});};$.extend($.fn.appear,{checks:[],timeout:null,checkAll:function(){var l=$.fn.appear.checks.length;if(l>0)while(l--)($.fn.appear.checks[l])();},run:function(){if($.fn.appear.timeout)clearTimeout($.fn.appear.timeout);$.fn.appear.timeout=setTimeout($.fn.appear.checkAll,20);}});$.each(['append','prepend','after','before','attr','removeAttr','addClass','removeClass','toggleClass','remove','css','show','hide'],function(i,n){var u=$.fn[n];if(u){$.fn[n]=function(){var r=u.apply(this,arguments);$.fn.appear.run();return r;}}});})(jQuery);
 
 
 /*
@@ -249,7 +292,7 @@ Blueprints.carousel_change = function(template)
 (function($){
 
     // console.log(Blueprints.config);
-    
+
     var template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
 
     if(Blueprints.config.publish_layout_takeover)
@@ -337,17 +380,39 @@ Blueprints.carousel_change = function(template)
                 // Make sure our hidden fields are added to the page, otherwise
                 // only clicking the Pages/Structure tab will add them.
                 Blueprints.carousel_change(select_value);
-                Blueprints.carousel(select_value);
+                // Blueprints.carousel(select_value);
             }
-        }.run, 350);
+        }.run, 100);
         
         // When a tab is clicked...
-        $('#structure, #pages').appear(function(){
-            setTimeout({
-                run: function() {
-                    Blueprints.carousel(select_value);
-                }
-            }.run, 100);
+        // $('#structure, #pages').appear(function(){
+        //     setTimeout({
+        //         run: function() {
+        //             Blueprints.carousel(select_value);
+        //         }
+        //     }.run, 100);
+        // });
+
+        var interval;
+        function showCarousel()
+        {
+            if ($('#structure, #pages').is(":visible"))
+            {
+                clearInterval(interval);
+                Blueprints.carousel(select_value);
+            }
+        }
+
+        $('.menu_structure, .menu_pages').bind('click', function()
+        {
+            if ($('#structure, #pages').is(":visible"))
+            {
+                Blueprints.carousel(select_value);
+            }
+            else
+            {
+                interval = setInterval(showCarousel, 100);
+            }
         });
     }
     
