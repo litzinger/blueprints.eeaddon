@@ -92,7 +92,7 @@ class Blueprints_acc {
             ';
             
             // Output JS, and remove extra white space and line breaks
-            $this->EE->javascript->output('$(function(){'. preg_replace("/\s+/", " ", $script) .'});');
+            $this->EE->javascript->output(preg_replace("/\s+/", " ", $script));
             $this->EE->javascript->compile();
             
             $this->_sidebar();
@@ -213,7 +213,7 @@ class Blueprints_acc {
          }
 
          // Output JS, and remove extra white space and line breaks
-         $this->EE->javascript->output('$(function(){'. preg_replace("/\s+/", " ", $script) .'});');
+         $this->EE->javascript->output(preg_replace("/\s+/", " ", $script));
          $this->EE->javascript->compile();
 
          // Extra CSS just for the sidebar. Some styles come from libraries/page_styles.php

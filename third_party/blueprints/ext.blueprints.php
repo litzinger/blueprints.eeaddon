@@ -336,6 +336,8 @@ class Blueprints_ext {
         
         $entry_id = $this->EE->input->get_post('entry_id');
         $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_path'];
+
+        $has_thumbnails = FALSE;
         
         // Lets get our active layouts into a JavaScript array to use with jQuery below
         $active_publish_layout = $this->EE->blueprints_model->get_active_publish_layout($channel_id);
@@ -453,10 +455,17 @@ class Blueprints_ext {
         
         foreach($carousel_templates as $template)
         {
+            $thumbnail = isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '';
+
+            if ($thumbnail AND ! is_numeric($thumbnail) AND $thumbnail != '')
+            {
+                $has_thumbnails = TRUE;
+            }
+
             $carousel_options[] = array(
                 'template_id' => $template['template_id'], 
                 'template_name' => $template['template_name'], 
-                'template_thumb' => isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '',
+                'template_thumb' => $thumbnail,
                 'layout_preview' => isset($layout_carousel_ids[$template['template_id']]) ? $layout_carousel_ids[$template['template_id']] : '',
                 'layout_name' => (isset($layout_carousel_names[$template['template_id']]) AND $layout_carousel_names[$template['template_id']] != '') ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
             ); 
@@ -479,6 +488,7 @@ class Blueprints_ext {
             edit_templates_link: "'. $edit_templates_link .'",
             enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
             hash: "'. $this->settings['hash'] .'",
+            has_thumbnails: '. ($has_thumbnails ? 'true' : 'false') .',
             layouts: {'. implode(',', $layouts) .'},
             layout_checkbox_options: "'. $layout_checkbox_options .'",
             layout_preview: "'. $this->EE->input->get_post('layout_preview') .'",
@@ -491,7 +501,7 @@ class Blueprints_ext {
             thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
         };';
 
-        $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">'. $blueprints_config .'</script><!-- END Blueprints assets -->');
+        $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><script type="text/javascript">(function($){'. $blueprints_config .'})(jQuery);</script><!-- END Blueprints assets -->');
         $this->EE->cp->add_to_head('<!-- BEGIN Blueprints assets --><link type="text/css" href="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/styles/blueprints.css" rel="stylesheet" /><!-- END Blueprints assets -->');
         $this->EE->cp->add_to_foot('<!-- BEGIN Blueprints assets --><script type="text/javascript" src="'. $this->EE->blueprints_helper->get_theme_folder_url() .'blueprints/scripts/blueprints.js"></script><!-- END Blueprints assets -->');
 
@@ -774,8 +784,8 @@ class Blueprints_ext {
         if($channels)
         {
             $channels = array_values($channels);
-            $channel_show_selected = array_values($channel_show_selected);
-            $channel_templates = array_values($channel_templates);
+            $channel_show_selected = ! empty($channel_show_selected) ? array_values($channel_show_selected) : array();
+            $channel_templates = ! empty($channel_templates) ? array_values($channel_templates) : array();
 
             // Figure out what templates to show for each channel
             foreach($channels as $k => $channel_id)
