@@ -214,6 +214,12 @@ table.mainTable .thumbnail_table tr td:last-child {
     -moz-border-radius-bottomright: 5px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+
+    -webkit-box-shadow: 1px 2px 4px 1px rgba(0,0,0,.4);
+    -moz-box-shadow: 1px 2px 4px 1px rgba(0,0,0,.4);
+    box-shadow: 1px 2px 2px 1px rgba(0,0,0,0.1);
+
+    padding-bottom: 5px;
 }
 .jcarousel-skin-blueprints .jcarousel-item span.is_publish_layout {
     padding: 3px 6px 3px 0;

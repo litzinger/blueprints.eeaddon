@@ -33,7 +33,7 @@ $('#blueprint_settings tbody').each(function(){
 $('.blueprint_add_row').live('click', function(e){
 
     var regex = /(\[\d+\]|\[new_\d+\])/g;
-    var regex_thumbnails = /((thumbnail_preview_)\d+|(thumbnail_trigger_)\d+|(thumbnail_value_)\d+)/g;
+    var regex_thumbnails = /((thumbnail_preview_)\d+|(thumbnail_trigger_)\d+|(thumbnail_value_)\d+|(thumbnail_remove_)\d+)/g;
 
     var rel = $(this).attr('rel');
     var table = $('.'+ rel +' .mainTable tbody:eq(0)');
@@ -41,18 +41,19 @@ $('.blueprint_add_row').live('click', function(e){
     var row = tr.html();
     var index = table.find('tr.row').length;
 
-    if(tr.hasClass('even')){
-        var cssclass = 'odd';
-    } else {
-        var cssclass = 'even';
-    }
+    // if(tr.hasClass('even')){
+    //     var cssclass = 'odd';
+    // } else {
+    //     var cssclass = 'even';
+    // }
 
     // Remove the index from the cloned row so it gets saved with a new index
-    row = row.replace(regex_thumbnails, function(match, g1, g2, g3, g4){
+    row = row.replace(regex_thumbnails, function(match, g1, g2, g3, g4, g5){
         var str = '';
-        if(g2) return g2 + index;
-        if(g3) return g3 + index;
-        if(g4) return g4 + index;
+        if(g2) return g2 + 'new_'+ index;
+        if(g3) return g3 + 'new_'+ index;
+        if(g4) return g4 + 'new_'+ index;
+        if(g5) return g5 + 'new_'+ index;
     });
 
     row = row.replace(regex, '[new_'+ index +']');
@@ -79,6 +80,7 @@ $('.blueprint_add_row').live('click', function(e){
     /* Remove thumbnail images */
     $('#thumbnail_preview_new_'+ index).html('');
     $('#thumbnail_trigger_new_'+ index).text('Select Image');
+    $('#thumbnail_remove_new_'+ index).hide();
 
     /* bind the file manager to the new rows we're adding */
     if(Blueprints.config.is_assets_installed == "yes")
@@ -105,9 +107,18 @@ $('.blueprint_add_row').live('click', function(e){
             blueprints_set_thumbnail(file, 'new_'+ index);
         });
     }
-    
+
     blueprints_set_row_events(rel);
     
+    e.preventDefault();
+});
+
+$('.thumbnail_remove').live('click', function(e){
+    parent = $(this).closest('td');
+    parent.find('.thumbnail_preview').html('');
+    parent.find('input').val('');
+    parent.find('.thumbnail_trigger').text("Select Image");
+    $(this).hide();
     e.preventDefault();
 });
 
@@ -309,7 +320,6 @@ function blueprints_set_thumbnail(file, field)
         var thumbnail = file.path.replace(/\{filedir_(\d+)\}/, url +'_thumbs/');
 
         $("#thumbnail_preview_"+ field).html('<img src="'+ thumbnail +'" />');
-        $("#thumbnail_trigger_"+ field).text("Change Image");
         $("#thumbnail_value_"+ field).val(file.path);
     }
     else
@@ -324,8 +334,18 @@ function blueprints_set_thumbnail(file, field)
         if(file.is_image)
         {
             $("#thumbnail_preview_"+ field).html('<img src="'+ file.thumb +'" />');
-            $("#thumbnail_trigger_"+ field).text("Change Image");
             $("#thumbnail_value_"+ field).val('{filedir_'+ file.directory +'}' + file.name);
         }
+    }
+
+    var trigger_link = $("#thumbnail_trigger_"+ field);
+    var remove_link = $("#thumbnail_remove_"+ field);
+
+    trigger_link.text("Change Image");
+
+    if(remove_link.length == 1) {
+        remove_link.show();        
+    } else {
+        trigger_link.after('<br /><a class="thumbnail_remove" href="#" id="thumbnail_remove_'+ field +'">Remove Image</a>');
     }
 }

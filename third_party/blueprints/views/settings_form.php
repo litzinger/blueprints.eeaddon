@@ -117,6 +117,7 @@
 
                                     echo '<div class="thumbnail_preview" id="thumbnail_preview_'. $k .'">'. $thumbnail .'</div>';
                                     echo '<a class="thumbnail_trigger" href="#" id="thumbnail_trigger_'. $k .'">'. $text .'</a>';
+                                    if($thumbnail != '') echo '<br /><a class="thumbnail_remove" href="#" id="thumbnail_remove_'. $k .'">Remove Image</a>';
                                     echo '<input type="hidden" name="'. $field['thb_name'] .'" value="'. $field['thb_options_selected'] .'" id="thumbnail_value_'. $k .'" />';
                                     ?>
                                 </td>
