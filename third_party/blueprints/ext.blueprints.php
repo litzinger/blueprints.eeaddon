@@ -337,6 +337,8 @@ class Blueprints_ext {
         $entry_id = $this->EE->input->get_post('entry_id');
         $thumbnail_path = isset($this->settings['thumbnail_path']) ? $this->settings['thumbnail_path'] : $this->cache['settings']['thumbnail_directory_path'];
 
+        $enable_carousel = isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n';
+
         $has_thumbnails = FALSE;
         
         // Lets get our active layouts into a JavaScript array to use with jQuery below
@@ -452,14 +454,33 @@ class Blueprints_ext {
         
         $carousel_templates = $this->EE->blueprints_model->get_assigned_templates($channel_templates);
         $carousel_options = array();
-        
+
         foreach($carousel_templates as $template)
         {
+            $layout_name = '';
             $thumbnail = isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '';
 
-            if ($thumbnail AND ! is_numeric($thumbnail) AND $thumbnail != '')
+            if ($thumbnail && ! is_numeric($thumbnail) && $thumbnail != '')
             {
                 $has_thumbnails = TRUE;
+            }
+
+            // If layout names are defined, set the layout_name, otherwise default to the actual template_name
+            if (
+                isset($layout_carousel_names[$template['template_id']]) && 
+                $layout_carousel_names[$template['template_id']] != ''
+            ){
+                // The carousel gets this special little dot.
+                if ($enable_carousel == 'y')
+                {
+                    $layout_name = '<span class="is_publish_layout">&#9679;</span>';
+                }
+
+                $layout_name .= $layout_carousel_names[$template['template_id']];
+            }
+            else
+            {
+                $layout_name = $template['template_name'];
             }
 
             $carousel_options[] = array(
@@ -467,7 +488,7 @@ class Blueprints_ext {
                 'template_name' => $template['template_name'], 
                 'template_thumb' => $thumbnail,
                 'layout_preview' => isset($layout_carousel_ids[$template['template_id']]) ? $layout_carousel_ids[$template['template_id']] : '',
-                'layout_name' => (isset($layout_carousel_names[$template['template_id']]) AND $layout_carousel_names[$template['template_id']] != '') ? '<span class="is_publish_layout">&#9679;</span>'. $layout_carousel_names[$template['template_id']] : $template['template_name']
+                'layout_name' => $layout_name
             ); 
         }
         
@@ -486,7 +507,7 @@ class Blueprints_ext {
             carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
             channel_templates: '. $channel_templates_options .',
             edit_templates_link: "'. $edit_templates_link .'",
-            enable_carousel: "'. (isset($this->settings['enable_carousel']) ? $this->settings['enable_carousel'] : 'n') .'",
+            enable_carousel: "'. $enable_carousel .'",
             hash: "'. $this->settings['hash'] .'",
             has_thumbnails: '. ($has_thumbnails ? 'true' : 'false') .',
             layouts: {'. implode(',', $layouts) .'},

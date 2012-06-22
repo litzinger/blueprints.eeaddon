@@ -13,7 +13,7 @@ input[type="text"].layout_group_name {
 	width: 80%;
 }
 
-.mainTable tr.row:nth-child(odd) {
+.mainTable tr.row:nth-child(odd) td {
     background-color: #F4F6F6;
 }
 
@@ -61,10 +61,11 @@ table.mainTable .thumbnail_table tr td:last-child {
 }
 #template_thumbnail img {
     float: left;
+    margin-right: 20px;
 }
 #template_thumbnail input {
     float: left;
-    margin-left: 20px;
+    /*margin-left: 20px;*/
 }
 #template_thumbnail .ajax_loader {
     margin-left: 45px;

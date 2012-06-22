@@ -236,10 +236,10 @@ Blueprints.is_array = function(input){ return typeof(input)=="object"&&(input in
 Blueprints.select_change = function(ele)
 {
     var template = $(ele).find("option:selected").val();
-    thumbnail = Blueprints.config.thumbnails[template];
+    var thumbnail = Blueprints.config.thumbnails[template].indexOf('http://') != -1 ? '<img src="'+ Blueprints.config.thumbnails[template] +'" />' : '';
     
     if(Blueprints.config.thumbnails[template] != "" && Blueprints.config.thumbnails[template] != undefined) {
-        $("#template_thumbnail").show().html('<img src="'+ thumbnail +'" width="155" />');
+        $("#template_thumbnail").show().html(thumbnail);
     } else {
         $("#template_thumbnail").hide().html('');
     }
@@ -300,11 +300,52 @@ Blueprints.tab_is_visible = function()
 }
 
 /*
+    Remove options from the Pages/Structure template dropdown menu, or rename them...
+*/
+Blueprints.filter_select_menu_options = function()
+{
+    Blueprints.select_change(Blueprints.template_select);
+    var template_select_options = Blueprints.template_select.find("option");
+
+    template_select_options.each(function(i){
+        var value = parseInt($(this).val());
+
+        // Remove templates that should not be displayed in the dropdown.
+        if( ! Blueprints.is_array(Blueprints.config.channel_templates) ) {
+            if(value != Blueprints.config.channel_templates) {
+                $(this).remove();
+            }
+        } else {
+            if($.inArray(value, Blueprints.config.channel_templates) == -1 && Blueprints.config.channel_templates.length > 0) {
+                $(this).remove();
+            }
+        }
+
+        // Update the label for the drop down if a custom layout name is defined.
+        if(Blueprints.config.carousel_options.length > 0) {
+            for(i = 0; i < Blueprints.config.carousel_options.length; i++) {
+                if(Blueprints.config.carousel_options[i].template_id == value) {
+                    $(this).text(Blueprints.config.carousel_options[i].layout_name);
+                }
+            }
+        }
+    });
+
+    var template_select_optgroups = Blueprints.template_select.find("optgroup");
+    template_select_optgroups.each(function(i){
+        if( $(this).children().length == 0 ){
+            $(this).remove();
+        }
+    });
+}
+
+/*
     Save the Entries data, then reload the page with the new layout and saved data
 */
 $(function(){
 
     // console.log(Blueprints.config);
+    var interval;
 
     Blueprints.template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
     Blueprints.structure_field = $('#hold_field_structure__template_id');
@@ -355,18 +396,18 @@ $(function(){
     // Only create the carousel if turned on
     if(Blueprints.config.enable_carousel == 'y' && Blueprints.config.carousel_options.length > 0)
     {
-        carousel = Blueprints.config.carousel_options;
-        out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints" style="display: none">';
+        var carousel = Blueprints.config.carousel_options;
+        var out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints" style="display: none">';
 
         for(i = 0; i < carousel.length; i++)
         {
-            template_thumb = carousel[i].template_thumb;
-            template_name = carousel[i].template_name;
-            template_id = carousel[i].template_id;
-            layout_preview = carousel[i].layout_preview;
-            layout_name = carousel[i].layout_name;
-            
-            thumbnail = template_thumb.indexOf('http://') != -1 ? '<div class="carousel_thumbnail"><img src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"><img src="'+ Blueprints.config.theme_url +'blueprints/images/no_template.png' +'" /></div>';
+            var template_thumb = carousel[i].template_thumb;
+            var template_name = carousel[i].template_name;
+            var template_id = carousel[i].template_id;
+            var layout_preview = carousel[i].layout_preview;
+            var layout_name = carousel[i].layout_name;
+
+            var thumbnail = template_thumb.indexOf('http://') != -1 ? '<div class="carousel_thumbnail"><img src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"><img src="'+ Blueprints.config.theme_url +'blueprints/images/no_template.png' +'" /></div>';
         
             out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"> \
                             <span class="carousel_template_name">'+ layout_name +'</span> \
@@ -380,8 +421,8 @@ $(function(){
         Blueprints.template_select.after(out);
 
         // Create our hidden field to send the ID to on click
-        select_name = Blueprints.template_select.attr('name');
-        select_value = Blueprints.template_select.val();
+        var select_name = Blueprints.template_select.attr('name');
+        var select_value = Blueprints.template_select.val();
         Blueprints.template_select.after('<input type="hidden" id="blueprints_template_id" name="'+ select_name +'" value="'+ select_value +'" />');
         
         // Remove the original Structure or Pages template dropdown, we just replaced it.
@@ -395,8 +436,6 @@ $(function(){
                 Blueprints.carousel_change(select_value);
             }
         }.run, 100);
-
-        var interval;
 
         $('.menu_structure, .menu_pages').bind('click', function()
         {
@@ -431,26 +470,27 @@ $(function(){
             Blueprints.select_change($(this));
         });
 
-        Blueprints.select_change(Blueprints.template_select);
-        var template_select_options = Blueprints.template_select.find("option");
-        Blueprints.template_select_options.each(function(i){
-            var value = parseInt($(this).val());
-
-            if(!Blueprints.is_array(Blueprints.config.channel_templates)) {
-                if(value != Blueprints.config.channel_templates) {
-                    $(this).remove();
-                }
-            } else {
-                if($.inArray(value, Blueprints.config.channel_templates) == -1 && Blueprints.config.channel_templates.length > 0) {
-                    $(this).remove();
-                }
+        $('.menu_structure, .menu_pages').bind('click', function()
+        {
+            // If everything loads correctly it should fire first time
+            if (Blueprints.tab_is_visible)
+            {
+                Blueprints.filter_select_menu_options();
             }
-        });
-    
-        var template_select_optgroups = Blueprints.template_select.find("optgroup");
-        template_select_optgroups.each(function(i){
-            if( $(this).children().length == 0 ){
-                $(this).remove();
+            else
+            {
+                // Keep firing to make sure the carousel gets initiated
+                interval = setInterval(function(){
+                    if (Blueprints.tab_is_visible) {
+                        Blueprints.filter_select_menu_options();
+                        clearInterval(interval);
+                    }
+                }, 50);
+
+                // Stop after 5 seconds just incase
+                setTimeout(function(){
+                    clearInterval(interval);
+                }, 5000);
             }
         });
     }

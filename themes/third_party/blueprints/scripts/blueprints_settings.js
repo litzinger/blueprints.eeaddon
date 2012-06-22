@@ -41,12 +41,6 @@ $('.blueprint_add_row').live('click', function(e){
     var row = tr.html();
     var index = table.find('tr.row').length;
 
-    // if(tr.hasClass('even')){
-    //     var cssclass = 'odd';
-    // } else {
-    //     var cssclass = 'even';
-    // }
-
     // Remove the index from the cloned row so it gets saved with a new index
     row = row.replace(regex_thumbnails, function(match, g1, g2, g3, g4, g5){
         var str = '';
@@ -58,7 +52,7 @@ $('.blueprint_add_row').live('click', function(e){
 
     row = row.replace(regex, '[new_'+ index +']');
 
-    table.append('<tr id="'+ rel + index +'" class="row '+ cssclass +'">'+ row +'</tr>');
+    table.append('<tr id="'+ rel + index +'" class="row">'+ row +'</tr>');
 
     /* Remove all selections from the duplicated select */
     $('#'+ rel + index).find('select').val('');

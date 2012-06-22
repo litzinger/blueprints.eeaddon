@@ -93,7 +93,6 @@ class Blueprints_upd {
         
         $this->_add_actions();
         $this->_add_tables();
-        $this->_migrate_settings();
         
         return TRUE;
     }
@@ -230,7 +229,7 @@ class Blueprints_upd {
             return;
                             
         $settings = unserialize($qry->row('settings'));
-        
+
         $new_settings = array();
 
         if(!empty($settings))
@@ -248,7 +247,8 @@ class Blueprints_upd {
                                 'site_id'       => $site_id,
                                 'group_id'      => $setting['layout_group_ids'][$k],
                                 'template'      => $setting['template'][$k],
-                                'thumbnail'     => $setting['thumbnails'][$k],
+                                // Don't migrate this, old thumbnails don't have {filedir_x} paths
+                                // 'thumbnail'     => $setting['thumbnails'][$k],
                                 'name'          => $setting['layout_group_names'][$k],
                             );
 

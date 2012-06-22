@@ -21,10 +21,10 @@ $lang = array(
 "Template<p class=\"heading_description\">Choose a template group, or specific templates to make visible in this Channel. Non-selected groups or templates will not appear in the Publish Page.</p>",
 
 "blueprint_thumbnail_heading" =>
-"Thumbnail<p class=\"heading_description\">Choose an image to represent your Publish Layout. Note that images should be sized to 155px wide, and max of 180px tall for best results.</p>",
+"Thumbnail<p class=\"heading_description\">Choose an image to represent your Publish Layout. Images should be sized to 155px wide, and max of 180px tall for best results.</p>",
 
 "blueprint_layout_heading" =>
-"Publish Layout Name<p class=\"heading_description\">Choose friendly name to represent your Publish Layout to your content editors. They will see this name instead of the template name.</p>",
+"Publish Layout Name<p class=\"heading_description\">Choose a friendly name to represent your Publish Layout to your content editors. They will see this name instead of the template name.</p>",
 
 "blueprint_channel_heading" =>
 "Channel",
@@ -34,7 +34,7 @@ $lang = array(
 
 "enable_detailed_template_detail" =>
 "By default only the templates you defined above will be visible in the Template dropdown or carousel on the publish page.
-This setting lets you get more specific with which templates are visible.",
+This setting lets you define more templates to display in the dropdown menu or carousel.",
 
 "thumbnail_path" =>
 "Thumbnails Path",
@@ -65,7 +65,7 @@ like the Publish option.<br /><b>The Blueprints Accessory must be installed.</b>
 "Enable Template Carousel?",
 
 "enable_carousel_detail" => 
-"The Pages or Structure template dropdown menu will be replaced with a carousel of templates with the preview thumbnails defined below.",
+"Set to <i>Yes</i> to replace the template dropdown menu with a carousel using the thumbnail images defined below.",
 
 "template_display_header" =>
 "Visible Templates",
@@ -75,7 +75,7 @@ like the Publish option.<br /><b>The Blueprints Accessory must be installed.</b>
 not defined, all templates will be displayed in the Structure Publish Tab.",
 
 "enable_publish_layout_takeover_detail" =>
-"If disabled, changing templates will not change the Publish Layout. You will only be able to use the template thumbnail preview feature.",
+"Set to <i>Yes</i> if you want to allow template changes to immediately reflect the Publish Layout.",
 
 
 // IGNORE
