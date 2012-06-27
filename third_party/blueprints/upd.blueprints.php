@@ -383,6 +383,8 @@ class Blueprints_upd {
                 'class' => 'Blueprints_mcp',
                 'method' => 'load_pages'
             );
+
+            $this->EE->db->insert('actions', $data);
             
             $data = array(
                 'class' => 'Blueprints_mcp',

@@ -51,6 +51,15 @@ class Blueprints_mcp {
     {
         $this->EE =& get_instance();
         $this->site_id = $this->EE->config->item('site_id');
+
+        $this->EE->load->model('blueprints_model');
+
+        if(!class_exists('Blueprints_helper'))
+        {
+            require PATH_THIRD . 'blueprints/helper.blueprints.php';
+        }
+        $this->EE->blueprints_helper = new Blueprints_helper;
+        
         $this->settings = $this->EE->blueprints_model->get_settings(true);
     }
     
@@ -75,7 +84,7 @@ class Blueprints_mcp {
     public function load_pages()
     {
         $pages = $this->EE->blueprints_helper->get_pages();
-        
+
         $this->send_ajax_response($pages);
     }
     
