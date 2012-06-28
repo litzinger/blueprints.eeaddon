@@ -55,7 +55,7 @@ Blueprints.carousel = function(template_id)
 
             var submit_button = $('<input type="submit" class="submit simple" name="submit" value="Load Layout" />');
 
-            if( $('input.submit.simple').length == 0 ) {
+            if( $('input.submit.simple').length == 0 && Blueprints.config.publish_layout_takeover) {
                 submit_button.insertAfter('#blueprints_carousel');
             }
 
@@ -153,7 +153,7 @@ Blueprints.carousel = function(template_id)
                 item.siblings().find('.ajax_loader').remove();
 
                 // Add zee button, but only if the choosen template is assigned to a Publish Layout
-                if(old_template_id != id && id in Blueprints.config.layouts)
+                if(old_template_id != id && id in Blueprints.config.layouts && Blueprints.config.publish_layout_takeover)
                 {
                     item.find('.carousel_thumbnail').prepend('<div class="overlay"></div>');
                     item.find('.carousel_thumbnail').prepend('<input type="submit" class="submit" name="submit" value="Load Layout" />');
