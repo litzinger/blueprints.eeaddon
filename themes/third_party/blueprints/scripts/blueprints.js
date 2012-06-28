@@ -24,6 +24,7 @@ if (typeof window.Blueprints == 'undefined') window.Blueprints = {};
 Blueprints.carousel = function(template_id)
 {
     var old_template_id = template_id;
+    var select_name = Blueprints.template_select.attr('name');
 
     // Make sure either of these divs are visible first
     if(Blueprints.tab_is_visible)
@@ -90,14 +91,20 @@ Blueprints.carousel = function(template_id)
                 // Add zee button, but only if the choosen template is assigned to a Publish Layout
                 if(old_template_id != id && id in Blueprints.config.layouts)
                 {
-                    submit_button.css({'opacity': '1'});
-                    
-                    submit_button.click(function(e){
-                        e.preventDefault();
-                        submit_button.after('<img class="ajax_loader simple" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
-                        submit_button.remove();
-                        Blueprints.autosave(layout_preview); 
-                    });
+                    submit_button.unbind('click')
+                        .css({'opacity': '1', 'cursor': 'pointer'})
+                        .click(function(e){
+                            e.preventDefault();
+                            submit_button.after('<img class="ajax_loader simple" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
+                            submit_button.remove();
+                            Blueprints.autosave(layout_preview); 
+                        });
+                }
+                else
+                {
+                    submit_button.unbind('click')
+                        .css({'opacity': '0.5', 'cursor': 'default'})
+                        .click(function(e){ e.preventDefault(); });
                 }
             });
         }
