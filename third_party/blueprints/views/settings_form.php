@@ -52,7 +52,7 @@
                     <?php echo lang('enable_publish_layout_takeover_detail'); ?>
                 </td>
                 <td width="20%">
-                    <?php echo form_dropdown('enable_publish_layout_takeover', array('n' => 'No', 'y' => 'Yes'), $enable_publish_layout_takeover, 'id="enable_publish_layout_takeover"'); ?>
+                    <?php echo form_dropdown('enable_publish_layout_takeover', array('n' => 'Simple', 'y' => 'Advanced'), $enable_publish_layout_takeover, 'id="enable_publish_layout_takeover"'); ?>
                 </td>
             </tr>
         </tbody>

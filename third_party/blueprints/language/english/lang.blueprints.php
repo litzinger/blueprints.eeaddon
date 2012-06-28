@@ -44,7 +44,17 @@ This setting lets you define more templates to display in the dropdown menu or c
 the settings must be saved and reloaded. Path must be below your web root.<br /><br />Optimal image sizes are 155px by 180px.",
 
 "enable_publish_layout_takeover" =>
-"Enable Publish Layout Takeover?",
+"Mode",
+
+"enable_publish_layout_takeover_detail" =>
+"Set to <i>Advanced</i> if you want to allow template changes to immediately reflect the Publish Layout.<br />
+Set to <i>Simple</i> to use the settings below to determine which templates are visible to the publisher for selection.",
+
+"enable_carousel" =>
+"Enable Template Carousel?",
+
+"enable_carousel_detail" => 
+"Set to <i>Yes</i> to replace the template dropdown menu with a carousel using the thumbnail images defined below.",
 
 "enable_template_multi_channel" =>
 "Enable assigning templates to multiple Channels?",
@@ -61,21 +71,12 @@ than the one the Publish Layout was created in, the Publish Layout will not be l
 "If enabled, the Content > Edit menu in the main navigation will directly link to Channels just 
 like the Publish option.<br /><b>The Blueprints Accessory must be installed.</b>",
 
-"enable_carousel" =>
-"Enable Template Carousel?",
-
-"enable_carousel_detail" => 
-"Set to <i>Yes</i> to replace the template dropdown menu with a carousel using the thumbnail images defined below.",
-
 "template_display_header" =>
 "Visible Templates",
 
 "template_display_detail" =>
 "Select which templates you would like to be visible in the Structure Publish Tab. If a channel is 
 not defined, all templates will be displayed in the Structure Publish Tab.",
-
-"enable_publish_layout_takeover_detail" =>
-"Set to <i>Yes</i> if you want to allow template changes to immediately reflect the Publish Layout.",
 
 
 // IGNORE
