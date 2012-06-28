@@ -226,6 +226,10 @@ table.mainTable .thumbnail_table tr td:last-child {
     padding: 3px 6px 3px 0;
     color: #28C916;
 }
+.jcarousel-skin-blueprints .jcarousel-item span.is_publish_layout {
+    /*display: none;*/
+}
+
 .jcarousel-skin-blueprints .jcarousel-item .carousel_thumbnail_wrapper {
     /*background-image: url(../images/no_template.png);*/
     background-position: 50% 50%;
