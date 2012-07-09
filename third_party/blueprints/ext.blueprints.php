@@ -258,8 +258,12 @@ class Blueprints_ext {
     */
     public function entry_submission_ready($meta, $data, $autosave)
     {
+        // Fixed to work with the Seed module, and any other module possibly using this hook.
+        $entry_id = isset($data['entry_id']) ? $data['entry_id'] : false;
+        if ( ! $entry_id) return;
+        
         // $this->cache['entry_submission_ready_called'] = true;
-        $this->_entry_submission($data['entry_id'], $data);
+        $this->_entry_submission($entry_id, $data);
     }
     
     /*
