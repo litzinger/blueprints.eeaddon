@@ -46,7 +46,7 @@ Blueprints.carousel = function(template_id)
             field.find('.js_hide').removeClass('js_hide');
             img.attr('src', src.replace('field_collapse.png', 'field_expand.png'));
         });
-        
+
         // Simple version, no carousel b/c there are no thumbnail previews :(
         if( ! Blueprints.config.has_thumbnails)
         {
@@ -112,7 +112,7 @@ Blueprints.carousel = function(template_id)
         {
             // Start it up
             jQuery("#blueprints_carousel").show().jcarousel({
-                size: carousel.length,
+                size: Blueprints.config.carousel_options.length,
                 start: start_template.index()
             });
 
