@@ -440,6 +440,7 @@ $(function(){
             run: function() {
                 // Make sure our hidden fields are added to the page, otherwise
                 // only clicking the Pages/Structure tab will add them.
+                Blueprints.carousel(select_value);
                 Blueprints.carousel_change(select_value);
             }
         }.run, 100);
