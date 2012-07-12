@@ -27,7 +27,7 @@ Blueprints.carousel = function(template_id)
     var select_name = Blueprints.template_select.attr('name');
 
     // Make sure either of these divs are visible first
-    if(Blueprints.tab_is_visible)
+    if(Blueprints.tab_is_visible())
     {
         // Find the template to select/start on
         if(Blueprints.config.layout_preview != "NULL" && Blueprints.config.layout_preview != "") {
@@ -435,38 +435,34 @@ $(function(){
         // Remove the original Structure or Pages template dropdown, we just replaced it.
         Blueprints.template_select.remove();
     
-        // On page load...
+        // On page load (if the user moved the Template field to another tab)
         setTimeout({
             run: function() {
                 // Make sure our hidden fields are added to the page, otherwise
                 // only clicking the Pages/Structure tab will add them.
-                Blueprints.carousel(select_value);
-                Blueprints.carousel_change(select_value);
+                if (Blueprints.tab_is_visible()) {
+                	Blueprints.carousel(select_value);
+                	Blueprints.carousel_change(select_value);
+                }
             }
         }.run, 100);
 
-        $('.content_tab').bind('click', function()
+        // When a tab is clicked
+        $('.content_tab a').bind('click', function()
         {
-            // If everything loads correctly it should fire first time
-            if (Blueprints.tab_is_visible)
-            {
-                Blueprints.carousel(select_value);
-            }
-            else
-            {
-                // Keep firing to make sure the carousel gets initiated
-                interval = setInterval(function(){
-                    if (Blueprints.tab_is_visible) {
-                        Blueprints.carousel(select_value);
-                        clearInterval(interval);
-                    }
-                }, 50);
-
-                // Stop after 5 seconds just incase
-                setTimeout(function(){
+            // Keep firing to make sure the carousel gets initiated
+            var interval = setInterval(function(){
+                if (Blueprints.tab_is_visible()) {
+                    Blueprints.carousel(select_value);
+                    Blueprints.carousel_change(select_value);
                     clearInterval(interval);
-                }, 5000);
-            }
+                }
+            });
+
+            // Stop after 3 seconds just incase
+            setTimeout(function(){
+                clearInterval(interval);
+            }, 3000);
         });
     }
     
@@ -478,28 +474,31 @@ $(function(){
             Blueprints.select_change($(this));
         });
 
-        $('.menu_structure, .menu_pages').bind('click', function()
-        {
-            // If everything loads correctly it should fire first time
-            if (Blueprints.tab_is_visible)
-            {
-                Blueprints.filter_select_menu_options();
+        // On page load (if the user moved the Template field to another tab)
+        setTimeout({
+            run: function() {
+                // Make sure our hidden fields are added to the page, otherwise
+                // only clicking the Pages/Structure tab will add them.
+                if (Blueprints.tab_is_visible()) {
+                	Blueprints.filter_select_menu_options();
+                }
             }
-            else
-            {
-                // Keep firing to make sure the carousel gets initiated
-                interval = setInterval(function(){
-                    if (Blueprints.tab_is_visible) {
-                        Blueprints.filter_select_menu_options();
-                        clearInterval(interval);
-                    }
-                }, 50);
+        }.run, 100);
 
-                // Stop after 5 seconds just incase
-                setTimeout(function(){
+        $('.content_tab a').bind('click', function()
+        {
+            // Keep firing to make sure the carousel gets initiated
+            interval = setInterval(function(){
+                if (Blueprints.tab_is_visible()) {
+                    Blueprints.filter_select_menu_options();
                     clearInterval(interval);
-                }, 5000);
-            }
+                }
+            });
+
+            // Stop after 3 seconds just incase
+            setTimeout(function(){
+                clearInterval(interval);
+            }, 3000);
         });
     }
 });
