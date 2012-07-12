@@ -445,7 +445,7 @@ $(function(){
             }
         }.run, 100);
 
-        $('.menu_structure, .menu_pages').bind('click', function()
+        $('.content_tab').bind('click', function()
         {
             // If everything loads correctly it should fire first time
             if (Blueprints.tab_is_visible)
