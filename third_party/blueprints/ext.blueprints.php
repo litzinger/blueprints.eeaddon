@@ -484,7 +484,7 @@ class Blueprints_ext {
             }
             else
             {
-                $layout_name = $template['template_name'];
+                $layout_name = $template['group_name'].'/'.$template['template_name'];
             }
 
             $carousel_options[] = array(
