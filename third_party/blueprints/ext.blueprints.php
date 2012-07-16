@@ -279,7 +279,7 @@ class Blueprints_ext {
     
     private function _entry_submission($entry_id, $data)
     {
-        if($this->EE->input->is_ajax_request() OR $entry_id == 0)
+        if(REQ != 'CP' OR $this->EE->input->is_ajax_request() OR $entry_id == 0)
         {
             return;
         }
