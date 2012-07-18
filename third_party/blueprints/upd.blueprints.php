@@ -163,6 +163,16 @@ class Blueprints_upd {
 
         if($current < '2.0')
         {
+            // Module data
+            $data = array(
+                'module_name' => BLUEPRINTS_NAME,
+                'module_version' => BLUEPRINTS_VERSION,
+                'has_cp_backend' => 'n',
+                'has_publish_fields' => 'n'
+            );
+
+            $this->EE->db->insert('modules', $data);
+            
             $this->_add_actions();
             $this->_add_tables();
             $this->_migrate_settings();
