@@ -99,7 +99,7 @@
             <?php foreach($fields as $k => $field): ?>
                 <tr id="order_<?php echo $field['row_id'] ?>" class="row">
                     <td width="33%">
-                        <div class="handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
+                        <div class="blueprints-handle"><img src="<?php echo $theme_folder_url ?>boldminded_themes/images/icon_handle.gif" /></div>
                         <?php echo form_hidden($field['layout_group_id'], $field['layout_group_id_value']); ?>
                         <?php echo form_input($field['layout_group_name'], $field['layout_group_name_value'], 'class="layout_group_name"'); ?>
                     </td>

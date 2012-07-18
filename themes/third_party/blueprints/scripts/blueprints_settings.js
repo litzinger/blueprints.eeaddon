@@ -17,7 +17,7 @@ $("div.settings_sortable table").sortable({
     forcePlaceholderSize: true,
     items: "tr",
     helper: fixHelper,
-    handle: ".handle",
+    handle: ".blueprints-handle",
     start: function (event, ui) {
         ui.placeholder.html("<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>");
     }
