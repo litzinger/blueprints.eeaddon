@@ -59,11 +59,15 @@ class Blueprints_upd {
     {
         // Delete old hooks
         $this->EE->db->query("DELETE FROM exp_extensions WHERE class = 'Blueprints_ext'");
+
+        $default_settings[$this->site_id] = array(
+            'hash' => $this->EE->functions->random('encrypt', 32)
+        );
         
         // Add new hooks
         $ext_template = array(
             'class'    => 'Blueprints_ext',
-            'settings' => '',
+            'settings' => serialize($default_settings),
             'priority' => 8,
             'version'  => $this->version,
             'enabled'  => 'y'

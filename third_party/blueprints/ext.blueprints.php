@@ -462,7 +462,9 @@ class Blueprints_ext {
         foreach($carousel_templates as $template)
         {
             $layout_name = '';
-            $thumbnail = isset($thumbnail_options[$template['template_id']]) ? $thumbnail_options[$template['template_id']] : '';
+
+            // When upgrading from 1.x its possible the thumbnail value might be an integer
+            $thumbnail = (isset($thumbnail_options[$template['template_id']]) AND ! is_numeric($thumbnail_options[$template['template_id']])) ? $thumbnail_options[$template['template_id']] : '';
 
             if ($thumbnail && ! is_numeric($thumbnail) && $thumbnail != '')
             {
