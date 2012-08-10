@@ -262,7 +262,7 @@ class Blueprints_ext {
         $entry_id = isset($data['entry_id']) ? $data['entry_id'] : false;
         if ( ! $entry_id) return;
         
-        // $this->cache['entry_submission_ready_called'] = true;
+        $this->cache['entry_submission_ready_called'] = true;
         $this->_entry_submission($entry_id, $data);
     }
     
@@ -293,13 +293,13 @@ class Blueprints_ext {
         $post_template_id = $this->EE->input->post('structure__template_id') ? 
                             $this->EE->input->post('structure__template_id') :
                             $this->EE->input->post('pages__pages_template_id');
-        
+
         // Save our entry
-        if($post_template_id AND $this->EE->input->post('layout_preview') AND $this->EE->input->post('layout_preview') != "NULL")
+        if($post_template_id AND $this->EE->input->post('new_layout_preview') AND $this->EE->input->post('new_layout_preview') != "NULL")
         {
             $data = array(
                 'site_id'       => $this->site_id,
-                'group_id'      => $this->EE->input->post('layout_preview'),
+                'group_id'      => $this->EE->input->post('new_layout_preview'),
                 'entry_id'      => $entry_id,
                 'template_id'   => $post_template_id
             );
@@ -314,7 +314,7 @@ class Blueprints_ext {
         
         // If the new template does not have a publish layout, delete from our entries table, otherwise it
         // will reload with the old layout preview set.
-        if($this->EE->input->post('old_layout_preview') AND $this->EE->input->post('layout_preview') == "NULL")
+        if($this->EE->input->post('old_layout_preview') AND $this->EE->input->post('new_layout_preview') == "NULL")
         {
             $this->EE->db->delete('blueprints_entries', array('site_id' => $this->site_id, 'entry_id' => $entry_id));
         }

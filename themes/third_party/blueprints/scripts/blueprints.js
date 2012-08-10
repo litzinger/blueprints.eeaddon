@@ -256,9 +256,9 @@ Blueprints.select_change = function(ele)
         layout_preview = Blueprints.config.layouts[template];
 
         if(layout_preview != undefined && layout_preview != "") {
-            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="new_layout_preview" value="'+ layout_preview +'" />');
         } else {
-            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="layout_preview" value="NULL" />');
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="new_layout_preview" value="NULL" />');
         }
         
         $("#template_thumbnail").show().append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
@@ -281,11 +281,11 @@ Blueprints.carousel_change = function(template)
         layout_preview = Blueprints.config.layouts[template];
 
         if(layout_preview != undefined && layout_preview != "") {
-            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="layout_preview" value="'+ layout_preview +'" />');
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="new_layout_preview" value="'+ layout_preview +'" />');
             $("#blueprints_template_id").val(template);
             return layout_preview;
         } else {
-            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="layout_preview" value="NULL" />');
+            $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="old_layout_preview" value="NULL" />');
             return false;
         }
     }
@@ -357,6 +357,7 @@ $(function(){
     Blueprints.template_select = $("select[name=structure__template_id], select[name=pages__pages_template_id]");
     Blueprints.structure_field = $('#hold_field_structure__template_id');
     Blueprints.pages_field = $('#hold_field_pages__pages_template_id');
+    PublishForm = $('#publishForm');
 
     if(Blueprints.config.publish_layout_takeover)
     {
@@ -406,6 +407,8 @@ $(function(){
         var carousel = Blueprints.config.carousel_options;
         var out = '<ul id="blueprints_carousel" class="jcarousel-skin-blueprints" style="display: none">';
 
+        PublishForm.prepend('<div id="layout_change"></div>');
+
         for(i = 0; i < carousel.length; i++)
         {
             var template_thumb = carousel[i].template_thumb;
@@ -422,16 +425,15 @@ $(function(){
                         </li>';
         }
     
-        out = out + '</ul><div id="layout_change"></div><div class="clear"></div>';
-    
+        out = out + '</ul><div class="clear"></div><input type="hidden" id="blueprints_template_id" name="'+ select_name +'" value="'+ select_value +'" />';
+
         // Insert our carousel HTML
         Blueprints.template_select.after(out);
 
         // Create our hidden field to send the ID to on click
         var select_name = Blueprints.template_select.attr('name');
         var select_value = Blueprints.template_select.val();
-        Blueprints.template_select.after('<input type="hidden" id="blueprints_template_id" name="'+ select_name +'" value="'+ select_value +'" />');
-        
+
         // Remove the original Structure or Pages template dropdown, we just replaced it.
         Blueprints.template_select.remove();
     
@@ -440,10 +442,10 @@ $(function(){
             run: function() {
                 // Make sure our hidden fields are added to the page, otherwise
                 // only clicking the Pages/Structure tab will add them.
-                if (Blueprints.tab_is_visible()) {
+                // if (Blueprints.tab_is_visible()) {
                 	Blueprints.carousel(select_value);
                 	Blueprints.carousel_change(select_value);
-                }
+                // }
             }
         }.run, 100);
 
@@ -469,7 +471,12 @@ $(function(){
     // Old school template select menu
     else
     {
-        Blueprints.template_select.after(Blueprints.config.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div id="layout_change"></div><div class="clear"></div>');
+    	PublishForm.prepend('<div id="layout_change"></div>');
+
+        Blueprints.template_select.after(Blueprints.config.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div class="clear"></div>');
+        
+        Blueprints.select_change(Blueprints.template_select);
+
         Blueprints.template_select.change(function(){
             Blueprints.select_change($(this));
         });
@@ -479,9 +486,7 @@ $(function(){
             run: function() {
                 // Make sure our hidden fields are added to the page, otherwise
                 // only clicking the Pages/Structure tab will add them.
-                if (Blueprints.tab_is_visible()) {
-                	Blueprints.filter_select_menu_options();
-                }
+               	Blueprints.filter_select_menu_options();
             }
         }.run, 100);
 

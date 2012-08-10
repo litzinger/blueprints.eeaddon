@@ -231,8 +231,8 @@ class Blueprints_model
                             ->where('entry_id', $entry_id)
                             ->where('channel_id', $channel_id)
                             ->get('channel_entries_autosave');
-                            
-        return unserialize($qry->row('entry_data'));
+
+        return $qry->num_rows() == 0 ? '' : unserialize($qry->row('entry_data'));
     }
     
     public function get_active_publish_layout($channel_id = false)
