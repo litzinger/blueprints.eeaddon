@@ -115,6 +115,7 @@ class Blueprints_upd {
         $this->EE->load->dbforge();
         $this->EE->dbforge->drop_table('blueprints_layouts');
         $this->EE->dbforge->drop_table('blueprints_entries');
+        $this->EE->dbforge->drop_table('blueprints_field_settings');
         
         return TRUE;
     }
