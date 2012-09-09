@@ -118,13 +118,13 @@ class Blueprints_helper
             {
                 require_once $this->get_theme_folder_path().'boldminded_themes/libraries/structure_pages.php';
                 $pages = Structure_Pages::get_instance();
-                $this->cache['pages'] = $pages->get_pages($this->EE);
+                $this->cache['pages'] = $pages->get_pages($this->site_id);
             }
             elseif(array_key_exists('pages', $this->EE->addons->get_installed()))
             {
                 require_once $this->get_theme_folder_path().'boldminded_themes/libraries/pages.php';
                 $pages = Pages::get_instance();
-                $this->cache['pages'] = $pages->get_pages($this->EE);
+                $this->cache['pages'] = $pages->get_pages($this->site_id);
             }
         }
 
