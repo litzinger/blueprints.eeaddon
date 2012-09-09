@@ -885,7 +885,18 @@ class Blueprints_ext {
 
         // Save our settings to the current site ID for MSM.
         $site_id = $this->EE->config->item('site_id');
-        $settings = $this->global_settings;
+
+        $qry = $this->EE->db->limit(1)->get_where('extensions', array('class' => 'Blueprints_ext'));
+        
+        if ($qry->num_rows())
+        {
+            $settings = unserialize($qry->row('settings'));
+        }
+        else
+        {
+            $settings = array();
+        }
+
         $settings[$site_id] = $save;
 
         $this->EE->db->where('class', 'Blueprints_ext');
