@@ -173,7 +173,14 @@ class Blueprints_ext {
         // Get default Structure settings
         elseif (array_key_exists('structure', $this->EE->addons->get_installed()))
         {
-            if(!$template_id = $structure_settings[$channel_id]['template_id'] AND $structure_settings[$channel_id]['type'] != 'asset')
+            $template_id = FALSE;
+
+            if (isset($structure_settings[$channel_id]['template_id']))
+            {
+                $template_id = $structure_settings[$channel_id]['template_id'];
+            }
+
+            if( ! $template_id AND ($structure_settings[$channel_id]['type'] == 'page' OR $structure_settings[$channel_id]['type'] == 'listing'))
             {
                 $channels = $this->EE->blueprints_model->get_channels();
                 $link = $base_url.'module=structure'.AMP.'method=channel_setings';
