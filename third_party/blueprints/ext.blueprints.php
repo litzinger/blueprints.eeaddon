@@ -10,6 +10,12 @@ if (! defined('BLUEPRINTS_VERSION'))
     define('BLUEPRINTS_DOCS', $config['docs_url']);
 }
 
+if ( ! defined('BLUEPRINTS_DOCS') ) 
+{ 
+    require PATH_THIRD.'blueprints/config.php'; 
+    define('BLUEPRINTS_DOCS', $config['docs_url']); 
+} 
+
 /**
  * ExpressionEngine Extension Class
  *
