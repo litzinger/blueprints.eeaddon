@@ -21,6 +21,8 @@
 
 if (typeof window.Blueprints == 'undefined') window.Blueprints = {};
 
+Blueprints.filter_select_menu_options_called = false;
+
 Blueprints.carousel = function(template_id)
 {
     var old_template_id = template_id;
@@ -310,19 +312,43 @@ Blueprints.tab_is_visible = function()
 */
 Blueprints.filter_select_menu_options = function()
 {
+    // Make sure this only happens once, otherwise it reverses what we just reversed
+    // b/c this gets called twice, once on init and once on click.
+    if (Blueprints.filter_select_menu_options_called != false)
+        return;
+
     Blueprints.select_init(Blueprints.template_select);
     var template_select_options = Blueprints.template_select.find("option");
+
+    var templates = [];
+    var extra_templates = [];
+
+    // Sort the array to the same order as defined in the settings.
+    for (key in Blueprints.config.layouts) {
+        if ($.inArray(key, Blueprints.config.channel_templates) == -1) {
+            templates.push(parseInt(key));
+        }
+    }
+
+    // Add any additional templates that might not be assigned to a layout
+    for (i = 0; i < Blueprints.config.channel_templates.length; i++)
+    {
+        var key = parseInt(Blueprints.config.channel_templates[i]);
+        if ($.inArray(key, templates) == -1) {
+            templates.push(key);
+        }
+    }
 
     template_select_options.each(function(i){
         var value = parseInt($(this).val());
 
         // Remove templates that should not be displayed in the dropdown.
-        if( ! Blueprints.is_array(Blueprints.config.channel_templates) ) {
-            if(value != Blueprints.config.channel_templates) {
+        if( ! Blueprints.is_array(templates) ) {
+            if(value != templates) {
                 $(this).remove();
             }
         } else {
-            if($.inArray(value, Blueprints.config.channel_templates) == -1 && Blueprints.config.channel_templates.length > 0) {
+            if($.inArray(value, templates) == -1 && templates.length > 0) {
                 $(this).remove();
             }
         }
@@ -337,12 +363,18 @@ Blueprints.filter_select_menu_options = function()
         }
     });
 
+    template_select_options = Blueprints.template_select.find("option").get().reverse();
+    Blueprints.template_select.find("option").remove();
+    Blueprints.template_select.append(template_select_options);
+
     var template_select_optgroups = Blueprints.template_select.find("optgroup");
     template_select_optgroups.each(function(i){
         if( $(this).children().length == 0 ){
             $(this).remove();
         }
     });
+
+    Blueprints.filter_select_menu_options_called = true;
 }
 
 /*
@@ -440,12 +472,12 @@ $(function(){
         setTimeout({
             run: function() {
 
-            	Blueprints.carousel_init(select_value);
+                Blueprints.carousel_init(select_value);
 
                 // Make sure our hidden fields are added to the page, otherwise
                 // only clicking the Pages/Structure tab will add them.
                 if (Blueprints.tab_is_visible()) {
-                	Blueprints.carousel(select_value);
+                    Blueprints.carousel(select_value);
                 }
             }
         }.run, 100);
@@ -471,7 +503,7 @@ $(function(){
     // Old school template select menu
     else
     {
-    	PublishForm.prepend('<div id="layout_change"></div>');
+        PublishForm.prepend('<div id="layout_change"></div>');
 
         Blueprints.template_select.after(Blueprints.config.edit_templates_link + '<div class="clear"></div><div id="template_thumbnail"></div><div class="clear"></div>');
 
@@ -479,11 +511,11 @@ $(function(){
         setTimeout({
             run: function() {
 
-            	Blueprints.select_init(Blueprints.template_select);
+                Blueprints.select_init(Blueprints.template_select);
 
                 // Make sure our hidden fields are added to the page, otherwise
                 // only clicking the Pages/Structure tab will add them.
-               	Blueprints.filter_select_menu_options();
+                Blueprints.filter_select_menu_options();
             }
         }.run, 100);
 
