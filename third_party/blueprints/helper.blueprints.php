@@ -217,18 +217,19 @@ class Blueprints_helper
 
         if ($thumbnail)
         {
-            foreach ($this->cache['upload_prefs_tokens'] as $token => $url)
+            if (strpos($str, '/') === FALSE)
             {
-                $urls[] = $url.'_thumbs/';
+                $str = str_replace('}', '}_thumbs/', $str);
             }
-
-            $urls = array_values($urls);
+            else
+            {
+                $parts = explode('/', $str);
+                $last = array_pop($parts);
+                $str = str_replace($last, '_thumbs/'.$last, $str);
+            }
         }
-        else
-        {
-            $urls = array_values($this->cache['upload_prefs_tokens']);
-        }
 
+        $urls = array_values($this->cache['upload_prefs_tokens']);
         $tokens = array_keys($this->cache['upload_prefs_tokens']);
 
         return str_replace($tokens, $urls, $str);

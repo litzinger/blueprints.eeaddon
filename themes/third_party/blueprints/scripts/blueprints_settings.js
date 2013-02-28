@@ -307,14 +307,26 @@ function blueprints_set_thumbnail(file, field)
     upload_paths = Blueprints.config.upload_prefs;
 
     // We have an Assets file...
-    if (file.path)
+    if (file.id && file.url)
     {
-        var directory = file.path.match(/\{filedir_(\d+)\}/)[1];
-        var url = upload_paths[directory]['url'];
-        var thumbnail = file.path.replace(/\{filedir_(\d+)\}/, url +'_thumbs/');
+        var url = file.url;
+        var file_parts = url.split('/');
+        var file_name = file_parts.slice(-1)[0];
+        var thumbnail = url.replace(file_name, '_thumbs/'+file_name);
+
+        for(dir_id in upload_paths)
+        {
+            path = upload_paths[dir_id];
+            if(file.url.indexOf(path.url) !== -1)
+            {
+                var directory = dir_id;
+                var image_url = url.replace(path.url, '{filedir_'+ dir_id +'}', url);
+                break;
+            }
+        }
 
         $("#thumbnail_preview_"+ field).html('<img src="'+ thumbnail +'" />');
-        $("#thumbnail_value_"+ field).val(file.path);
+        $("#thumbnail_value_"+ field).val(image_url);
     }
     else
     {
