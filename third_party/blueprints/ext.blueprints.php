@@ -404,6 +404,11 @@ class Blueprints_ext {
         // Show specific templates depending on settings
         elseif(isset($this->settings['channels']))
         {
+            foreach($this->cache['layouts'] as $group_id => $layout)
+            {
+                $channel_templates[] = $layout['template'];
+            }
+
             foreach($this->settings['channels'] as $k => $channel)
             {
                 if($channel == $channel_id OR $channel == '*')
@@ -420,21 +425,30 @@ class Blueprints_ext {
                         }
                     
                         $templates_result = $this->EE->blueprints_model->get_templates(implode(',', $groups));
-                    
+
                         $channel_templates = array();
                         foreach($templates_result->result_array() as $row)
                         {
-                            $channel_templates[] = $row['template_id'];
+                            if ( ! in_array($row['template_id'], $channel_templates))
+                            {
+                                $channel_templates[] = $row['template_id'];
+                            }
                         }
                     }
                     elseif(isset($this->settings['channel_templates']))
                     {
-                        $channel_templates = isset($this->settings['channel_templates'][$k]) ? $this->settings['channel_templates'][$k] : '';
+                        foreach($this->settings['channel_templates'][$k] as $row)
+                        {
+                            if ( ! in_array($row, $channel_templates))
+                            {
+                                $channel_templates[] = $row;
+                            }
+                        }
                     }
                 }
             }
         }
-        
+
         if(is_array($channel_templates) AND count($channel_templates) == 1)
         {
             // Reset the index and grab first value
@@ -449,7 +463,7 @@ class Blueprints_ext {
         {
             $channel_templates_options = '""';
         }
-        
+
         // If the current user is an Admin, give them a link to edit the templates that appear
         $edit_templates_link = '';
         if($this->EE->session->userdata['group_id'] == 1)

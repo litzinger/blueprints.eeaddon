@@ -323,32 +323,16 @@ Blueprints.filter_select_menu_options = function()
     var templates = [];
     var extra_templates = [];
 
-    // Sort the array to the same order as defined in the settings.
-    for (key in Blueprints.config.layouts) {
-        if ($.inArray(key, Blueprints.config.channel_templates) == -1) {
-            templates.push(parseInt(key));
-        }
-    }
-
-    // Add any additional templates that might not be assigned to a layout
-    for (i = 0; i < Blueprints.config.channel_templates.length; i++)
-    {
-        var key = parseInt(Blueprints.config.channel_templates[i]);
-        if ($.inArray(key, templates) == -1) {
-            templates.push(key);
-        }
-    }
-
     template_select_options.each(function(i){
         var value = parseInt($(this).val());
 
         // Remove templates that should not be displayed in the dropdown.
-        if( ! Blueprints.is_array(templates) ) {
-            if(value != templates) {
+        if( ! Blueprints.is_array(Blueprints.config.channel_templates) ) {
+            if(value != Blueprints.config.channel_templates) {
                 $(this).remove();
             }
         } else {
-            if($.inArray(value, templates) == -1 && templates.length > 0) {
+            if($.inArray(value, Blueprints.config.channel_templates) == -1 && Blueprints.config.channel_templates.length > 0) {
                 $(this).remove();
             }
         }
@@ -363,9 +347,12 @@ Blueprints.filter_select_menu_options = function()
         }
     });
 
-    template_select_options = Blueprints.template_select.find("option").get().reverse();
+    template_select_options = Blueprints.template_select.find("option").get();
+
+    var sorted = Blueprints.sort_options(template_select_options, Blueprints.config.channel_templates);
+
     Blueprints.template_select.find("option").remove();
-    Blueprints.template_select.append(template_select_options);
+    Blueprints.template_select.append(sorted);
 
     var template_select_optgroups = Blueprints.template_select.find("optgroup");
     template_select_optgroups.each(function(i){
@@ -375,6 +362,26 @@ Blueprints.filter_select_menu_options = function()
     });
 
     Blueprints.filter_select_menu_options_called = true;
+}
+
+Blueprints.sort_options = function(options, order)
+{
+    var new_array = [];
+
+    $.each(order, function(i){
+
+    	$.each(options, function()
+    	{
+    		var opt = $(this);
+
+            if (parseInt(opt.val()) === parseInt(order[i]))
+            {
+            	new_array.push(opt[0]);
+            }
+        });
+    });
+
+    return new_array;
 }
 
 /*
