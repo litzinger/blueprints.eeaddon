@@ -21,3 +21,4 @@ If a green bullet point, like this •, is next to the Publish Layout Name it me
 
 ### Layout Switching
 Clicking Load Layout will initiate a Publish Layout change by creating an autosave entry within ExpressionEngine. This does require a page reload and will happen fairly quickly. The reason for the page reload is very deliberate. Layout Switching could have been made instant, similar to the Entry Type add-on, but I choose not to build it that way for one specific reason: required fields. Showing or hiding required fields, retaining the Publish Layout, and ensuring that required fields would remain required would be very difficult and be potentially very fragile behavior.
+
