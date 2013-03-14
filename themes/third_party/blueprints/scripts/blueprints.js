@@ -319,6 +319,10 @@ Blueprints.filter_select_menu_options = function()
 
     Blueprints.select_init(Blueprints.template_select);
     var template_select_options = Blueprints.template_select.find("option");
+    var template_select_options_selected = template_select_options.filter(':selected');
+    
+    // Grab the selected value prior to manipulating the options because Firefox is stupid
+    var selected_val = template_select_options_selected.val();
 
     var templates = [];
     var extra_templates = [];
@@ -353,6 +357,17 @@ Blueprints.filter_select_menu_options = function()
 
     Blueprints.template_select.find("option").remove();
     Blueprints.template_select.append(sorted);
+
+    // Because Firefox when appending options back to the list doesn't
+    // set the selected value properly, thus causing the last template/option
+    // in the list to be POSTed and breaking layouts.
+    Blueprints.template_select.find("option").each(function(){
+        if ($(this).val() == selected_val) {
+            $(this).attr('selected', true);
+        } else {
+            $(this).attr('selected', false);
+        }
+    });
 
     var template_select_optgroups = Blueprints.template_select.find("optgroup");
     template_select_optgroups.each(function(i){
