@@ -524,7 +524,9 @@ class Blueprints_ext {
                 'layout_name' => $layout_name
             ); 
         }
-        
+
+        $carousel_options = $this->EE->blueprints_helper->order_layouts($carousel_options, $this->cache['layouts']);
+
         // Used in the first ajax request when changing the publish layout.
         $ajax_params = 'entry_id='.$entry_id.'&channel_id='.$channel_id;
 
