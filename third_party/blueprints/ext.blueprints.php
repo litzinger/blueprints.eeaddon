@@ -437,13 +437,8 @@ class Blueprints_ext {
                     }
                     elseif(isset($this->settings['channel_templates']))
                     {
-                        foreach($this->settings['channel_templates'][$k] as $row)
-                        {
-                            if ( ! in_array($row, $channel_templates))
-                            {
-                                $channel_templates[] = $row;
-                            }
-                        }
+                        $key = array_search($channel_id, $this->settings['channels']);
+                        $channel_templates = $this->settings['channel_templates'][$key];
                     }
                 }
             }
