@@ -137,6 +137,18 @@ class Blueprints_ext {
         $entry_id = $this->EE->input->get_post('entry_id');
         $site_assets = false;
 
+        // If for some reason channel_id is not in $_GET/$_POST
+        if ( !$channel_id)
+        {
+            $qry = $this->EE->db->where('entry_id', $entry_id)
+                                ->get('channel_titles');
+
+            if ($qry->num_rows())
+            {
+                $channel_id = $qry->row('channel_id');
+            }
+        }
+
         // If Structure is installed, get it's data
         if (array_key_exists('structure', $this->EE->addons->get_installed()))
         {
