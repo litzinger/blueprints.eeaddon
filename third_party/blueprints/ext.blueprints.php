@@ -848,12 +848,12 @@ class Blueprints_ext {
         $insert['thumbnails'] = $this->EE->input->post('thumbnails');
         $insert['layout_group_ids'] = $this->EE->input->post('layout_group_ids');
         $insert['layout_group_names'] = $this->EE->input->post('layout_group_names');
-        
+
         if($channels)
         {
             $channels = array_values($channels);
-            $channel_show_selected = ! empty($channel_show_selected) ? array_values($channel_show_selected) : array();
-            $channel_templates = ! empty($channel_templates) ? array_values($channel_templates) : array();
+            $channel_show_selected = !empty($channel_show_selected) ? $channel_show_selected : array();
+            $channel_templates = !empty($channel_templates) ? array_values($channel_templates) : array();
 
             // Figure out what templates to show for each channel
             foreach($channels as $k => $channel_id)
@@ -862,12 +862,12 @@ class Blueprints_ext {
                 {
                     $save['channels'][$k] = $channel_id;
                 }
-            
+
                 if(isset($channel_show_group[$k]))
                 {
                     $save['channel_show_group'][$k] = $channel_show_group[$k];
                 }
-                elseif(isset($channel_show_selected[$k]) AND $channel_show_selected[$k] == 'y' AND $channel_templates)
+                elseif(isset($channel_show_selected[$k]) AND $channel_show_selected[$k] == 'y' AND isset($channel_templates[$k]))
                 {
                     $save['channel_show_selected'][$k] = $channel_show_selected[$k];
                     $save['channel_templates'][$k] = $channel_templates[$k];
