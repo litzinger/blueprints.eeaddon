@@ -551,7 +551,7 @@ class Blueprints_ext {
             action_url_update_field_settings: "'. $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'update_field_settings') .'",
             autosave_entry_id: "'. ($this->EE->input->get('use_autosave') == 'y' ? $this->EE->input->get_post('entry_id') : '') .'",
             ajax_params: "'. $ajax_params .'",
-            carousel_options: '. $this->EE->javascript->generate_json($carousel_options, TRUE) .',
+            carousel_options: '. json_encode($carousel_options, TRUE) .',
             channel_templates: '. $channel_templates_options .',
             edit_templates_link: "'. $edit_templates_link .'",
             enable_carousel: "'. $enable_carousel .'",
@@ -565,7 +565,7 @@ class Blueprints_ext {
             publish_layout_takeover: '. ($this->EE->blueprints_helper->enable_publish_layout_takeover() ? 'true' : 'false') .',
             theme_url: "'. $this->EE->blueprints_helper->get_theme_folder_url() .'",
             thumbnails: {'. implode(',', $thumbnails) .'},
-            thumbnail_options: '. $this->EE->javascript->generate_json($thumbnail_options, TRUE) .',
+            thumbnail_options: '. json_encode($thumbnail_options, TRUE) .',
             thumbnail_path: "'. $this->EE->config->slash_item('site_url') . $thumbnail_path .'"
         };';
 
