@@ -137,6 +137,18 @@ class Blueprints_ext {
         $entry_id = $this->EE->input->get_post('entry_id');
         $site_assets = false;
 
+        // If for some reason channel_id is not in $_GET/$_POST
+        if ( !$channel_id)
+        {
+            $qry = $this->EE->db->where('entry_id', $entry_id)
+                                ->get('channel_titles');
+
+            if ($qry->num_rows())
+            {
+                $channel_id = $qry->row('channel_id');
+            }
+        }
+
         // If Structure is installed, get it's data
         if (array_key_exists('structure', $this->EE->addons->get_installed()))
         {
@@ -524,7 +536,9 @@ class Blueprints_ext {
                 'layout_name' => $layout_name
             ); 
         }
-        
+
+        $carousel_options = $this->EE->blueprints_helper->order_layouts($carousel_options, $this->cache['layouts']);
+
         // Used in the first ajax request when changing the publish layout.
         $ajax_params = 'entry_id='.$entry_id.'&channel_id='.$channel_id;
 
@@ -834,12 +848,12 @@ class Blueprints_ext {
         $insert['thumbnails'] = $this->EE->input->post('thumbnails');
         $insert['layout_group_ids'] = $this->EE->input->post('layout_group_ids');
         $insert['layout_group_names'] = $this->EE->input->post('layout_group_names');
-        
+
         if($channels)
         {
             $channels = array_values($channels);
-            $channel_show_selected = ! empty($channel_show_selected) ? array_values($channel_show_selected) : array();
-            $channel_templates = ! empty($channel_templates) ? array_values($channel_templates) : array();
+            $channel_show_selected = !empty($channel_show_selected) ? $channel_show_selected : array();
+            $channel_templates = !empty($channel_templates) ? array_values($channel_templates) : array();
 
             // Figure out what templates to show for each channel
             foreach($channels as $k => $channel_id)
@@ -848,12 +862,12 @@ class Blueprints_ext {
                 {
                     $save['channels'][$k] = $channel_id;
                 }
-            
+
                 if(isset($channel_show_group[$k]))
                 {
                     $save['channel_show_group'][$k] = $channel_show_group[$k];
                 }
-                elseif(isset($channel_show_selected[$k]) AND $channel_show_selected[$k] == 'y' AND $channel_templates)
+                elseif(isset($channel_show_selected[$k]) AND $channel_show_selected[$k] == 'y' AND isset($channel_templates[$k]))
                 {
                     $save['channel_show_selected'][$k] = $channel_show_selected[$k];
                     $save['channel_templates'][$k] = $channel_templates[$k];

@@ -150,6 +150,30 @@ class Blueprints_helper
         
         return $this->cache['enable_publish_layout_takeover'];
     }
+
+    /**
+     * Re-order the carousel layouts based on the saved settings
+     * @param  array $layouts
+     * @param  array $settings
+     * @return array
+     */
+    public function order_layouts($layouts, $settings)
+    {
+        $new_array = array();
+
+        foreach ($settings as $layout_id => $setting_data)
+        {
+            foreach ($layouts as $k => $layout_data)
+            {
+                if ($layout_data['template_id'] == $setting_data['template'])
+                {
+                    $new_array[] = $layout_data;
+                }
+            }
+        }
+
+        return $new_array;
+    }
     
     public function get_site_index()
     {

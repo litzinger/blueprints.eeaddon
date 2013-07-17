@@ -429,28 +429,6 @@ $(function(){
             }, function() {
                 $(".active_publish_layout").remove();
             });
-
-            // if(Blueprints.config.layout_group == "" && Blueprints.config.member_group_id == 1)
-            // {
-            //     $('#showToolbarLink a span').text('No Publish Layout defined for the current template and channel combination. Create one now.');
-            // }
-            
-            // $('#layout_groups_holder input[name="member_group[]"]').live('click', function(){
-            //     var b_checkboxes = $('.blueprints_layout_groups_holder input[name="member_group[]"]');
-            //     var d_checkboxes = $('#layout_groups_holder input[name="member_group[]"]').not('.blueprints_member_groups');
-                
-            //     if(b_checkboxes.filter(':checked').length > 0){
-            //         d_checkboxes.attr('disabled', true);
-            //     } else {
-            //         d_checkboxes.attr('disabled', false);
-            //     }
-                
-            //     if(d_checkboxes.filter(':checked').length > 0){
-            //         b_checkboxes.attr('disabled', true);
-            //     } else {
-            //         b_checkboxes.attr('disabled', false);
-            //     }
-            // });
         });
     }
 
@@ -541,9 +519,9 @@ $(function(){
             }
         }.run, 100);
 
-        // Blueprints.template_select.change(function(){
-        //     Blueprints.select_init($(this));
-        // });
+        Blueprints.template_select.change(function(){
+            Blueprints.select_init($(this));
+        });
 
         $('.content_tab a').bind('click', function()
         {
