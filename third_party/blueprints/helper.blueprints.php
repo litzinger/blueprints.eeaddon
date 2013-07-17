@@ -158,7 +158,7 @@ class Blueprints_helper
         
         $index = ($site_index != '') ? $site_index : (($index_page != '') ? $index_page : 'index.php');
         
-        return $this->EE->functions->remove_double_slashes($this->EE->config->slash_item('site_url') . $index);
+        return reduce_double_slashes($this->EE->config->slash_item('site_url') . $index);
     }
 
     public function get_upload_prefs($group_id = NULL, $id = NULL)
