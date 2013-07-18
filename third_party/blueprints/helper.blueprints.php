@@ -167,12 +167,20 @@ class Blueprints_helper
             {
                 if ($layout_data['template_id'] == $setting_data['template'])
                 {
-                    $new_array[] = $layout_data;
+                    $new_array[$layout_data['template_id']] = $layout_data;
                 }
             }
         }
 
-        return $new_array;
+        foreach ($layouts as $template_data)
+        {
+            if ( !array_key_exists($template_data['template_id'], $new_array))
+            {
+                $new_array[$template_data['template_id']] = $template_data;
+            }
+        }
+
+        return array_values($new_array);
     }
     
     public function get_site_index()
