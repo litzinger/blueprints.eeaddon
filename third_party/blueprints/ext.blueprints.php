@@ -416,9 +416,12 @@ class Blueprints_ext {
         // Show specific templates depending on settings
         elseif(isset($this->settings['channels']))
         {
-            foreach($this->cache['layouts'] as $group_id => $layout)
+            if (empty($this->settings['channels']))
             {
-                $channel_templates[] = $layout['template'];
+                foreach($this->cache['layouts'] as $group_id => $layout)
+                {
+                    $channel_templates[] = $layout['template'];
+                }
             }
 
             foreach($this->settings['channels'] as $k => $channel)
@@ -427,7 +430,6 @@ class Blueprints_ext {
                 {
                     // If neither of these are true then the user didn't complete the settings form entirely.
                     // If that is the case then all templates will be visible.
-                    
                     if(isset($this->settings['channel_show_group'][$k]))
                     {
                         $groups = array();
