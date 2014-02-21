@@ -44,7 +44,7 @@ Blueprints.carousel = function(template_id)
             var field = $(this);
             var img = field.find('img.field_collapse');
             var src = img.attr('src');
-            
+
             field.find('.js_hide').removeClass('js_hide');
             img.attr('src', src.replace('field_collapse.png', 'field_expand.png'));
         });
@@ -99,7 +99,7 @@ Blueprints.carousel = function(template_id)
                             e.preventDefault();
                             submit_button.after('<img class="ajax_loader simple" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
                             submit_button.remove();
-                            Blueprints.autosave(layout_preview); 
+                            Blueprints.autosave(layout_preview);
                         });
                 }
                 else
@@ -126,7 +126,7 @@ Blueprints.carousel = function(template_id)
 
             // On load set the active template
             start_template.addClass('current');
-            
+
             // On click set active template
             $('.jcarousel-item').click(function(){
                 item = $(this);
@@ -165,20 +165,20 @@ Blueprints.carousel = function(template_id)
                     item_width = $('.carousel_thumbnail').width();
                     submit_width = submit_button.width();
                     submit_button.css('left', ((item_width / 2) - (submit_width / 2)) - 8);
-                    
+
                     submit_button.click(function(e){
                         e.preventDefault();
                         item.find('.overlay').addClass('loading');
                         submit_button.after('<img class="ajax_loader" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
                         submit_button.remove();
-                        Blueprints.autosave(layout_preview); 
+                        Blueprints.autosave(layout_preview);
                     });
                 }
             });
         }
     }
 }
-    
+
 Blueprints.autosave = function(layout_preview)
 {
     post_data = $("#publishForm").serialize();
@@ -189,17 +189,17 @@ Blueprints.autosave = function(layout_preview)
         type: "POST",
         url: Blueprints.config.action_url_update_field_settings,
         data: "action=unset&hash="+ Blueprints.config.hash +'&'+ Blueprints.config.ajax_params +'&entry_id='+ entry_id,
-        success: function (data, status, xhr) 
+        success: function (data, status, xhr)
         {
             $.ajax({
                 type: "POST",
                 dataType: "json",
                 url: EE.BASE + "&C=content_publish&M=autosave",
                 data: post_data,
-                success: function (data, status, xhr) 
+                success: function (data, status, xhr)
                 {
                     setTimeout({
-                        run: function() 
+                        run: function()
                         {
                             Blueprints.autosave_redirect(data.autosave_entry_id, layout_preview);
                         }
@@ -246,7 +246,7 @@ Blueprints.select_init = function(ele)
 {
     var template = $(ele).find("option:selected").val();
     var thumbnail = Blueprints.config.thumbnails[template] != '' ? '<img src="'+ Blueprints.config.thumbnails[template] +'" />' : '';
-    
+
     if(Blueprints.config.thumbnails[template] != "" && Blueprints.config.thumbnails[template] != undefined) {
         $("#template_thumbnail").show().html(thumbnail);
     } else {
@@ -262,13 +262,13 @@ Blueprints.select_init = function(ele)
         } else {
             $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="NULL" /><input type="hidden" name="new_layout_preview" value="NULL" />');
         }
-        
+
         $("#template_thumbnail").show().append('<input type="submit" class="submit" name="submit" value="Load Layout" />');
         $("#template_thumbnail .submit").click(function(e){
             e.preventDefault();
             $(this).after('<img class="ajax_loader" src="'+ Blueprints.config.theme_url +'blueprints/images/ajax_loader.gif" />');
             $(this).remove();
-            Blueprints.autosave(layout_preview); 
+            Blueprints.autosave(layout_preview);
         });
     }
 }
@@ -292,14 +292,14 @@ Blueprints.carousel_init = function(template)
     }
 };
 
-/* 
+/*
     See if either the Structure tab or Pages tab is visible
 */
 Blueprints.tab_is_visible = function()
 {
-    if( 
-        (Blueprints.structure_field.length > 0 && Blueprints.structure_field.is(':visible')) || 
-        (Blueprints.pages_field.length > 0 && Blueprints.pages_field.is(':visible')) 
+    if(
+        (Blueprints.structure_field.length > 0 && Blueprints.structure_field.is(':visible')) ||
+        (Blueprints.pages_field.length > 0 && Blueprints.pages_field.is(':visible'))
     ){
         return true;
     }
@@ -320,7 +320,7 @@ Blueprints.filter_select_menu_options = function()
     Blueprints.select_init(Blueprints.template_select);
     var template_select_options = Blueprints.template_select.find("option");
     var template_select_options_selected = template_select_options.filter(':selected');
-    
+
     // Grab the selected value prior to manipulating the options because Firefox is stupid
     var selected_val = template_select_options_selected.val();
 
@@ -381,6 +381,10 @@ Blueprints.filter_select_menu_options = function()
 
 Blueprints.sort_options = function(options, order)
 {
+    if (options.length == 1) {
+        return options;
+    }
+
     var new_array = [];
 
     $.each(order, function(i){
@@ -449,7 +453,7 @@ $(function(){
             var layout_name = carousel[i].layout_name;
 
             var thumbnail = template_thumb != '' ? '<div class="carousel_thumbnail"><img src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"><img src="'+ Blueprints.config.theme_url +'blueprints/images/no_template.png' +'" /></div>';
-        
+
             out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"> \
                             <span class="carousel_template_name">'+ layout_name +'</span> \
                             <div class="carousel_thumbnail_wrapper">'+ thumbnail +'</div> \
@@ -467,7 +471,7 @@ $(function(){
 
         // Remove the original Structure or Pages template dropdown, we just replaced it.
         Blueprints.template_select.remove();
-    
+
         // On page load (if the user moved the Template field to another tab)
         setTimeout({
             run: function() {
@@ -499,7 +503,7 @@ $(function(){
             }, 3000);
         });
     }
-    
+
     // Old school template select menu
     else
     {

@@ -874,6 +874,13 @@ class Blueprints_ext {
                     $save['channel_show_selected'][$k] = $channel_show_selected[$k];
                     $save['channel_templates'][$k] = $channel_templates[$k];
                 }
+                // If adding a new row in the detailed settings the key is set to new_ for show selected
+                // but not the other rows. Not sure how it came to this, but just rolling with it to make it work.
+                elseif(isset($channel_show_selected['new_'.$k]) AND $channel_show_selected['new_'.$k] == 'y' AND isset($channel_templates[$k]))
+                {
+                    $save['channel_show_selected'][$k] = $channel_show_selected['new_'.$k];
+                    $save['channel_templates'][$k] = $channel_templates[$k];
+                }
             }
         }
 
