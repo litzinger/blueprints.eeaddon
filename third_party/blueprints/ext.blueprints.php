@@ -449,7 +449,7 @@ class Blueprints_ext {
                             }
                         }
                     }
-                    elseif(isset($this->settings['channel_templates']))
+                    elseif(isset($this->settings['channel_templates']) && isset($this->settings['channel_templates'][$k]))
                     {
                         foreach($this->settings['channel_templates'][$k] as $row)
                         {
