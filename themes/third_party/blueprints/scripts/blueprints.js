@@ -25,6 +25,7 @@ Blueprints.filter_select_menu_options_called = false;
 
 Blueprints.carousel = function(template_id)
 {
+    var start_template;
     var old_template_id = template_id;
     var select_name = Blueprints.template_select.attr('name');
 
@@ -69,7 +70,7 @@ Blueprints.carousel = function(template_id)
 
             // On click set active template
             $('.jcarousel-item').click(function(){
-                item = $(this);
+                var item = $(this);
 
                 // Set all siblings as not clicked
                 item.siblings().each(function(){
@@ -84,7 +85,7 @@ Blueprints.carousel = function(template_id)
                 $('input[name='+ select_name +']').val(id);
 
                 // Set layout_change on item click
-                layout_preview = Blueprints.carousel_init(id);
+                var layout_preview = Blueprints.carousel_init(id);
 
                 // Make it visually active
                 item.siblings().removeClass('active');
@@ -129,7 +130,7 @@ Blueprints.carousel = function(template_id)
 
             // On click set active template
             $('.jcarousel-item').click(function(){
-                item = $(this);
+                var item = $(this);
 
                 // Set all siblings as not clicked
                 item.siblings().each(function(){
@@ -140,11 +141,11 @@ Blueprints.carousel = function(template_id)
                 if(item.data('clicked')) return;
                 item.data('clicked', true);
 
-                id = $(this).attr('data-id');
+                var id = $(this).attr('data-id');
                 $('input[name='+ select_name +']').val(id);
 
                 // Set layout_change on item click
-                layout_preview = Blueprints.carousel_init(id);
+                var layout_preview = Blueprints.carousel_init(id);
 
                 // Make it visually active
                 item.siblings().removeClass('active');
@@ -162,8 +163,8 @@ Blueprints.carousel = function(template_id)
                     item.find('.carousel_thumbnail .overlay').height( item.find('img').height() );
                     submit_button = item.find('.submit');
 
-                    item_width = $('.carousel_thumbnail').width();
-                    submit_width = submit_button.width();
+                    var item_width = $('.carousel_thumbnail').width();
+                    var submit_width = submit_button.width();
                     submit_button.css('left', ((item_width / 2) - (submit_width / 2)) - 8);
 
                     submit_button.click(function(e){
@@ -181,9 +182,9 @@ Blueprints.carousel = function(template_id)
 
 Blueprints.autosave = function(layout_preview)
 {
-    post_data = $("#publishForm").serialize();
-    entry_id = $("#publishForm input[name=entry_id]").val();
-    channel_id = $("#publishForm input[name=channel_id]").val();
+    var post_data = $("#publishForm").serialize();
+    var entry_id = $("#publishForm input[name=entry_id]").val();
+    var channel_id = $("#publishForm input[name=channel_id]").val();
 
     $.ajax({
         type: "POST",
@@ -212,7 +213,7 @@ Blueprints.autosave = function(layout_preview)
 
 Blueprints.autosave_redirect = function(autosave_entry_id, layout_preview)
 {
-    href = window.location.href;
+    var href = window.location.href;
 
     // Clean up the current URL to make sure the params are set correctly,
     // and we don't have more than 1 of each.
@@ -255,7 +256,7 @@ Blueprints.select_init = function(ele)
 
     if(Blueprints.config.publish_layout_takeover)
     {
-        layout_preview = Blueprints.config.layouts[template];
+        var layout_preview = Blueprints.config.layouts[template];
 
         if(layout_preview != undefined && layout_preview != "") {
             $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="new_layout_preview" value="'+ layout_preview +'" />');
@@ -280,7 +281,7 @@ Blueprints.carousel_init = function(template)
 {
     if(Blueprints.config.publish_layout_takeover)
     {
-        layout_preview = Blueprints.config.layouts[template];
+        var layout_preview = Blueprints.config.layouts[template];
 
         if(layout_preview != undefined && layout_preview != "") {
             $("#layout_change").html('<input type="hidden" name="old_layout_preview" value="'+ layout_preview +'" /><input type="hidden" name="new_layout_preview" value="'+ layout_preview +'" />');
