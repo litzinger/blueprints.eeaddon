@@ -213,7 +213,8 @@ Blueprints.autosave = function(layout_preview)
 
 Blueprints.autosave_redirect = function(autosave_entry_id, layout_preview)
 {
-    var href = window.location.href;
+    // Split on # to avoid conflicts with other add-ons using the hashbang.
+    var href = window.location.href.split('#')[0];
 
     // Clean up the current URL to make sure the params are set correctly,
     // and we don't have more than 1 of each.
