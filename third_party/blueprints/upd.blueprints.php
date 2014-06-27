@@ -18,7 +18,7 @@ if (! defined('BLUEPRINTS_VERSION'))
  * @author      Brian Litzinger
  * @copyright   Copyright (c) 2010, 2011 - Brian Litzinger
  * @link        http://boldminded.com/add-ons/blueprints
- * @license 
+ * @license
  *
  * Copyright (c) 2011, 2012. BoldMinded, LLC
  * All rights reserved.
@@ -63,7 +63,7 @@ class Blueprints_upd {
         $default_settings[$this->site_id] = array(
             'hash' => $this->EE->functions->random('encrypt', 32)
         );
-        
+
         // Add new hooks
         $ext_template = array(
             'class'    => 'Blueprints_ext',
@@ -72,19 +72,20 @@ class Blueprints_upd {
             'version'  => $this->version,
             'enabled'  => 'y'
         );
-        
+
         $extensions = array(
             array('hook'=>'publish_form_channel_preferences', 'method'=>'publish_form_channel_preferences'),
             array('hook'=>'sessions_end', 'method'=>'sessions_end'),
-            array('hook'=>'entry_submission_ready', 'method'=>'entry_submission_ready')
+            array('hook'=>'entry_submission_ready', 'method'=>'entry_submission_ready'),
+            array('hook'=>'channel_entries_tagdata', 'method'=>'channel_entries_tagdata')
         );
-        
+
         foreach($extensions as $extension)
         {
             $ext = array_merge($ext_template, $extension);
             $this->EE->db->insert('exp_extensions', $ext);
         }
-        
+
         // Module data
         $data = array(
             'module_name' => BLUEPRINTS_NAME,
@@ -94,44 +95,44 @@ class Blueprints_upd {
         );
 
         $this->EE->db->insert('modules', $data);
-        
+
         $this->_add_actions();
         $this->_add_tables();
-        
+
         return TRUE;
     }
-    
+
     public function uninstall()
     {
         $this->EE->db->where('module_name', BLUEPRINTS_NAME);
         $this->EE->db->delete('modules');
-        
+
         $this->EE->db->where('class', 'Blueprints_mcp')->delete('actions');
-        
+
         // Delete records
         $this->EE->db->where('class', 'Blueprints_ext');
         $this->EE->db->delete('exp_extensions');
-        
+
         $this->EE->load->dbforge();
         $this->EE->dbforge->drop_table('blueprints_layouts');
         $this->EE->dbforge->drop_table('blueprints_entries');
         $this->EE->dbforge->drop_table('blueprints_field_settings');
-        
+
         return TRUE;
     }
-    
+
     public function update($current = '')
     {
         // Uh, this is called when a template is requested?
         // Got an error below when requesting a template.
         if(REQ != 'CP')
             return;
-        
+
         if ($current == $this->version)
         {
             return FALSE;
         }
-        
+
         if($current < '1.3.2')
         {
             // Save our settings to the current site ID for MSM.
@@ -145,7 +146,7 @@ class Blueprints_upd {
                 $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
             }
         }
-        
+
         if($current < '1.3.5')
         {
             $this->EE->db->where('class', 'Blueprints_ext');
@@ -155,7 +156,7 @@ class Blueprints_upd {
                 'hook' => 'entry_submission_absolute_end'
             ));
         }
-        
+
         if($current < '1.3.7.4')
         {
             $this->EE->db->where('class', 'Blueprints_ext');
@@ -177,20 +178,20 @@ class Blueprints_upd {
             );
 
             $this->EE->db->insert('modules', $data);
-            
+
             $this->_add_actions();
             $this->_add_tables();
             $this->_migrate_settings();
-            
+
             $qry = $this->EE->db->select('settings')
                                 ->where('enabled', 'y')
                                 ->where('class', 'Blueprints_ext')
                                 ->limit(1)
                                 ->get('extensions');
-                                
+
             $settings = unserialize($qry->row('settings'));
             $new_settings = array();
-            
+
             foreach($settings as $site_id => $setting_data)
             {
                 $new_settings[$site_id] = $setting_data;
@@ -199,7 +200,7 @@ class Blueprints_upd {
 
             $this->EE->db->where('class', 'Blueprints_ext');
             $this->EE->db->update('exp_extensions', array('settings' => serialize($new_settings)));
-            
+
             // Add new hooks
             $ext_template = array(
                 'class'    => 'Blueprints_ext',
@@ -219,14 +220,36 @@ class Blueprints_upd {
                 $this->EE->db->insert('exp_extensions', $ext);
             }
         }
-        
+
+        if($current < '2.1')
+        {
+            // Add new hooks
+            $ext_template = array(
+                'class'    => 'Blueprints_ext',
+                'settings' => '',
+                'priority' => 8,
+                'version'  => $this->version,
+                'enabled'  => 'y'
+            );
+
+            $extensions = array(
+                array('hook'=>'channel_entries_tagdata', 'method'=>'channel_entries_tagdata')
+            );
+
+            foreach($extensions as $extension)
+            {
+                $ext = array_merge($ext_template, $extension);
+                $this->EE->db->insert('exp_extensions', $ext);
+            }
+        }
+
         // Update version #
         $this->EE->db->where('class', 'Blueprints_ext');
         $this->EE->db->update('exp_extensions', array('version' => $this->version));
-        
+
         return TRUE;
     }
-    
+
     /*
         Migrate settings from version 1.x to 2.x
     */
@@ -238,11 +261,11 @@ class Blueprints_upd {
                             ->where('class', 'Blueprints_ext')
                             ->limit(1)
                             ->get();
-        
+
         // Stop here if it's a new install
         if($qry->num_rows() == 0)
             return;
-                            
+
         $settings = unserialize($qry->row('settings'));
 
         $new_settings = array();
@@ -271,7 +294,7 @@ class Blueprints_upd {
                         }
                     }
                 }
-            
+
                 if(isset($setting['template_layout']) AND !empty($setting['template_layout']))
                 {
                     foreach($setting['template_layout'] as $entry_id => $v)
@@ -285,18 +308,18 @@ class Blueprints_upd {
                                 'template_id'   => $v['template_id'],
                                 'group_id'      => $v['layout_group_id']
                             );
-            
+
                             $this->EE->db->insert('blueprints_entries', $data);
                         }
                     }
                 }
-                
+
                 $new_settings[$site_id] = $setting;
 
                 // Create a random hash to use to validate ACT
                 $new_settings[$site_id]['hash'] = $this->EE->functions->random('encrypt', 32);
             }
-        
+
             $this->EE->db->where('class', 'Blueprints_ext');
             $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
         }
@@ -309,7 +332,7 @@ class Blueprints_upd {
             $this->EE->db->update('extensions', array('settings' => serialize($new_settings)));
         }
     }
-    
+
     /*
         Add our tables for 2.x version.
     */
@@ -317,7 +340,7 @@ class Blueprints_upd {
     {
         // Create our external tables
         $this->EE->load->dbforge();
-        
+
         if (! $this->EE->db->table_exists('blueprints_layouts'))
         {
             $this->EE->dbforge->add_field(array(
@@ -327,17 +350,17 @@ class Blueprints_upd {
                 'template'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
                 'thumbnail'     => array('type' => 'text'),
                 'name'          => array('type' => 'text'),
-                'order'         => array('type' => 'int', 'constraint' => 2, 'default' => 0) 
+                'order'         => array('type' => 'int', 'constraint' => 2, 'default' => 0)
             ));
 
             $this->EE->dbforge->add_key('id', TRUE);
             $this->EE->dbforge->add_key('group_id', TRUE);
             $this->EE->dbforge->create_table('blueprints_layouts');
-            
+
             // Start the ID as 2000
             // $this->EE->db->query("ALTER TABLE `exp_blueprints_layouts` AUTO_INCREMENT = 2000");
         }
-        
+
         if (! $this->EE->db->table_exists('blueprints_entries'))
         {
             $this->EE->dbforge->add_field(array(
@@ -353,7 +376,7 @@ class Blueprints_upd {
             $this->EE->dbforge->add_key('group_id', TRUE);
             $this->EE->dbforge->create_table('blueprints_entries');
         }
-        
+
         if (! $this->EE->db->table_exists('blueprints_field_settings'))
         {
             $this->EE->dbforge->add_field(array(
@@ -376,7 +399,7 @@ class Blueprints_upd {
             $this->EE->dbforge->create_table('blueprints_field_settings');
         }
     }
-    
+
     /*
         Add actions for 2.x version.
     */
@@ -393,14 +416,14 @@ class Blueprints_upd {
             );
 
             $this->EE->db->insert('actions', $data);
-            
+
             $data = array(
                 'class' => 'Blueprints_mcp',
                 'method' => 'load_pages'
             );
 
             $this->EE->db->insert('actions', $data);
-            
+
             $data = array(
                 'class' => 'Blueprints_mcp',
                 'method' => 'update_field_settings'
@@ -409,13 +432,13 @@ class Blueprints_upd {
             $this->EE->db->insert('actions', $data);
         }
     }
-    
+
     private function debug($str, $die = false)
     {
         echo '<pre>';
         var_dump($str);
         echo '</pre>';
-        
+
         if($die) die('debug terminated');
     }
 }

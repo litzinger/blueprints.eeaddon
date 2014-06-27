@@ -75,9 +75,10 @@ class Blueprints_ext {
      */
     public function Blueprints_ext($settings = '')
     {
+        $this->EE =& get_instance();
+
         if (REQ != 'CP') return;
 
-        $this->EE =& get_instance();
         $this->site_id = $this->EE->config->item('site_id');
 
         // Create cache
@@ -577,6 +578,45 @@ class Blueprints_ext {
 
         // Return the unmodified data
         return $data;
+    }
+
+    /*
+       Parse template variables.
+       Contribution from Tim Kelty
+    */
+    public function channel_entries_tagdata($tagdata, $row, $obj)
+    {
+        if($this->EE->extensions->last_call)
+        {
+            $tagdata = $this->EE->extensions->last_call;
+        }
+
+        $entry_id = $row['entry_id'];
+
+        // Get templates
+        $site_pages = $this->EE->config->item('site_pages');
+        $templates  = $site_pages[$this->EE->config->item('site_id')]['templates'];
+
+        $template_id = isset($templates[$entry_id]) ? $templates[$entry_id] : FALSE;
+        $template_path = FALSE;
+
+        if ($template_id)
+        {
+            $qry = $this->EE->db->get_where('templates', array('template_id' => $template_id));
+            $template = $qry->row();
+
+            $qry = $this->EE->db->get_where('template_groups', array('group_id' => $template->group_id));
+            $group = $qry->row();
+
+            $template_path = $group->group_name . '/' . $template->template_name;
+        }
+
+        $tagdata = $this->EE->TMPL->parse_variables_row($tagdata, array(
+            'pages_template_id' => $template_id,
+            'pages_template_path' => $template_path,
+        ));
+
+        return $tagdata;
     }
 
     /*
