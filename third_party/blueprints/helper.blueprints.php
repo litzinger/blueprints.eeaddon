@@ -138,7 +138,7 @@ class Blueprints_helper
 
     public function get_theme_folder_url()
     {
-        return $this->EE->config->slash_item('theme_folder_url') .'third_party/';
+        return URL_THIRD_THEMES;
     }
 
     public function enable_publish_layout_takeover()

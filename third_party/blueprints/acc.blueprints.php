@@ -18,7 +18,7 @@ if (! defined('BLUEPRINTS_VERSION'))
  * @author      Brian Litzinger
  * @copyright   Copyright (c) 2010, 2011 - Brian Litzinger
  * @link        http://boldminded.com/add-ons/blueprints
- * @license 
+ * @license
  *
  * Copyright (c) 2011, 2012. BoldMinded, LLC
  * All rights reserved.
@@ -44,7 +44,7 @@ if (! defined('BLUEPRINTS_VERSION'))
  * source is null and void. Use of this software constitutes your agreement
  * to this clause.
  */
- 
+
 class Blueprints_acc {
 
     public $name            = 'Blueprints Accessory';
@@ -61,7 +61,7 @@ class Blueprints_acc {
     {
         $this->EE =& get_instance();
         $this->EE->lang->loadfile('blueprints');
-        
+
         // Create cache
         if (! isset($this->EE->session->cache['blueprints']))
         {
@@ -69,7 +69,7 @@ class Blueprints_acc {
         }
         $this->cache =& $this->EE->session->cache['blueprints'];
     }
-    
+
     function set_sections()
     {
         if (array_key_exists('blueprints', $this->EE->addons->get_installed()))
@@ -84,21 +84,21 @@ class Blueprints_acc {
             $this->EE->blueprints_helper = new Blueprints_helper;
 
             $this->cache['settings'] = $this->EE->blueprints_model->get_settings(true);
-            
+
             // Remove the tab. This is lame.
             $script = '
                 $("#blueprints.accessory").remove();
                 $("#accessoryTabs").find("a.blueprints").parent("li").remove();
             ';
-            
+
             // Output JS, and remove extra white space and line breaks
             $this->EE->javascript->output(preg_replace("/\s+/", " ", $script));
             $this->EE->javascript->compile();
-            
+
             $this->_sidebar();
         }
     }
-    
+
     private function _sidebar()
     {
         $script = '';
@@ -111,15 +111,15 @@ class Blueprints_acc {
         <div class="blueprints_page_listing"></div>
         ';
 
-        if (array_key_exists('structure', $this->EE->addons->get_installed()) OR 
+        if (array_key_exists('structure', $this->EE->addons->get_installed()) OR
             array_key_exists('pages', $this->EE->addons->get_installed()))
         {
             $load_pages_url = $this->EE->blueprints_helper->get_site_index() . '?ACT='. $this->EE->cp->fetch_action_id('Blueprints_mcp', 'load_pages');
 
             $script .= '
-             
+
             $("#sidebarContent").prepend(\'<div class="structure_pages_sidebar contents">'. $contents .'</div>\');
-             
+
             $("#sidebarContent .structure_pages_sidebar h1 a").toggle(function(){
                 $(".structure_pages_sidebar ul, .structure_pages_sidebar .item_wrapper").not(".listings").slideDown();
                 $(".structure_pages_sidebar h1 span.blueprints_arrow").addClass("active");
@@ -156,7 +156,7 @@ class Blueprints_acc {
                     }
                 }
             });
-             
+
             $.ajax({
                 type: "GET",
                 url: "'. $load_pages_url .'",
@@ -167,14 +167,14 @@ class Blueprints_acc {
          }
 
          // No longer needed in 2.0 version
-         
-         // Fix from John D. Wells        
+
+         // Fix from John D. Wells
          // first create default settings array
          // $settings = array('enable_edit_menu_tweaks' => '');
-         // 
+         //
          // // now attempt to override from DB
          // $query = $this->EE->db->get_where('extensions', array('class' => 'Blueprints_ext'), 1, 0);
-         // 
+         //
          // if ($query->num_rows() > 0)
          // {
          //     $row = unserialize($query->row('settings'));
@@ -186,7 +186,7 @@ class Blueprints_acc {
          // }
 
          if (
-             isset($this->cache['settings']['enable_edit_menu_tweaks']) AND 
+             isset($this->cache['settings']['enable_edit_menu_tweaks']) AND
              $this->cache['settings']['enable_edit_menu_tweaks'] == 'y' AND
              $this->EE->config->item('app_version') <= 231
          ){
@@ -224,7 +224,7 @@ class Blueprints_acc {
                  right: 8px;
                  top: 6px;
                  padding-right: 20px;
-                 background: #fff url('. $this->EE->config->item('theme_folder_url') .'third_party/boldminded_themes/images/icon-search.png) 98% 50% no-repeat;
+                 background: #fff url('. $this->EE->config->item('url_third_themes') .'third_party/boldminded_themes/images/icon-search.png) 98% 50% no-repeat;
              }
              .structure_pages_sidebar .blueprints_arrow {
                  float: left;
@@ -234,18 +234,18 @@ class Blueprints_acc {
                  margin-top: -2px;
                  background-color: none;
                  background-position: -32px -16px;
-                 background-image: url('. $this->EE->config->item('theme_folder_url') .'third_party/jquery_ui/default/images/ui-icons_ffffff_256x240.png);
+                 background-image: url('. $this->EE->config->item('url_third_themes') .'third_party/jquery_ui/default/images/ui-icons_ffffff_256x240.png);
              }
              .structure_pages_sidebar .blueprints_arrow.active {
                  background-position: -64px -16px;
              }
              .structure_pages_sidebar h1 {
                  /* background: #2A3940; */
-                 color: #fff; 
-                 font-size: 11px; 
-                 padding: 5px; 
+                 color: #fff;
+                 font-size: 11px;
+                 padding: 5px;
                  height: 25px;
-                 margin-bottom: 2px; 
+                 margin-bottom: 2px;
                  text-transform: uppercase;
                  -webkit-border-radius: 3px;
                  -moz-border-radius: 3px;
@@ -283,7 +283,7 @@ class Blueprints_acc {
              }
              ul.structure_pages .item_wrapper a.expand,
              ul.structure_pages .item_wrapper a.expand:hover {
-                 background-image: url('. $this->EE->config->item('theme_folder_url') .'third_party/structure/img/icon-listing.png);
+                 background-image: url('. $this->EE->config->item('url_third_themes') .'third_party/structure/img/icon-listing.png);
                  background-position: 5px 50%;
                  background-repeat: no-repeat;
              }
@@ -298,7 +298,7 @@ class Blueprints_acc {
         echo '<pre>';
         var_dump($str);
         echo '</pre>';
-        
+
         if($die) die('debug terminated');
     }
 }
