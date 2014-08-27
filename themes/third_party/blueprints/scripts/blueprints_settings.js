@@ -309,10 +309,27 @@ function blueprints_set_thumbnail(file, field)
     // We have an Assets file...
     if (file.id && file.url)
     {
-        var url = file.url;
-        var file_parts = url.split('/');
-        var file_name = file_parts.slice(-1)[0];
-        var thumbnail = url.replace(file_name, '_thumbs/'+file_name);
+        var url = '',
+            thumbnail = '',
+            file_parts = [],
+            file_name = '';
+
+        // Add the path to the input.
+        if (file.directory && file.name) {
+            url = file.url;
+            file_parts = url.split('/');
+            file_name = file_parts.slice(-1)[0];
+            thumbnail = url.replace(file_name, '_thumbs/'+file_name);
+
+        // It's an Assets file from S3 or another external source.
+        } else if (file.url) {
+            url = file.url;
+            thumbnail = url;
+
+        // Don't know how to handle it, let the user know.
+        } else {
+
+        }
 
         for(dir_id in upload_paths)
         {
