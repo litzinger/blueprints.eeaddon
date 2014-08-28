@@ -249,6 +249,12 @@ class Blueprints_helper
 
         if ($thumbnail)
         {
+            // If the path does not contain a {filedir_X} token then its probably
+            // an Assets S3 or external CDN URL, so just return the full URL.
+            if (strpos($str, '{filedir_') === FALSE) {
+                return $str;
+            }
+
             if (strpos($str, '/') === FALSE)
             {
                 $str = str_replace('}', '}_thumbs/', $str);

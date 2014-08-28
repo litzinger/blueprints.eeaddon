@@ -454,7 +454,7 @@ $(function(){
             var layout_preview = carousel[i].layout_preview;
             var layout_name = carousel[i].layout_name;
 
-            var thumbnail = template_thumb != '' ? '<div class="carousel_thumbnail"><img src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"><img src="'+ Blueprints.config.theme_url +'blueprints/images/no_template.png' +'" /></div>';
+            var thumbnail = template_thumb != '' ? '<div class="carousel_thumbnail"><img width="155" src="'+ template_thumb +'" /></div>' : '<div class="carousel_thumbnail"><img src="'+ Blueprints.config.theme_url +'blueprints/images/no_template.png' +'" /></div>';
 
             out = out + '<li data-id="'+ template_id +'" data-layout="'+ layout_preview +'"> \
                             <span class="carousel_template_name">'+ layout_name +'</span> \

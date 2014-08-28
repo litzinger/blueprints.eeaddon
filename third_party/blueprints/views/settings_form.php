@@ -111,7 +111,7 @@
                             <tr>
                                 <td width="70%">
                                     <?php 
-                                    $thumbnail = (isset($field['thb_options_selected']) AND $field['thb_options_selected'] != '' AND ! is_numeric($field['thb_options_selected'])) ? '<img src="'. $this->blueprints_helper->swap_upload_pref_token($field['thb_options_selected'], true) .'" />' : '';
+                                    $thumbnail = (isset($field['thb_options_selected']) AND $field['thb_options_selected'] != '' AND ! is_numeric($field['thb_options_selected'])) ? '<img width="75" src="'. $this->blueprints_helper->swap_upload_pref_token($field['thb_options_selected'], true) .'" />' : '';
 
                                     $text = $thumbnail != '' ? 'Change Image' : 'Select Image';
 

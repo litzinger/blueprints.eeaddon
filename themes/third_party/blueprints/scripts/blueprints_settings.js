@@ -309,10 +309,12 @@ function blueprints_set_thumbnail(file, field)
     // We have an Assets file...
     if (file.id && file.url)
     {
-        var url = '',
-            thumbnail = '',
+        var url = null,
+            thumbnail = null,
             file_parts = [],
-            file_name = '';
+            file_name = null,
+            image_url = null,
+            directory = null;
 
         // Add the path to the input.
         if (file.directory && file.name) {
@@ -326,9 +328,6 @@ function blueprints_set_thumbnail(file, field)
             url = file.url;
             thumbnail = url;
 
-        // Don't know how to handle it, let the user know.
-        } else {
-
         }
 
         for(dir_id in upload_paths)
@@ -336,13 +335,17 @@ function blueprints_set_thumbnail(file, field)
             path = upload_paths[dir_id];
             if(file.url.indexOf(path.url) !== -1)
             {
-                var directory = dir_id;
-                var image_url = url.replace(path.url, '{filedir_'+ dir_id +'}', url);
+                directory = dir_id;
+                image_url = url.replace(path.url, '{filedir_'+ dir_id +'}', url);
                 break;
             }
         }
 
-        $("#thumbnail_preview_"+ field).html('<img src="'+ thumbnail +'" />');
+        if ( !image_url) {
+            image_url = url;
+        }
+
+        $("#thumbnail_preview_"+ field).html('<img src="'+ thumbnail +'" width="75" />');
         $("#thumbnail_value_"+ field).val(image_url);
     }
     else
@@ -356,7 +359,7 @@ function blueprints_set_thumbnail(file, field)
 
         if(file.is_image)
         {
-            $("#thumbnail_preview_"+ field).html('<img src="'+ file.thumb +'" />');
+            $("#thumbnail_preview_"+ field).html('<img src="'+ file.thumb +'" width="75" />');
             $("#thumbnail_value_"+ field).val('{filedir_'+ file.directory +'}' + file.name);
         }
     }
