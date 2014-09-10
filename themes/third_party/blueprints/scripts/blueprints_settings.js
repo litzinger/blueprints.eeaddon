@@ -64,10 +64,10 @@ $('.blueprint_add_row').live('click', function(e){
     var max_group_id = parseInt($('#max_group_id').val()) + 1;
     $('#max_group_id').val(max_group_id);
     $('#'+ rel + index).find('input[type="hidden"]').val(max_group_id);
-    
+
     /* Reset all checkboxes */
     $('#'+ rel + index).find('.show_group, .show_selected').attr('disabled', false).attr('checked', false);
-    
+
     /* Hide the select */
     $('#'+ rel + index).find('.show_select').hide();
 
@@ -83,7 +83,7 @@ $('.blueprint_add_row').live('click', function(e){
             var sheet = new Assets.Sheet({
                 filedirs: "all",
                 kinds: "any",
-                onSelect: function(file) { 
+                onSelect: function(file) {
                     blueprints_set_thumbnail(file[0], 'new_'+ index);
                 }
             });
@@ -103,7 +103,7 @@ $('.blueprint_add_row').live('click', function(e){
     }
 
     blueprints_set_row_events(rel);
-    
+
     e.preventDefault();
 });
 
@@ -136,16 +136,16 @@ blueprints_dialog = $('#remove_dialog').dialog({
                 // Add ID to delete
                 $('#blueprint_settings').append('<input type="hidden" name="delete[]" value="'+ id +'" />');
             }
-            
+
             // Remove row and close dialog
             blueprints_dialog.dialog('close');
             link.closest('tr.row').remove();
-        
+
             /* Add the Add link back ;) */
             if($('.publish_layouts tbody tr.row').length <= Blueprints.config.blueprints_total_templates){
                 $('.publish_layouts + .blueprint_add_row').show();
             }
-            
+
             // Unset our data
             $.data(document.body, 'delete_id', false);
             $.data(document.body, 'delete_link', false);
@@ -154,14 +154,14 @@ blueprints_dialog = $('#remove_dialog').dialog({
 });
 
 $('.blueprint_remove_row').live('click', function(e){
-    
+
     rel = $(this).attr('rel');
     field = $(this).closest('tr.row').find('.layout_group_name');
 
     if(field.val() == "")
     {
         $(this).closest('tr.row').remove();
-        
+
         /* Add the Add link back ;) */
         if($('.publish_layouts tbody tr.row').length <= Blueprints.config.blueprints_total_templates){
             $('.publish_layouts + .blueprint_add_row').show();
@@ -173,7 +173,7 @@ $('.blueprint_remove_row').live('click', function(e){
         id = $(this).attr('data');
         $.data(document.body, 'delete_id', id);
         $.data(document.body, 'delete_link', $(this));
-    
+
         blueprints_dialog.dialog('open');
 
         /* Add the Add link back ;) */
@@ -184,18 +184,18 @@ $('.blueprint_remove_row').live('click', function(e){
     else if(rel == 'channel_template_selection')
     {
         $(this).closest('tr.row').remove();
-        
+
         /* Add the Add link back ;) */
         if($('.channel_template_selection tbody tr.row').length <= Blueprints.config.blueprints_total_channels){
             $('.channel_template_selection + .blueprint_add_row').show();
         }
     }
-    
+
     // Hide delete link if 1 row is present
     if( $('.'+ rel +' tbody tr.row').length == 1 ) {
         $('.'+ rel +' tbody tr.row').find('.blueprint_remove_row').hide();
     }
-    
+
     e.preventDefault();
 });
 
@@ -222,7 +222,7 @@ function blueprints_set_row_events(rel)
     if(rel == 'channel_template_selection'){
         if($('.channel_template_selection tbody tr').length >= Blueprints.config.blueprints_total_channels){
             $('.channel_template_selection + .blueprint_add_row').hide();
-        } 
+        }
     } else if(rel == 'publish_layouts') {
         if($('.publish_layouts tbody tr.row').length >= Blueprints.config.blueprints_total_templates){
             $('.publish_layouts + .blueprint_add_row').hide();
@@ -288,7 +288,7 @@ $('#enable_detailed_template').next('.pt-switch').click(function(){
 function blueprints_toggle_enabled_detailed_template()
 {
     val = $('#enable_detailed_template').val();
-    
+
     if(val == 'y') {
         $('.channel_template_selection').slideDown();
         $('.channel_template_selection').next('.blueprint_add_row').show();
@@ -336,7 +336,7 @@ function blueprints_set_thumbnail(file, field)
             if(file.url.indexOf(path.url) !== -1)
             {
                 directory = dir_id;
-                image_url = url.replace(path.url, '{filedir_'+ dir_id +'}', url);
+                image_url = url.replace(path.url, '{filedir_'+ dir_id +'}' + url);
                 break;
             }
         }
@@ -370,7 +370,7 @@ function blueprints_set_thumbnail(file, field)
     trigger_link.text("Change Image");
 
     if(remove_link.length == 1) {
-        remove_link.show();        
+        remove_link.show();
     } else {
         trigger_link.after('<br /><a class="thumbnail_remove" href="#" id="thumbnail_remove_'+ field +'">Remove Image</a>');
     }
