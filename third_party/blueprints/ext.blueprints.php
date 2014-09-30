@@ -75,9 +75,9 @@ class Blueprints_ext {
      */
     public function Blueprints_ext($settings = '')
     {
-        $this->EE =& get_instance();
-
         if (REQ != 'CP') return;
+
+        $this->EE =& get_instance();
 
         $this->site_id = $this->EE->config->item('site_id');
 
