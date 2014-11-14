@@ -1,3 +1,6 @@
+# Important
+This add-on is provided as is, without warranty or support. I will accept pull requests for fixes or features, however, I will not be actively developing for this add-on.
+
 # Requirements
 ExpressionEngine 2.5+
 Structure or Pages module
