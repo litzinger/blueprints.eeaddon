@@ -114,6 +114,9 @@ class Blueprints_ext {
     */
     public function sessions_end($session)
     {
+        // Structure and other third-party things triggered by this may choke if session is not set
+        $this->EE->session = $session;
+
         // Stop here if we shouldn't be hi-jacking the publish layouts
         if(
             REQ != 'CP' OR
@@ -586,6 +589,8 @@ class Blueprints_ext {
     */
     public function channel_entries_tagdata($tagdata, $row, $obj)
     {
+        if(!isset($this->EE)) $this->EE = &get_instance();
+        
         if($this->EE->extensions->last_call)
         {
             $tagdata = $this->EE->extensions->last_call;
