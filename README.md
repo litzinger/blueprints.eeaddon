@@ -1,5 +1,5 @@
 # Important
-This add-on is provided as is, without warranty or support. I will accept pull requests for fixes or features, however, I will not be actively developing for this add-on.
+This add-on is provided as is, without warranty or support. I will accept pull requests for fixes or features, however, I will not be actively developing for this add-on. For more information on this please see https://boldminded.com/news/blueprints-is-no-longer-for-sale
 
 # Requirements
 ExpressionEngine 2.5+
